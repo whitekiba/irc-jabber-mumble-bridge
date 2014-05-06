@@ -1,0 +1,17 @@
+:irc:
+   :nick: 'bridge'
+   :user: 'bridge'
+   :name: 'Jabber Bridge'
+   :server: 'irc.rout0r.org'
+   :channel: '#test'
+   :port: 6667
+   :master: 'WhiteKIBA'
+:jabber:
+   :id: 'bridge@rout0r.org'
+   :pw: ''
+   :name: 'bridge'
+   :conference_room: 'fluxnet-lobby@conference.rout0r.org'
+   :channel_password: ''
+   :resource: 'bridge'
+   :port: 5222
+   :master: 'whitekiba@rout0r.org'
