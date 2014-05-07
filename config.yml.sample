@@ -7,7 +7,7 @@
    :port: 6667
    :master: 'WhiteKIBA'
 :jabber:
-   :id: 'bridge@rout0r.org'
+   :id: 'example@rout0r.org'
    :pw: ''
    :name: 'bridge'
    :conference_room: 'fluxnet-lobby@conference.rout0r.org'
@@ -15,3 +15,7 @@
    :resource: 'bridge'
    :port: 5222
    :master: 'whitekiba@rout0r.org'
+:mumble:
+   :server: 'mumble.rout0r.org'
+   :username: 'bridge'
+   :channel: 'Flux Networks - Rechtecke'

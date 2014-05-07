@@ -2,11 +2,22 @@ require "rubygems"
 require "IRC"
 
 class IRCBridge
-	def self.start(conf)
+	def self.start(conf, bridge)
+		@my_name = :irc
 		@conf = conf
+		@bridge = bridge
 		@bot = IRC.new(conf[:nick], conf[:server], conf[:port], conf[:name])
 		IRCEvent.add_callback('endofmotd') { |event| @bot.add_channel(conf[:channel]) }
 		IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }
+		bridge.subscribe(@my_name)
+		Thread.new do
+			loop do
+				sleep 0.1
+				if msg_in = bridge.getNextMessage(@my_name)
+					@bot.send_message(conf[:channel], msg_in)
+				end
+			end
+		end
 		@bot.connect
 	end
 	def self.handleMessage(message)
@@ -14,6 +25,7 @@ class IRCBridge
 			cmd = /\ (.*)/.match(message.message)[1]
 			command(message.from, cmd)
 		else
+			@bridge.broadcast(@my_name, "[#{message.from}]: #{message.message}")
 			$logger.info message.message
 		end
 	end
