@@ -36,10 +36,14 @@ class IRCBridge
 		end
 	end
 	def self.joinMessage(event)
-		@bridge.broadcast(@my_name, "#{event.from} kam in den Channel.")
+		if event.from != @conf[:nick]
+			@bridge.broadcast(@my_name, "#{event.from} kam in den Channel.")
+		end
 	end
 	def self.partMessage(event)
-		@bridge.broadcast(@my_name, "#{event.from} hat den Channel verlassen")
+		if event.from != @conf[:nick]
+			@bridge.broadcast(@my_name, "#{event.from} hat den Channel verlassen")
+		end
 	end
 	def self.command(user, command)
 		if command == "version"
