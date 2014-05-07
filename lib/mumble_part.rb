@@ -13,6 +13,7 @@ class MumbleBridge
 			handleMessage(msg)
 		end
 		bridge.subscribe(@my_name)
+		bridge.addPrefix(@my_name, "M")
 		Thread.new do
 			loop do
 				sleep 0.1

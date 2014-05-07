@@ -9,7 +9,10 @@ class IRCBridge
 		@bot = IRC.new(conf[:nick], conf[:server], conf[:port], conf[:name])
 		IRCEvent.add_callback('endofmotd') { |event| @bot.add_channel(conf[:channel]) }
 		IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }
+		IRCEvent.add_callback('join') { |event| joinMessage event }
+		IRCEvent.add_callback('part') { |event| partMessage event }
 		bridge.subscribe(@my_name)
+		bridge.addPrefix(@my_name, "I")
 		Thread.new do
 			loop do
 				sleep 0.1
@@ -28,6 +31,12 @@ class IRCBridge
 			@bridge.broadcast(@my_name, "[#{message.from}]: #{message.message}")
 			$logger.info message.message
 		end
+	end
+	def self.joinMessage(event)
+		@bridge.broadcast(@my_name, "#{event.from} kam in den Channel.")
+	end
+	def self.partMessage(event)
+		@bridge.broadcast(@my_name, "#{event.from} hat den Channel verlassen")
 	end
 	def self.command(user, command)
 		if command == "version"

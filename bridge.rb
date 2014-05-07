@@ -12,9 +12,13 @@ class Bridge
 	def initialize
 		@messages = Hash.new #hier werden alle nachrichten reingepumpt
 		@subscribers = [] #die liste der endpunkte
+		@prefixes = Hash.new #prefixe fuer nachrichten
 	end
 	def broadcast(from, message)
 		$logger.info "Broadcast message called for #{from}"
+		if !@prefixes[from].nil?
+			message = "[#{@prefixes[from]}]#{message}"
+		end
 		@subscribers.each { |sub|
 			if sub != from
 				@messages[sub] << message
@@ -26,6 +30,9 @@ class Bridge
 			@subscribers << name
 			@messages[name] = []
 		end
+	end
+	def addPrefix(from, prefix)
+		@prefixes[from] = prefix
 	end
 	def getNextMessage(from)
 		@messages[from].shift

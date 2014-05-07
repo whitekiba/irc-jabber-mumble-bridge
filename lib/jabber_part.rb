@@ -21,6 +21,7 @@ class JabberBridge
 		end
 		@bot.handlers[:message] << msg_handler
 		bridge.subscribe(@my_name)
+		bridge.addPrefix(@my_name, "J")
 		Thread.new do
 			loop do
 				sleep 0.1
