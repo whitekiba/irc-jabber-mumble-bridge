@@ -3,6 +3,9 @@ require "IRC"
 
 class IRCBridge
 	def self.start(conf, bridge)
+		if conf[:enabled] == false
+			exit
+		end
 		@my_name = :irc
 		@conf = conf
 		@bridge = bridge

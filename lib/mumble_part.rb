@@ -3,6 +3,9 @@ require "mumble-ruby"
 
 class MumbleBridge
 	def self.start(conf, bridge)
+		if conf[:enabled] == false
+			exit
+		end
 		@my_name = :mumble
 		@conf = conf
 		@bridge = bridge

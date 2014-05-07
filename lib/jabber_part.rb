@@ -3,6 +3,9 @@ require "jabbot"
 
 class JabberBridge
 	def self.start(conf, bridge)
+		if conf[:enabled] == false
+			exit
+		end
 		@my_name = :jabber
 		@conf = conf
 		@bridge = bridge
