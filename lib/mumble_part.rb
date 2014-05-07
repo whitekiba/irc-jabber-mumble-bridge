@@ -10,7 +10,6 @@ class MumbleBridge
 			config.username = conf[:username]
 		end
 		@mumble.on_text_message do |msg|
-			puts msg
 			handleMessage(msg)
 		end
 		bridge.subscribe(@my_name)
