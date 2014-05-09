@@ -1,5 +1,6 @@
 require "rubygems"
 require "mumble-ruby"
+require 'cgi'
 
 class MumbleBridge
 	def self.start(conf, bridge)
@@ -21,7 +22,7 @@ class MumbleBridge
 			loop do
 				sleep 0.1
 				if msg_in = bridge.getNextMessage(@my_name)
-					@mumble.text_channel(conf[:channel], msg_in)
+					@mumble.text_channel(conf[:channel], CGI.escapeHTML(msg_in))
 				end
 			end
 		end
@@ -34,7 +35,7 @@ class MumbleBridge
 			$logger.info "Hier fehlt der Kommandocode fuer Mumble"
 		else
 			username = @mumble.users[msg.actor].name
-			@bridge.broadcast(@my_name, "[#{username}]: #{msg.to_hash()["message"]}")
+			@bridge.broadcast(@my_name, "[#{username}]: #{CGI.unescapeHTML(msg.to_hash()["message"])}")
 			$logger.info msg.to_hash()["message"]
 		end
 	end
