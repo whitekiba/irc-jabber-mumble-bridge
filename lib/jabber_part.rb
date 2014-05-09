@@ -36,10 +36,11 @@ class JabberBridge
 		@bot.connect
 	end
 	def self.handleMessage(message)
+		nick = message.user.split("@").first
 		if /#{@conf[:nick]}, (.*)/.match(message.text)
 			$logger.info "Hier fehlt der Code fuer Kommandos in Jabber!"
 		else
-			@bridge.broadcast(@my_name, "[#{message.user}]: #{message.text}")
+			@bridge.broadcast(@my_name, "[#{nick}]: #{message.text}")
 			$logger.info message.text
 		end
 	end
