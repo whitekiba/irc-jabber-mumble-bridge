@@ -28,7 +28,11 @@ class IRCBridge
 			cmd = /\ (.*)/.match(message.message)[1]
 			command(message.from, cmd)
 		else
-			@bridge.broadcast(@my_name, "[#{message.from}]: #{message.message}")
+			if /^\x01ACTION (.)+\x01$/.match(message.message)
+				@bridge.broadcast(@my_name, " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, "")}")
+			else
+				@bridge.broadcast(@my_name, "[#{message.from}]: #{message.message}")
+			end
 			$logger.info message.message
 		end
 	end
