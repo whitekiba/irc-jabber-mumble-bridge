@@ -1,6 +1,7 @@
 require "rubygems"
 require "mumble-ruby"
 require 'cgi'
+require "sanitize"
 
 class MumbleBridge
 	def self.start(conf, bridge)
@@ -36,7 +37,7 @@ class MumbleBridge
 		else
 			if @mumble.users[msg.actor].respond_to? :name
 				username = @mumble.users[msg.actor].name
-				@bridge.broadcast(@my_name, "[#{username}]: #{CGI.unescapeHTML(msg.to_hash()["message"])}")
+				@bridge.broadcast(@my_name, "[#{username}]: #{Sanitize.clean(CGI.unescapeHTML(msg.to_hash()["message"]))}")
 				$logger.info msg.to_hash()["message"]
 			end
 		end

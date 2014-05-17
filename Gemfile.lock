@@ -2,10 +2,37 @@ GEM
   remote: https://rubygems.org/
   specs:
     Ruby-IRC (1.0.13)
+    activesupport (4.1.1)
+      i18n (~> 0.6, >= 0.6.9)
+      json (~> 1.7, >= 1.7.7)
+      minitest (~> 5.1)
+      thread_safe (~> 0.1)
+      tzinfo (~> 1.1)
     eventmachine (0.12.10)
+    ffi (1.9.3)
+    hashie (2.1.1)
+    i18n (0.6.9)
     jabbot (1.0.0)
       eventmachine (~> 0.12)
       xmpp4r (~> 0.4)
+    json (1.8.1)
+    mini_portile (0.6.0)
+    minitest (5.3.4)
+    mumble-ruby (1.0.2)
+      activesupport
+      hashie
+      opus-ruby
+      ruby_protobuf
+    nokogiri (1.6.2.1)
+      mini_portile (= 0.6.0)
+    opus-ruby (0.0.1)
+      ffi
+    ruby_protobuf (0.4.11)
+    sanitize (2.1.0)
+      nokogiri (>= 1.4.4)
+    thread_safe (0.3.3)
+    tzinfo (1.1.0)
+      thread_safe (~> 0.1)
     xmpp4r (0.5.6)
 
 PLATFORMS
@@ -14,3 +41,5 @@ PLATFORMS
 DEPENDENCIES
   Ruby-IRC
   jabbot
+  mumble-ruby
+  sanitize
