@@ -34,9 +34,11 @@ class MumbleBridge
 		if /#{@conf[:username]} (.*)/.match(msg.message)
 			$logger.info "Hier fehlt der Kommandocode fuer Mumble"
 		else
-			username = @mumble.users[msg.actor].name
-			@bridge.broadcast(@my_name, "[#{username}]: #{CGI.unescapeHTML(msg.to_hash()["message"])}")
-			$logger.info msg.to_hash()["message"]
+			if @mumble.users[msg.actor].respond_to? :name
+				username = @mumble.users[msg.actor].name
+				@bridge.broadcast(@my_name, "[#{username}]: #{CGI.unescapeHTML(msg.to_hash()["message"])}")
+				$logger.info msg.to_hash()["message"]
+			end
 		end
 	end
 end
