@@ -14,12 +14,14 @@ depend() {
 
 start() {
 	ebegin "Starting irc-jabber-mumble-bridge"
+	cd ${bridge_path} # change to the directory where bridge is in, otherwise it will look for bridge.rb in /
 	$bridged start
 	eend $?
 }
 
 stop() {
 	ebegin "Stopping irc-jabber-mumble-bridge"
+	cd ${bridge_path}
 	$bridged stop
 	eend $?
 }
