@@ -1,0 +1,25 @@
+#!/sbin/runscript
+# Basic bridge init script for use with OpenRC
+# (c) 2014 nilsding
+
+bridge_path="/opt/bridge" # change this to the path where the bridge is in
+
+bridged="${bridge_path}/bridged.rb"
+
+pidfile="${bridge_path}/bridge.pid"
+
+depend() {
+	use net
+}
+
+start() {
+	ebegin "Starting irc-jabber-mumble-bridge"
+	$bridged start
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping irc-jabber-mumble-bridge"
+	$bridged stop
+	eend $?
+}
