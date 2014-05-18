@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+Dir.chdir $pwd unless $pwd.nil?
+
 $:.unshift("lib/")
 
 require "irc_part"
