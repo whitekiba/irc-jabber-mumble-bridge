@@ -1,9 +1,13 @@
 require "rubygems"
 require "mumble-ruby"
 require 'cgi'
+require "sanitize"
 
 class MumbleBridge
 	def self.start(conf, bridge)
+		if conf[:enabled] == false
+			exit
+		end
 		@my_name = :mumble
 		@conf = conf
 		@bridge = bridge
@@ -31,9 +35,11 @@ class MumbleBridge
 		if /#{@conf[:username]} (.*)/.match(msg.message)
 			$logger.info "Hier fehlt der Kommandocode fuer Mumble"
 		else
-			username = @mumble.users[msg.actor].name
-			@bridge.broadcast(@my_name, "[#{username}]: #{CGI.unescapeHTML(msg.to_hash()["message"])}")
-			$logger.info msg.to_hash()["message"]
+			if @mumble.users[msg.actor].respond_to? :name
+				username = @mumble.users[msg.actor].name
+				@bridge.broadcast(@my_name, "[#{username}]: #{Sanitize.clean(CGI.unescapeHTML(msg.to_hash()["message"]))}")
+				$logger.info msg.to_hash()["message"]
+			end
 		end
 	end
 end

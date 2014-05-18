@@ -3,3 +3,4 @@ bridge.log
 bridge_cert/
 irb_cert/
 test_cert/
+Gemfile.lock
