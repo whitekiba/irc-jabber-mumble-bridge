@@ -52,11 +52,13 @@ class MumbleBridge
 			if username == @conf[:username] #if the event is triggered by bridge
 				@channel_id = msg.channel_id
 			else
-				if @mumble.channels[msg.channel_id].name == @conf[:channel]
-					@bridge.broadcast(@my_name, " #{username} hat den Channel betreten.")
-				else
-					if @mumble.users[msg.actor].channel_id == @channel_id
-						@bridge.broadcast(@my_name, " #{username} hat den Channel verlassen.")
+				if @mumble.channels[msg.channel_id].respond_to? :name
+					if @mumble.channels[msg.channel_id].name == @conf[:channel]
+						@bridge.broadcast(@my_name, " #{username} hat den Channel betreten.")
+					else
+						if @mumble.users[msg.actor].channel_id == @channel_id
+							@bridge.broadcast(@my_name, " #{username} hat den Channel verlassen.")
+						end
 					end
 				end
 			end
