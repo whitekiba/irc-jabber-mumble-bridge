@@ -18,6 +18,7 @@ class Bridge
 	end
 	def broadcast(from, message)
 		$logger.info "Broadcast message called for #{from}"
+		message = message.gsub(/[[:cntrl:]]/, '')
 		if !@prefixes[from].nil?
 			message = "[#{@prefixes[from]}]#{message}"
 		end
