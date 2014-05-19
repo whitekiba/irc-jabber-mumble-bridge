@@ -22,7 +22,15 @@ class JabberBridge
 		msg_handler = Jabbot::Handler.new do |msg, params|
 			handleMessage(msg)
 		end
+		join_handler = Jabbot::Handler.new do |msg, params|
+			handleJoin(msg)
+		end
+		leave_handler = Jabbot::Handler.new do |msg, params|
+			handleLeave(msg)
+		end
 		@bot.handlers[:message] << msg_handler
+		@bot.handlers[:join] << join_handler
+		@bot.handlers[:leave] << leave_handler
 		bridge.subscribe(@my_name)
 		bridge.addPrefix(@my_name, "J")
 		Thread.new do
@@ -43,5 +51,11 @@ class JabberBridge
 			@bridge.broadcast(@my_name, "[#{nick}]: #{message.text}")
 			$logger.info message.text
 		end
+	end
+	def self.handleJoin(message)
+		@bridge.broadcast(@my_name, " #{message.user} betrat den Chat.")
+	end
+	def self.handleLeave(message)
+		@bridge.broadcast(@my_name, " #{message.user} hat den Chat verlassen.")
 	end
 end
