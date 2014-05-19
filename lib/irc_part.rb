@@ -14,6 +14,7 @@ class IRCBridge
 		IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }
 		IRCEvent.add_callback('join') { |event| joinMessage event }
 		IRCEvent.add_callback('part') { |event| partMessage event }
+		IRCEvent.add_callback('quit') { |event| quitMessage event }
 		bridge.subscribe(@my_name)
 		bridge.addPrefix(@my_name, "I")
 		Thread.new do
@@ -47,6 +48,11 @@ class IRCBridge
 	def self.partMessage(event)
 		if event.from != @conf[:nick]
 			@bridge.broadcast(@my_name, "#{event.from} hat den Channel verlassen")
+		end
+	end
+	def self.quitMessage(event)
+		if event.from != @conf[:nick]
+			@bridge.broadcast(@my_name, "#{event.from} hat den Server verlassen")
 		end
 	end
 	def self.command(user, command)
