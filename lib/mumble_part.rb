@@ -32,7 +32,7 @@ class MumbleBridge
 			end
 		end
 		@mumble.connect
-		sleep 2 #wir muessen warten weil er den channel sonnst nicht joint
+		sleep 5 #wir muessen warten weil er den channel sonnst nicht joint
 		@mumble.join_channel(conf[:channel])
 	end
 	def self.handleMessage(msg)
