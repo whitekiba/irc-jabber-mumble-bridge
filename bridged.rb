@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby19
+#!/usr/bin/env ruby
 
 require 'rubygems'
 require 'daemons'
@@ -6,7 +6,8 @@ require 'daemons'
 $pwd = File.dirname(File.expand_path(__FILE__))
 
 options = {
-  app_name: 'bridge'
+  :app_name => 'bridge',
+  :monitor	=>	true
 }
 
-Daemons.run('bridge.rb')
+Daemons.run('bridge.rb', options)
