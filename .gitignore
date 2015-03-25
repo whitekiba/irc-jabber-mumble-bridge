@@ -1,6 +1,4 @@
 config.yml
 bridge.log
-bridge_cert/
-irb_cert/
-test_cert/
+*_cert/
 Gemfile.lock
