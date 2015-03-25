@@ -1,3 +1,4 @@
+# encoding: utf-8
 require "rubygems"
 require "mumble-ruby"
 require 'cgi'
@@ -35,15 +36,17 @@ class MumbleBridge
 			end
 		end
 		@mumble.connect
-		sleep 5 #wir muessen warten weil er den channel sonnst nicht joint
+		sleep 3 #wir muessen warten weil er den channel sonnst nicht joint
 		@mumble.join_channel(conf[:channel])
 	end
 	def self.handleMessage(msg)
+		$logger.info "handleMessage wurde aufgerufen."
+		$logger.debug msg.to_hash()
 		if /#{@conf[:username]} (.*)/.match(msg.message)
 			$logger.info "Hier fehlt der Kommandocode fuer Mumble"
 		else
-			if @mumble.users[msg.session].respond_to? :name
-				username = @mumble.users[msg.session].name
+			if @mumble.users[msg.actor].respond_to? :name
+				username = @mumble.users[msg.actor].name
 				@bridge.broadcast(@my_name, "[#{username}]: #{Sanitize.clean(CGI.unescapeHTML(msg.to_hash()["message"]))}")
 				$logger.info msg.to_hash()["message"]
 			end
