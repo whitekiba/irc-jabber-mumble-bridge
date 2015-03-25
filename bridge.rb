@@ -15,6 +15,7 @@ class Bridge
 		@messages = Hash.new #hier werden alle nachrichten reingepumpt
 		@subscribers = [] #die liste der endpunkte
 		@prefixes = Hash.new #prefixe fuer nachrichten
+		@prefixes[:core] = "core"
 	end
 	def broadcast(from, message)
 		$logger.info "Broadcast message called for #{from}"
@@ -72,5 +73,13 @@ Thread.new do
 end
 
 loop do
-	sleep 0.5
+	begin
+		sleep 0.5
+	rescue StandardError => e
+		$logger.error e
+		$logger.error e.backtrace.join("\n")
+		bridge.broadcast(:core, " Unable to handle exception. Going down!")
+		sleep 1
+		abort
+	end
 end
