@@ -21,6 +21,9 @@ class MumbleBridge
 		@mumble.on_user_state do |msg|
 			handleUserChange(msg)
 		end
+		@mumble.on_user_remove do |msg|
+			handleUserRemove(msg)
+		end
 		bridge.subscribe(@my_name)
 		bridge.addPrefix(@my_name, "M")
 		Thread.new do
@@ -39,16 +42,19 @@ class MumbleBridge
 		if /#{@conf[:username]} (.*)/.match(msg.message)
 			$logger.info "Hier fehlt der Kommandocode fuer Mumble"
 		else
-			if @mumble.users[msg.actor].respond_to? :name
-				username = @mumble.users[msg.actor].name
+			if @mumble.users[msg.session].respond_to? :name
+				username = @mumble.users[msg.session].name
 				@bridge.broadcast(@my_name, "[#{username}]: #{Sanitize.clean(CGI.unescapeHTML(msg.to_hash()["message"]))}")
 				$logger.info msg.to_hash()["message"]
 			end
 		end
 	end
 	def self.handleUserChange(msg)
-		if @mumble.users[msg.actor].respond_to? :name
-			username = @mumble.users[msg.actor].name
+		$logger.info "handleUserChange wurde aufgerufen."
+		$logger.debug msg.to_hash()
+		if @mumble.users[msg.session].respond_to? :name
+			username = @mumble.users[msg.session].name
+			$logger.debug "handleUserChange wurde ausgelöst von #{username}"
 			if username == @conf[:username] #if the event is triggered by bridge
 				@channel_id = msg.channel_id
 			else
@@ -56,12 +62,23 @@ class MumbleBridge
 					if @mumble.channels[msg.channel_id].name == @conf[:channel]
 						@bridge.broadcast(@my_name, " #{username} hat den Channel betreten.")
 					else
-						if @mumble.users[msg.actor].channel_id == @channel_id
+						if @mumble.users[msg.session].channel_id == @channel_id
 							@bridge.broadcast(@my_name, " #{username} hat den Channel verlassen.")
 						end
 					end
 				end
 			end
+		else
+			@bridge.broadcast(@my_name, " #{msg.name} hat den Server betreten.")
+		end
+	end
+	def self.handleUserRemove(msg)
+		$logger.info "handleUserRemove wurde aufgerufen."
+		$logger.debug msg.to_hash()
+		if @mumble.users[msg.session].respond_to? :name
+			username = @mumble.users[msg.session].name
+			$logger.info "Username wurde gefunden"
+			@bridge.broadcast(@my_name, " #{username} hat den Server verlassen.")
 		end
 	end
 end
