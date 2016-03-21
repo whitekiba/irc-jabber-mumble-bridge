@@ -6,7 +6,6 @@ class TelegramBridge
 		if conf[:enabled] == false
 			exit
 		end
-		puts "test"
 		@my_name = :telegram
 		@conf = conf
 		@bridge = bridge
