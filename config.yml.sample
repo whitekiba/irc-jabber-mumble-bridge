@@ -22,3 +22,7 @@
    :server: 'mumble.rout0r.org'
    :username: 'bridge'
    :channel: 'Flux Networks - Rechtecke'
+:telegram
+   :enabled: true
+   :token: 'API-KEY'
+   :chatid: 'Chat-ID'
