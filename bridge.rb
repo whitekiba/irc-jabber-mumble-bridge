@@ -3,7 +3,7 @@ Dir.chdir $pwd unless $pwd.nil?
 
 $:.unshift("lib/")
 
-require "irc_part"
+require 'irc_part'
 require "jabber_part"
 require "mumble_part"
 
