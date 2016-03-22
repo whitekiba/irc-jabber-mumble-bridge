@@ -35,7 +35,7 @@ class TelegramBridge
 			unless msg.chat.id.to_s.eql? @conf[:chatid].to_s
 				@telegram.api.send_message(chat_id: msg.chat.id, text: "Hey. Looks like you found the Fluxnet Bridge! Unfortunately you are not able to use it now. For further information check out: https://git.rout0r.org/fluxnet/bridge")
 			else
-				@bridge.broadcast(@my_name,"#{msg.from.first_name}: #{Sanitize.clean(CGI.unescapeHTML(msg.text))}")
+				@bridge.broadcast(@my_name,"[#{msg.from.first_name}]: #{Sanitize.clean(CGI.unescapeHTML(msg.text))}")
 			end
 		end
 	end
