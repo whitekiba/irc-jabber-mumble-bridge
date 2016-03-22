@@ -6,6 +6,7 @@ $:.unshift("lib/")
 require 'irc_part'
 require "jabber_part"
 require "mumble_part"
+require "telegram_part"
 
 $config = YAML.load_file(File.dirname(__FILE__) + '/config.yml')
 $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
