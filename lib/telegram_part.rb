@@ -40,3 +40,5 @@ class TelegramBridge
 		end
 	end
 end
+
+# vim: tabstop=3

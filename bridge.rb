@@ -4,7 +4,7 @@ Dir.chdir $pwd unless $pwd.nil?
 $:.unshift("lib/")
 
 require 'irc_part'
-require "jabber_part"
+#require "jabber_part"
 require "mumble_part"
 require "telegram_part"
 
@@ -55,14 +55,14 @@ Thread.new do
 	end
 end
 
-Thread.new do
-	begin
-		JabberBridge.start($config[:jabber], bridge)
-	rescue Exception => e
-		$logger.error e
-		$logger.error e.backtrace.join("\n")
-	end
-end
+#Thread.new do
+#	begin
+#		JabberBridge.start($config[:jabber], bridge)
+#	rescue Exception => e
+#		$logger.error e
+#		$logger.error e.backtrace.join("\n")
+#	end
+#end
 
 Thread.new do
 	begin
