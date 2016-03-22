@@ -72,6 +72,15 @@ Thread.new do
 	end
 end
 
+Thread.new do
+	begin
+		TelegramBridge.start($config[:telegram], bridge)
+	rescue Exception => e
+		$logger.error e
+		$logger.error e.backtrace.join("\n")
+	end
+end
+
 loop do
 	begin
 		sleep 0.5
@@ -83,3 +92,5 @@ loop do
 		abort
 	end
 end
+
+# vim: tabstop=3
