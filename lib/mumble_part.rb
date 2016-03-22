@@ -31,13 +31,23 @@ class MumbleBridge
 			loop do
 				sleep 0.1
 				if msg_in = bridge.getNextMessage(@my_name)
+					begin
 					@mumble.text_channel(conf[:channel], CGI.escapeHTML(msg_in))
+					rescue Exception => e
+						$logger.info "Failed to send Message"
+						$logger.info e
+					end
 				end
 			end
 		end
 		@mumble.connect
-		sleep 3 #wir muessen warten weil er den channel sonnst nicht joint
-		@mumble.join_channel(conf[:channel])
+		sleep 4 #wir muessen warten weil er den channel sonnst nicht joint
+		begin
+			@mumble.join_channel(conf[:channel])
+		rescue Exception => e
+			$logger.info "Failed to join channel"
+			$logger.info e
+		end
 	end
 	def self.handleMessage(msg)
 		$logger.info "handleMessage wurde aufgerufen."
