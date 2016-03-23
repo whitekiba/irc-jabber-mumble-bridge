@@ -6,7 +6,6 @@ class TelegramBridge
     if conf[:enabled] == false
       exit
     end
-    @my_name = :telegram
     @conf = conf
     @bridge = bridge
     @telegram = Telegram::Bot::Client.new(@conf[:token])
@@ -36,8 +35,10 @@ class TelegramBridge
       loop do
         sleep 0.1
         if msg_in = bridge.getNextMessage(@my_name)
-          unless @conf[:ignore].include?(msg_in.scan(/\[([^\]]+)\]/)[1][0].to_s)
-            @telegram.api.send_message(chat_id: @conf[:chatid], text: msg_in)
+          unless msg_in.scan(/\[([^\]]+)\]/)[1][0].nil?
+            unless @conf[:ignore].include?(msg_in.scan(/\[([^\]]+)\]/)[1][0].to_s)
+              @telegram.api.send_message(chat_id: @conf[:chatid], text: msg_in)
+            end
           end
 
         end
@@ -50,6 +51,7 @@ class TelegramBridge
       end
     end
   end
+
   def self.handleMessage(msg)
     $logger.info "handleMessage wurde aufgerufen!"
     $logger.debug msg.to_hash()
