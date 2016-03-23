@@ -36,7 +36,7 @@ class TelegramBridge
       loop do
         sleep 0.1
         if msg_in = bridge.getNextMessage(@my_name)
-          unless @conf[:ignore].include?(msg_in.scan(/\[([^\]]+)\]/).last[0].to_s)
+          unless @conf[:ignore].include?(msg_in.scan(/\[([^\]]+)\]/)[1][0].to_s)
             @telegram.api.send_message(chat_id: @conf[:chatid], text: msg_in)
           end
 
