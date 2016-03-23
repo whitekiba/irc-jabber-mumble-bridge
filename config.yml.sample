@@ -25,4 +25,9 @@
 :telegram
    :enabled: true
    :token: 'API-KEY'
-   :chatid: 'Chat-ID'
+   :chatid: ''
+   :ignore:
+           - jenni
+           - example
+
+
