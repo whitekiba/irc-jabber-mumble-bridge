@@ -7,6 +7,9 @@
    :channel: '#test'
    :port: 6667
    :master: 'WhiteKIBA'
+   :ignore:
+           - jenni
+           - example
 :jabber:
 	:enabled: true
    :id: 'example@rout0r.org'
@@ -26,8 +29,5 @@
    :enabled: true
    :token: 'API-KEY'
    :chatid: ''
-   :ignore:
-           - jenni
-           - example
 
 
