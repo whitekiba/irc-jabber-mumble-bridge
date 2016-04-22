@@ -7,4 +7,6 @@ gem "sanitize"
 gem 'telegram-bot-ruby'
 gem "eventmachine"
 
+gem "redis"
+
 gem "daemons" # 666 satan
