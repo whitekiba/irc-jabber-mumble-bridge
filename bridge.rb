@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 Dir.chdir $pwd unless $pwd.nil?
 
-$:.unshift("lib/")
+$:.unshift("protocols/")
 
 require "rubygems"
 require "yaml"
