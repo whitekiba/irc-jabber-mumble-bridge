@@ -24,15 +24,6 @@ end
 
 bridge = Bridge.new
 
-Thread.new do
-  begin
-    DummyBridge.start($config[:dummy], bridge)
-  rescue Exception => e
-    $logger.error e
-    $logger.error e.backtrace.join("\n")
-  end
-end
-
 loop do
   begin
     sleep 0.5
