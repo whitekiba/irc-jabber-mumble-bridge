@@ -1,0 +1,20 @@
+Redis PubSub format
+
+$userid.$channel
+
+$userid
+
+Die ID des Users in MongoDB.
+
+$channel
+
+Die ID/Name des Channels in dem der Bot sitzt. Wir nutzen hierfür das Kürzel
+des Protokolls + eventuell eine Nummer falls es mehre gibt
+
+
+----
+Alle Module welche nur eine Verbindung zu einem dienst haben subscriben alle
+Channels.
+
+Dienste welche für jeden Channel eine neue Verbindung brauchen subscriben zu
+$userid.* und forken dann in einen eigenen Thread
