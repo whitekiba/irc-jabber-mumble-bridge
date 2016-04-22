@@ -13,17 +13,6 @@ require 'dummy_part'
 $config = YAML.load_file(File.dirname(__FILE__) + '/config.yml')
 $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
 
-class Bridge
-	def initialize
-		@messages = Hash.new #hier werden alle nachrichten reingepumpt
-		@subscribers = [] #die liste der endpunkte
-		@prefixes = Hash.new #prefixe fuer nachrichten
-		@prefixes[:core] = "core"
-	end
-end
-
-bridge = Bridge.new
-
 loop do
   begin
     sleep 0.5
