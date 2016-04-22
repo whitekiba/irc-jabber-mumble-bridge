@@ -1,6 +1,6 @@
 require "rubygems"
 require 'redis'
-require_relative "./module_base"
+require_relative "../lib/module_base"
 require "logger"
 
 $logger = Logger.new(File.dirname(__FILE__) + '/dummy.log')
@@ -8,14 +8,12 @@ $logger = Logger.new(File.dirname(__FILE__) + '/dummy.log')
 class DummyBridge < ModuleBase
   def gen_messages
     @my_name = :dummy
-    Thread.new do
-      loop do
-        sleep 1
-        self.publish(@my_name, "test")
-        $logger.info "Message gesendet!"
-      end
+    loop do
+      sleep 1
+      self.publish(@my_name, "test")
+      $logger.info "Message gesendet!"
     end
-    sleep 60
+    $logger.info "Dummy... Dead!"
   end
 end
 

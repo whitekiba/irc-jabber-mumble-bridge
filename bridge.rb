@@ -6,12 +6,20 @@ $:.unshift("protocols/")
 require "rubygems"
 require "yaml"
 require "logger"
-#require './module_base'
 require "redis"
-require 'dummy_part'
+require 'childprocess'
 
-$config = YAML.load_file(File.dirname(__FILE__) + '/config.yml')
+#$config = YAML.load_file(File.dirname(__FILE__) + '/config.yml')
 $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
+
+processes = Hash.new
+
+protocols = ["dummy", "irc", "telegram"]
+
+protocols.each { |proto|
+  processes[proto] = ChildProcess.build("ruby", "protocols/#{proto}_part.rb")
+  processes[proto].start
+}
 
 loop do
   begin
