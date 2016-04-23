@@ -1,16 +1,16 @@
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
-gem "Ruby-IRC"
+gem 'Ruby-IRC'
 #gem "jabbot"
-gem "mumble-ruby"
-gem "sanitize"
+gem 'mumble-ruby'
+gem 'sanitize'
 gem 'telegram-bot-ruby'
-gem "eventmachine"
+gem 'eventmachine'
 
-gem "childprocess"
+gem 'childprocess'
 
 #Datenbankstuff für die bridge
-gem "redis"
-gem "mongo"
+gem 'redis'
+gem 'mongo'
 
-gem "daemons" # 666 satan
+gem 'daemons' # 666 satan

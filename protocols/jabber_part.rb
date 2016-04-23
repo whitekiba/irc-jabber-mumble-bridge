@@ -1,5 +1,5 @@
-require "rubygems"
-require "jabbot"
+require 'rubygems'
+require 'jabbot'
 
 class JabberBridge
 	def self.start(conf, bridge)
@@ -32,7 +32,7 @@ class JabberBridge
 		@bot.handlers[:join] << join_handler
 		@bot.handlers[:leave] << leave_handler
 		bridge.subscribe(@my_name)
-		bridge.addPrefix(@my_name, "J")
+		bridge.addPrefix(@my_name, 'J')
 		Thread.new do
 			loop do
 				sleep 0.1
@@ -44,7 +44,7 @@ class JabberBridge
 		@bot.connect
 	end
 	def self.handleMessage(message)
-		nick = message.user.split("@").first
+		nick = message.user.split('@').first
 		@bridge.broadcast(@my_name, "[#{nick}]: #{message.text}")
 		$logger.info message.text
 	end

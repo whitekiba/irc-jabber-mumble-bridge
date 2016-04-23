@@ -1,8 +1,8 @@
 # encoding: utf-8
-require "rubygems"
-require "mumble-ruby"
+require 'rubygems'
+require 'mumble-ruby'
 require 'cgi'
-require "sanitize"
+require 'sanitize'
 
 class MumbleBridge
 	def self.start(conf, bridge)
@@ -26,7 +26,7 @@ class MumbleBridge
 			handleUserRemove(msg)
 		end
 		bridge.subscribe(@my_name)
-		bridge.addPrefix(@my_name, "M")
+		bridge.addPrefix(@my_name, 'M')
 		Thread.new do
 			loop do
 				sleep 0.1
@@ -34,7 +34,7 @@ class MumbleBridge
 					begin
 					@mumble.text_channel(conf[:channel], CGI.escapeHTML(msg_in))
 					rescue Exception => e
-						$logger.info "Failed to send Message"
+						$logger.info 'Failed to send Message'
 						$logger.info e
 					end
 				end
@@ -45,25 +45,25 @@ class MumbleBridge
 		begin
 			@mumble.join_channel(conf[:channel])
 		rescue Exception => e
-			$logger.info "Failed to join channel"
+			$logger.info 'Failed to join channel'
 			$logger.info e
 		end
 	end
 	def self.handleMessage(msg)
-		$logger.info "handleMessage wurde aufgerufen."
+		$logger.info 'handleMessage wurde aufgerufen.'
 		$logger.debug msg.to_hash()
 		if /#{@conf[:username]} (.*)/.match(msg.message)
-			$logger.info "Hier fehlt der Kommandocode fuer Mumble"
+			$logger.info 'Hier fehlt der Kommandocode fuer Mumble'
 		else
 			if @mumble.users[msg.actor].respond_to? :name
 				username = @mumble.users[msg.actor].name
-				@bridge.broadcast(@my_name, "[#{username}]: #{Sanitize.clean(CGI.unescapeHTML(msg.to_hash()["message"]))}")
-				$logger.info msg.to_hash()["message"]
+				@bridge.broadcast(@my_name, "[#{username}]: #{Sanitize.clean(CGI.unescapeHTML(msg.to_hash()['message']))}")
+				$logger.info msg.to_hash()['message']
 			end
 		end
 	end
 	def self.handleUserChange(msg)
-		$logger.info "handleUserChange wurde aufgerufen."
+		$logger.info 'handleUserChange wurde aufgerufen.'
 		$logger.debug msg.to_hash()
 		if @mumble.users[msg.session].respond_to? :name
 			username = @mumble.users[msg.session].name
@@ -86,11 +86,11 @@ class MumbleBridge
 		end
 	end
 	def self.handleUserRemove(msg)
-		$logger.info "handleUserRemove wurde aufgerufen."
+		$logger.info 'handleUserRemove wurde aufgerufen.'
 		$logger.debug msg.to_hash()
 		if @mumble.users[msg.session].respond_to? :name
 			username = @mumble.users[msg.session].name
-			$logger.info "Username wurde gefunden"
+			$logger.info 'Username wurde gefunden'
 			@bridge.broadcast(@my_name, " #{username} hat den Server verlassen.")
 		end
 	end

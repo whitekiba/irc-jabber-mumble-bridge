@@ -20,7 +20,7 @@ class TelegramBridge
             unless update.message.new_chat_participant.nil?
               if update.message.new_chat_participant.username.eql?(Telegram::Bot::Types::User.new(@telegram.api.getMe['result']).username)
                 puts "Bot added to chat! \n Title: #{update.message.chat.title} \n Chat-ID: #{update.message.chat.id}"
-                puts "Please exit and change your config now!"
+                puts 'Please exit and change your config now!'
                 return
               end
             end
@@ -31,7 +31,7 @@ class TelegramBridge
       end
     end
     @bridge.subscribe(@my_name)
-    @bridge.addPrefix(@my_name, "T")
+    @bridge.addPrefix(@my_name, 'T')
     Thread.new do
       loop do
         sleep 0.1
@@ -49,11 +49,11 @@ class TelegramBridge
   end
 
   def self.handleMessage(msg)
-    $logger.info "handleMessage wurde aufgerufen!"
+    $logger.info 'handleMessage wurde aufgerufen!'
     $logger.debug msg.to_hash()
     unless msg.text.nil?
       unless msg.chat.id.to_s.eql? @conf[:chatid].to_s
-        @telegram.api.send_message(chat_id: msg.chat.id, text: "Hey. Looks like you found the Fluxnet Bridge! Unfortunately you are not able to use it now. For further information check out: https://git.rout0r.org/fluxnet/bridge")
+        @telegram.api.send_message(chat_id: msg.chat.id, text: 'Hey. Looks like you found the Fluxnet Bridge! Unfortunately you are not able to use it now. For further information check out: https://git.rout0r.org/fluxnet/bridge')
       else
         @bridge.broadcast(@my_name, "[#{msg.from.first_name}]: #{Sanitize.clean(CGI.unescapeHTML(msg.text))}")
       end

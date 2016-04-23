@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 Dir.chdir $pwd unless $pwd.nil?
 
-$:.unshift("protocols/")
+$:.unshift('protocols/')
 
-require "rubygems"
-require "yaml"
-require "logger"
-require "redis"
+require 'rubygems'
+require 'yaml'
+require 'logger'
+require 'redis'
 require 'childprocess'
 
 #$config = YAML.load_file(File.dirname(__FILE__) + '/config.yml')
@@ -14,10 +14,10 @@ $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
 
 processes = Hash.new
 
-protocols = ["dummy", "irc", "telegram"]
+protocols = ['dummy', 'irc', 'telegram']
 
 protocols.each { |proto|
-  processes[proto] = ChildProcess.build("ruby", "protocols/#{proto}_part.rb")
+  processes[proto] = ChildProcess.build('ruby', "protocols/#{proto}_part.rb")
   processes[proto].start
 }
 

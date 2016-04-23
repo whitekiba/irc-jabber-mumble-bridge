@@ -18,3 +18,10 @@ Channels.
 
 Dienste welche für jeden Channel eine neue Verbindung brauchen subscriben zu
 $userid.* und forken dann in einen eigenen Thread
+
+= Wichtige Channels =
+
+Ein paar Channel sind sehr zielgerichtet und werden stärker gefiltert. Im
+folgenden eine Liste der Channel die kritisch sind
+
+assistant.$userid - Nachrichten an den SetupAssistenten

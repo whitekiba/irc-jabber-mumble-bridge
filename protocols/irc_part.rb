@@ -1,6 +1,6 @@
-require "rubygems"
-require "IRC"
-require_relative "../lib/module_base"
+require 'rubygems'
+require 'IRC'
+require_relative '../lib/module_base'
 
 class IRCBridge < ModuleBase
   def self.start
@@ -29,7 +29,7 @@ class IRCBridge < ModuleBase
     else
       unless @conf[:ignore].include?(message.from)
         if /^\x01ACTION (.)+\x01$/.match(message.message)
-          self.publish(@my_name, " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, "")}")
+          self.publish(@my_name, " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}")
         else
           self.publish(@my_name, "[#{message.from}]: #{message.message}")
         end
@@ -57,13 +57,13 @@ class IRCBridge < ModuleBase
   end
 
   def self.command(user, command)
-    if command == "version"
+    if command == 'version'
       ver = `uname -a`
       @bot.send_message(@conf[:channel], "Version? Oh... ich hab sowas nicht nicht :'(")
       @bot.send_message(@conf[:channel], "Aber hey ich hab das hier! Mein OS: #{ver}")
     end
     if @conf[:master] == user
-      if command == "ge wek"
+      if command == 'ge wek'
         abort
       end
     end

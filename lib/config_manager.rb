@@ -1,4 +1,4 @@
-require "mongo"
+require 'mongo'
 
 class ConfigManager
   def initialize
