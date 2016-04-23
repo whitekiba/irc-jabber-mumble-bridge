@@ -23,11 +23,16 @@ protocols.each { |proto|
 
 loop do
   begin
-    sleep 0.5
+    processes.each_key { |proc|
+      if processes[proc].exited?
+        processes[proc].start
+      end
+    }
+    sleep 1
   rescue StandardError => e
     $logger.error e
     $logger.error e.backtrace.join("\n")
-    bridge.broadcast(:core, " Unable to handle exception. Going down!")
+    #bridge.broadcast(:core, " Unable to handle exception. Going down!")
     sleep 1
     abort
   end
