@@ -7,7 +7,9 @@ gem 'sanitize'
 gem 'telegram-bot-ruby'
 gem 'eventmachine'
 
+#helper
 gem 'childprocess'
+gem 'hashie'
 
 #Datenbankstuff für die bridge
 gem 'redis'
