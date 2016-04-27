@@ -6,15 +6,14 @@ require 'logger'
 $logger = Logger.new(File.dirname(__FILE__) + '/dummy.log')
 
 class DummyBridge < ModuleBase
-  def initialize
-    @my_short_name = 'D'
-    @my_network_id = 1
-  end
+  @my_short_name = 'D'
+  @my_network_id = 1
+  @my_user_id = 1
   def gen_messages
     @my_name = :dummy
     loop do
       sleep 1
-      self.publish(@my_name, 'test')
+      self.publish(source_user: @my_user_id, message: 'test', nick: 'nickname')
       $logger.info 'Message gesendet!'
     end
     $logger.info 'Dummy... Dead!'

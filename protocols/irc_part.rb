@@ -3,7 +3,7 @@ require 'IRC'
 require_relative '../lib/module_base'
 
 class IRCBridge < ModuleBase
-  def self.start
+  def self.receive
     @my_name = :irc
     @bot = IRC.new(conf[:nick], conf[:server], conf[:port], conf[:name])
     IRCEvent.add_callback('endofmotd') { |event| @bot.add_channel(conf[:channel]) }
@@ -11,14 +11,6 @@ class IRCBridge < ModuleBase
     IRCEvent.add_callback('join') { |event| joinMessage event }
     IRCEvent.add_callback('part') { |event| partMessage event }
     IRCEvent.add_callback('quit') { |event| quitMessage event }
-    Thread.new do
-      loop do
-        sleep 0.1
-        if msg_in = bridge.getNextMessage(@my_name)
-          @bot.send_message(conf[:channel], msg_in)
-        end
-      end
-    end
     @bot.connect
   end
 
@@ -31,7 +23,7 @@ class IRCBridge < ModuleBase
         if /^\x01ACTION (.)+\x01$/.match(message.message)
           self.publish(@my_name, " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}")
         else
-          self.publish(@my_name, "[#{message.from}]: #{message.message}")
+          self.publish(source_network_type: @my_name, message: "[#{message.from}]: #{message.message}")
         end
         $logger.info message.message
       end
@@ -40,19 +32,19 @@ class IRCBridge < ModuleBase
 
   def self.joinMessage(event)
     if event.from != @conf[:nick]
-      self.publish(@my_name, "#{event.from} kam in den Channel.")
+      self.publish(source_network_type: @my_name, message: "#{event.from} kam in den Channel.")
     end
   end
 
   def self.partMessage(event)
     if event.from != @conf[:nick]
-      self.publish(@my_name, "#{event.from} hat den Channel verlassen")
+      self.publish(source_network_type: @my_name, message: "#{event.from} hat den Channel verlassen")
     end
   end
 
   def self.quitMessage(event)
     if event.from != @conf[:nick]
-      self.publish(@my_name, "#{event.from} hat den Server verlassen")
+      self.publish(source_network_type: @my_name, message: "#{event.from} hat den Server verlassen")
     end
   end
 
@@ -69,3 +61,6 @@ class IRCBridge < ModuleBase
     end
   end
 end
+
+irc = IRCBridge.new
+irc.receive

@@ -2,11 +2,11 @@ require 'redis'
 
 class ModuleBase
   def initialize
-    single_con_networks = %w(I T)
+    @single_con_networks = %w(I T)
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
     Thread.new do
-      sleep 2
+      sleep 0.1
       $logger.info('Thread gestartet!')
       @redis_sub.psubscribe('msg.*') do |on|
         on.psubscribe do |channel, subscriptions|
@@ -18,6 +18,7 @@ class ModuleBase
           $logger.info ('Got message!')
         end
       end
+
     end
   end
   def publish(api_ver: '1', source_network_type: nil, source_network: nil, source_user:,
@@ -25,7 +26,7 @@ class ModuleBase
               message_type: 'msg', attachment: nil)
     source_network_type = @my_name_short if source_network_type.nil?
     $logger.info ('publish wurde aufgerufen')
-    @redis_pub.publish("msg.#{source}", message)
+    @redis_pub.publish("msg.#{source_network}", message)
     puts message
   end
 end
