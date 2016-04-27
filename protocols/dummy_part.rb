@@ -6,6 +6,10 @@ require 'logger'
 $logger = Logger.new(File.dirname(__FILE__) + '/dummy.log')
 
 class DummyBridge < ModuleBase
+  def initialize
+    @my_short_name = 'D'
+    @my_network_id = 1
+  end
   def gen_messages
     @my_name = :dummy
     loop do
