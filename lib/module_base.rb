@@ -1,7 +1,9 @@
 require 'redis'
+require 'json'
 
 class ModuleBase
   def initialize
+    $config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')
     @single_con_networks = %w(I T)
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
@@ -18,7 +20,6 @@ class ModuleBase
           $logger.info ('Got message!')
         end
       end
-
     end
   end
   def publish(api_ver: '1', source_network_type: nil, source_network: nil, source_user:,
@@ -26,7 +27,15 @@ class ModuleBase
               message_type: 'msg', attachment: nil)
     source_network_type = @my_name_short if source_network_type.nil?
     $logger.info ('publish wurde aufgerufen')
-    @redis_pub.publish("msg.#{source_network}", message)
-    puts message
+    json = JSON.generate ({
+        'message' => message,
+        'nick' => nick,
+        'source_network_type' => source_network_type
+              })
+    @redis_pub.publish("msg.#{source_network}", json)
+    puts json
+  end
+  def receive
+
   end
 end

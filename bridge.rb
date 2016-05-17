@@ -9,7 +9,7 @@ require 'logger'
 require 'redis'
 require 'childprocess'
 
-#$config = YAML.load_file(File.dirname(__FILE__) + '/config.yml')
+$config = YAML.load_file(File.dirname(__FILE__) + '/config.yml')
 $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
 
 processes = Hash.new
