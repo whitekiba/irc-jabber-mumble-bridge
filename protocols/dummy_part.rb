@@ -10,6 +10,7 @@ class DummyBridge < ModuleBase
   @my_network_id = 1
   @my_user_id = 1
   def gen_messages
+    puts 'Dummy starting... Generating test messages'
     @my_name = :dummy
     loop do
       sleep 1
@@ -17,6 +18,11 @@ class DummyBridge < ModuleBase
       $logger.info 'Message gesendet!'
     end
     $logger.info 'Dummy... Dead!'
+  end
+  def receive_messages
+    Thread.new do
+      self.receive
+    end
   end
 end
 

@@ -14,13 +14,16 @@ $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
 
 processes = Hash.new
 
-protocols = ['dummy', 'irc', 'telegram']
+protocols = ['dummy', 'irc']
 
 protocols.each { |proto|
   processes[proto] = ChildProcess.build('ruby', "protocols/#{proto}_part.rb")
   processes[proto].start
 }
 
+puts "bridge-v2 starting up... (INTEGRATE ALL TEH THINGS!)"
+
+puts "Starting Mainloop and services."
 loop do
   begin
     processes.each_key { |proc|

@@ -3,6 +3,7 @@ require 'cgi'
 require 'sanitize'
 class TelegramBridge
   def self.start(conf, bridge)
+    puts 'Telegram process starting...'
     if conf[:enabled] == false
       exit
     end

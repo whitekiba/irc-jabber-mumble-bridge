@@ -1,5 +1,6 @@
 require 'redis'
 require 'json'
+require 'yaml'
 
 class ModuleBase
   def initialize
@@ -7,6 +8,7 @@ class ModuleBase
     @single_con_networks = %w(I T)
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
+    @messages = Array.new
     Thread.new do
       sleep 0.1
       $logger.info('Thread gestartet!')
@@ -16,8 +18,9 @@ class ModuleBase
           $logger.info ('subscribed!')
         end
         on.pmessage do |pattern, channel, message|
-          puts "Got message: #{channel}: #{message}"
-          $logger.info ('Got message!')
+          $logger.info ("Got message! #{message}")
+          data = JSON.parse(message)
+          @messages.unshift(data)
         end
       end
     end
@@ -30,12 +33,16 @@ class ModuleBase
     json = JSON.generate ({
         'message' => message,
         'nick' => nick,
-        'source_network_type' => source_network_type
+        'source_network_type' => source_network_type,
+        'source_network' => source_network,
+        'source_user' => source_user,
+        'user_id' => user_id,
+        'network_id' => network_id,
+        'timestamp' => timestamp,
+        'message_type' => message_type,
+        'attachment' => attachment
               })
     @redis_pub.publish("msg.#{source_network}", json)
     puts json
-  end
-  def receive
-
   end
 end
