@@ -9,6 +9,8 @@ class ModuleBase
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
     @messages = Array.new
+  end
+  def subscribe(name)
     Thread.new do
       sleep 0.1
       $logger.info('Thread gestartet!')
@@ -20,7 +22,11 @@ class ModuleBase
         on.pmessage do |pattern, channel, message|
           $logger.info ("Got message! #{message}")
           data = JSON.parse(message)
-          @messages.unshift(data)
+          if data["source_network_type"] != name
+            $logger.info data
+            @messages.unshift(data)
+            $logger.info("Length of @message #{@messages.length}")
+          end
         end
       end
     end
