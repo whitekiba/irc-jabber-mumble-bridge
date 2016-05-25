@@ -1,16 +1,31 @@
 require 'rubygems'
 require 'IRC'
 require_relative '../lib/module_base'
+require 'logger'
+
+$logger = Logger.new(File.dirname(__FILE__) + '/irc.log')
 
 class IRCBridge < ModuleBase
-  def self.receive
+  def receive
     @my_name = :irc
-    @bot = IRC.new(conf[:nick], conf[:server], conf[:port], conf[:name])
-    IRCEvent.add_callback('endofmotd') { |event| @bot.add_channel(conf[:channel]) }
+    @bot = IRC.new("bridge-test", "irc.rout0r.org", 6667, "bridge-test")
+    IRCEvent.add_callback('endofmotd') { |event| @bot.add_channel("#bridge-test") }
     IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }
     IRCEvent.add_callback('join') { |event| joinMessage event }
     IRCEvent.add_callback('part') { |event| partMessage event }
     IRCEvent.add_callback('quit') { |event| quitMessage event }
+    Thread.new do
+      loop do
+        sleep 0.1
+        msg_in = @messages.pop
+        $logger.info "State of message array: #{msg_in.nil?}"
+        if !msg_in.nil?
+          $logger.info msg_in
+          @bot.send_message("#bridge-test", msg_in["message"])
+        end
+      end
+    end
+
     @bot.connect
   end
 
