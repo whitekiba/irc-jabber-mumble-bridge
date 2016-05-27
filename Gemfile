@@ -13,6 +13,6 @@ gem 'hashie'
 
 #Datenbankstuff für die bridge
 gem 'redis'
-gem 'mongo'
+gem 'mysql2'
 
 gem 'daemons' # 666 satan

@@ -24,4 +24,4 @@ $userid.* und forken dann in einen eigenen Thread
 Ein paar Channel sind sehr zielgerichtet und werden stärker gefiltert. Im
 folgenden eine Liste der Channel die kritisch sind
 
-assistant.$userid - Nachrichten an den SetupAssistenten
+assistant.$network.$userid - Nachrichten an den SetupAssistenten
