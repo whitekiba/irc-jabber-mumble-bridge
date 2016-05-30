@@ -1,5 +1,5 @@
 :irc:
-	:enabled: true
+:enabled: true
    :nick: 'bridge'
    :user: 'bridge'
    :name: 'Jabber Bridge'
@@ -11,7 +11,7 @@
            - jenni
            - example
 :jabber:
-	:enabled: true
+   :enabled: true
    :id: 'example@rout0r.org'
    :pw: ''
    :name: 'bridge'
@@ -29,5 +29,11 @@
    :enabled: true
    :token: 'API-KEY'
    :chatid: ''
-
-
+:redis:
+   :host: 10.1.0.48
+   :port: 7777
+:database:
+   :host: 10.1.0.48
+   :database: 'bridge'
+   :user: 'root'
+   :password: ''
