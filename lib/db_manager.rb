@@ -1,7 +1,7 @@
 require 'mysql2'
 require 'yaml'
 
-class ConfigManager
+class DbManager
   def initialize
     @config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:database]
     @db = Mysql2::Client.new(:host => @config[:host], :username => @config[:user], :password => @config[:password])
@@ -14,7 +14,7 @@ class ConfigManager
       puts entry
       services[entry["user_ID"]] = entry["channel"]
     end
-    puts services
+    puts services.to_hash
   end
   def addServiceToUser(user_id, service, ident_value, server = nil, server_username = nil)
     @db.query("INSERT INTO `services` (`ID`, `user_ID`, `ident_value`, `channel`) VALUES (NULL, '#{user_id}', '#{ident_value}', "")")
