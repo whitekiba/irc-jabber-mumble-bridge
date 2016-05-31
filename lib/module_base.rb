@@ -24,7 +24,7 @@ class ModuleBase
         on.pmessage do |pattern, channel, message|
           $logger.info ("Got message! #{message}")
           data = JSON.parse(message)
-          if data["source_network_type"] != name
+          if data["source_network"] != name
             $logger.info data
             @messages.unshift(data)
             $logger.info("Length of @message #{@messages.length}")

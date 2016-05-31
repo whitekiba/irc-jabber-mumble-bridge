@@ -9,6 +9,7 @@ $logger = Logger.new(File.dirname(__FILE__) + '/telegram.log')
 class TelegramBridge < ModuleBase
   def receive
     @my_name = 'telegram'
+    @my_short = 'T'
     $logger.info 'Telegram process starting...'
     @telegram = Telegram::Bot::Client.new('216275672:AAGoqjZLStLGqFL54-bao5NwWeRdebyN4Ao')
     subscribe(@my_name)
@@ -51,7 +52,7 @@ class TelegramBridge < ModuleBase
     unless msg.text.nil?
       is_assistant = false
       is_assistant = true if msg.chat.type.eql?('private')
-      publish(source_network_type: @my_name, source_user: 'empty', nick: msg.from.first_name, message: msg.text, is_assistant: is_assistant, chat_id: msg.chat.id)
+      publish(source_network_type: @my_short, source_network: @my_name, source_user: 'empty', nick: msg.from.first_name, message: msg.text, is_assistant: is_assistant, chat_id: msg.chat.id)
     end
   end
 end
