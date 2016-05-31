@@ -22,6 +22,7 @@ protocols.each { |proto|
 }
 
 ChildProcess.build('ruby', "assistant/telegram_assistant.rb").start
+
 puts "bridge-v2 starting up... (INTEGRATE ALL TEH THINGS!)"
 
 puts "Starting Mainloop and services."
@@ -41,6 +42,3 @@ loop do
     abort
   end
 end
-
-
-# vim: tabstop=3

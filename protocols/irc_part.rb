@@ -8,7 +8,8 @@ $logger = Logger.new(File.dirname(__FILE__) + '/irc.log')
 class IRCBridge < ModuleBase
   def receive
     @my_name = 'irc'
-    @bot = IRC.new($config[:nick], $config[:server], $config[:port], $config[:ident])
+
+    @bot = IRC.new($config[:irc][:nick], $config[:irc][:server], $config[:irc][:port], $config[:irc][:name])
     IRCEvent.add_callback('endofmotd') { |event| @bot.add_channel("#bridge-test") }
     IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }
     IRCEvent.add_callback('join') { |event| joinMessage event }
@@ -34,9 +35,9 @@ class IRCBridge < ModuleBase
   def handleMessage(message)
     $logger.info "handleMessage wurde aufgerufen"
     if /^\x01ACTION (.)+\x01$/.match(message.message)
-      self.publish(source_network_type: @my_name, message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}")
+      self.publish(source_network_type: @my_name, message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}", chat_id: '-145447289')
     else
-      self.publish(source_network_type: @my_name, source_user: 'empty', nick: message.from, message: message.message)
+      self.publish(source_network_type: @my_name, source_user: 'empty', nick: message.from, message: message.message, chat_id: '-145447289')
     end
     $logger.info message.message
   end
