@@ -24,7 +24,7 @@ class IRCBridge < ModuleBase
         #$logger.info "State of message array: #{msg_in.nil?}"
         if !msg_in.nil?
           $logger.info msg_in
-          @bot.send_message("#bridge-test", msg_in["message"])
+          @bot.send_message("#bridge-test", "[#{msg_in["source_network_type"]}][#{msg_in["nick"]}]#{msg_in["message"]}")
         end
       end
     end
