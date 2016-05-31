@@ -8,7 +8,7 @@ $logger = Logger.new(File.dirname(__FILE__) + '/irc.log')
 class IRCBridge < ModuleBase
   def receive
     @my_name = 'irc'
-    @bot = IRC.new("bridge-test", "irc.rout0r.org", 6667, "bridge-test")
+    @bot = IRC.new($config[:nick], $config[:server], $config[:port], $config[:ident])
     IRCEvent.add_callback('endofmotd') { |event| @bot.add_channel("#bridge-test") }
     IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }
     IRCEvent.add_callback('join') { |event| joinMessage event }

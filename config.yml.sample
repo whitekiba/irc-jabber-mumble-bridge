@@ -1,7 +1,7 @@
 :irc:
    :enabled: true
    :nick: 'bridge'
-   :user: 'bridge'
+   :ident: 'bridge'
    :name: 'Jabber Bridge'
    :server: 'irc.rout0r.org'
    :channel: '#test'

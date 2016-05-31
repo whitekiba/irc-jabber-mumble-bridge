@@ -11,9 +11,10 @@ class ConfigManager
     services = Array.new
     res = @db.query("SELECT * FROM services WHERE service LIKE '#{service}'");
     res.each do |entry|
-      services[entry["service"]] = entry["user_ID"]
+      puts entry
+      services[entry["user_ID"]] = entry["channel"]
     end
-    services
+    puts services
   end
   def addServiceToUser(user_id, service, ident_value, server = nil, server_username = nil)
     @db.query("INSERT INTO `services` (`ID`, `user_ID`, `ident_value`, `channel`) VALUES (NULL, '#{user_id}', '#{ident_value}', "")")
@@ -38,4 +39,4 @@ class ConfigManager
 end
 
 db_test = ConfigManager.new
-db_test.loadService('telegram')
+db_test.loadService('irc')

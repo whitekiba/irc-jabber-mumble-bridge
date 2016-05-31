@@ -34,7 +34,7 @@ class TelegramBridge < ModuleBase
     #$logger.info 'handleMessage wurde aufgerufen!'
     #$logger.info msg.to_hash()
     unless msg.text.nil?
-      publish(source_network_type: @my_name, source_user: 'empty', nick: msg.from.first_name, message: msg.text)
+      publish(source_network_type: @my_name, source_user: 'empty', nick: msg.from.first_name, message: msg.text, chat_id: msg.chat.id)
     end
   end
 end
