@@ -1,5 +1,5 @@
 :irc:
-:enabled: true
+   :enabled: true
    :nick: 'bridge'
    :user: 'bridge'
    :name: 'Jabber Bridge'
@@ -13,22 +13,11 @@
 :jabber:
    :enabled: true
    :id: 'example@rout0r.org'
-   :pw: ''
-   :name: 'bridge'
-   :conference_room: 'fluxnet-lobby@conference.rout0r.org'
-   :channel_password: ''
-   :resource: 'bridge'
-   :port: 5222
-   :master: 'whitekiba@rout0r.org'
 :mumble:
-	:enabled: true
-   :server: 'mumble.rout0r.org'
-   :username: 'bridge'
-   :channel: 'Flux Networks - Rechtecke'
+   :enabled: true
 :telegram
    :enabled: true
    :token: 'API-KEY'
-   :chatid: ''
 :redis:
    :host: 10.1.0.48
    :port: 7777

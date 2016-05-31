@@ -4,7 +4,7 @@ require 'yaml'
 
 class ModuleBase
   def initialize
-    $config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')
+    $config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[@my_name]
     @single_con_networks = %w(I T)
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)

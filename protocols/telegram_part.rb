@@ -7,10 +7,10 @@ require 'logger'
 $logger = Logger.new(File.dirname(__FILE__) + '/telegram.log')
 
 class TelegramBridge < ModuleBase
+  @my_name = 'telegram'
   def receive
-    @my_name = 'telegram'
     $logger.info 'Telegram process starting...'
-    @telegram = Telegram::Bot::Client.new('188291608:AAHlW548Esg1SSKOgCC9qjcNvEnAt35KmK8')
+    @telegram = Telegram::Bot::Client.new($config[:token])
 
     subscribe(@my_name)
     Thread.new do
