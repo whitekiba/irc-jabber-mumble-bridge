@@ -7,18 +7,20 @@ class DbManager
     @db = Mysql2::Client.new(:host => @config[:host], :username => @config[:user], :password => @config[:password])
     @db.select_db(@config[:database])
   end
+
   def loadService(service)
     services = Array.new
     res = @db.query("SELECT * FROM services WHERE service LIKE '#{service}'");
     res.each do |entry|
-      puts entry
       services[entry["user_ID"]] = entry
     end
-    puts services.to_hash
+    services
   end
+
   def addServiceToUser(user_id, service, ident_value, server = nil, server_username = nil)
     @db.query("INSERT INTO `services` (`ID`, `user_ID`, `ident_value`, `channel`) VALUES (NULL, '#{user_id}', '#{ident_value}', "")")
   end
+
   #erzeugt einen neuen Datensatz für den User
   #generiert außerdem auch ein secret für die Datenbank
   def addUser(username)
@@ -29,6 +31,7 @@ class DbManager
     @db.query("INSERT INTO `users` (`ID`, `username`, `secret`) VALUES (NULL, '#{username}', '#{secret}');")
     secret #return the secret
   end
+
   def checkSecret(secret)
     res = @db.query("SELECT * FROM `users` WHERE `secret` LIKE '#{secret}'")
     if res.count > 0
@@ -38,5 +41,5 @@ class DbManager
   end
 end
 
-db_test = DbManager.new
-db_test.addUser('leopold')
+#db_test = DbManager.new
+#db_test.addUser('leopold')

@@ -2,6 +2,7 @@ require 'telegram/bot'
 require 'cgi'
 require 'sanitize'
 require_relative '../lib/module_base'
+require_relative '../lib/db_manager'
 require 'logger'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/telegram.log')
@@ -12,6 +13,17 @@ class TelegramBridge < ModuleBase
     @my_short = 'T'
     $logger.info 'Telegram process starting...'
     @telegram = Telegram::Bot::Client.new($config[:telegram][:token])
+    @db = DbManager.new
+
+    @chat_ids = Hash.new
+    @user_assoc = @db.loadService(@my_name)
+    #Wir erzeugen einen kleinen Hash mit ident_value => user_id Zuordnungen
+    @user_assoc.each do |u|
+      unless u.nil?
+        @chat_ids[u["ident_value"]] = u["user_ID"]
+      end
+    end
+
     subscribe(@my_name)
     subscribeAssistant(@my_name)
     Thread.new do
@@ -21,7 +33,7 @@ class TelegramBridge < ModuleBase
         #$logger.info "State of message array: #{msg_in.nil?}"
         if !msg_in.nil?
           $logger.info msg_in
-          @telegram.api.send_message(chat_id: msg_in["chat_id"], text: msg_in["message"])
+          @telegram.api.send_message(chat_id: @user_assoc[msg_in["user_id"]]["ident_value"], text: msg_in["message"])
         end
       end
     end
@@ -55,7 +67,7 @@ class TelegramBridge < ModuleBase
     unless msg.text.nil?
       is_assistant = false
       is_assistant = true if msg.chat.type.eql?('private')
-      publish(source_network_type: @my_short, source_network: @my_name, source_user: 'empty', nick: msg.from.first_name, message: msg.text, is_assistant: is_assistant, chat_id: msg.chat.id)
+      publish(source_network_type: @my_short, user_id: @chat_ids[msg.chat.id.to_s], source_network: @my_name, source_user: 'empty', nick: msg.from.first_name, message: msg.text, is_assistant: is_assistant, chat_id: msg.chat.id)
     end
   end
 end
