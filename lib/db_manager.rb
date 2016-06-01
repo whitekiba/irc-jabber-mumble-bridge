@@ -12,7 +12,7 @@ class DbManager
     res = @db.query("SELECT * FROM services WHERE service LIKE '#{service}'");
     res.each do |entry|
       puts entry
-      services[entry["user_ID"]] = entry["channel"]
+      services[entry["user_ID"]] = entry
     end
     puts services.to_hash
   end
@@ -38,5 +38,5 @@ class DbManager
   end
 end
 
-db_test = ConfigManager.new
-db_test.loadService('irc')
+db_test = DbManager.new
+db_test.addUser('leopold')

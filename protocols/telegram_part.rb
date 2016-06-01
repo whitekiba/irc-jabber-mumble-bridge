@@ -11,7 +11,7 @@ class TelegramBridge < ModuleBase
     @my_name = 'telegram'
     @my_short = 'T'
     $logger.info 'Telegram process starting...'
-    @telegram = Telegram::Bot::Client.new('216275672:AAGoqjZLStLGqFL54-bao5NwWeRdebyN4Ao')
+    @telegram = Telegram::Bot::Client.new($config[:telegram][:token])
     subscribe(@my_name)
     subscribeAssistant(@my_name)
     Thread.new do
@@ -48,7 +48,10 @@ class TelegramBridge < ModuleBase
   end
   def handleMessage(msg)
     #$logger.info 'handleMessage wurde aufgerufen!'
-    #$logger.info msg.to_hash()
+    $logger.info msg.to_hash()
+    unless msg.new_chat_member.nil?
+      @telegram.api.send_message(chat_id: msg.chat.id, text: "Ohai. I am new. This chat has ID: #{msg.chat.id}")
+    end
     unless msg.text.nil?
       is_assistant = false
       is_assistant = true if msg.chat.type.eql?('private')
