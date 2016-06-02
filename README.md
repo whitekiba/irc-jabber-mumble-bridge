@@ -1,10 +1,15 @@
-IRC <-> Jabber <-> Mumble Gateway
+Bridge-v2
 
-Running on:
- - mumble.rout0r.org
- - #lobby on irc.rout0r.org
- - fluxnet-lobby@conference.rout0r.org
+INTEGRATE ALL TEH THINGS!
 
-Dependencies on Ubuntu/Debian:
-- zlib1g-dev
-- libopus-dev
+Supported networks:
+- IRC
+- Telegram
+- Jabber
+- Mumble
+
+Used technologies:
+- Ruby
+- Redis
+- MariaDB
+- InfluxDB
