@@ -16,11 +16,8 @@ class IRCBridge < ModuleBase
     @user_assoc = @db.loadService(@my_name)
     @channels = @db.loadChatIDs(@my_name)
 
-    @bot = IRC.new($config[:irc][:nick], $config[:irc][:server], $config[:irc][:port], $config[:irc][:name])
-    IRCEvent.add_callback('endofmotd') { |event|
-      @chat_ids.each_key { | key |
-        @bot.add_channel(key)
-    }}
+    @bot = IRC.new("test", "irc.rout0r.org", "6667", "blub")
+    IRCEvent.add_callback('endofmotd') { |event| joinChannels }
     IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }
     IRCEvent.add_callback('join') { |event| joinMessage event }
     IRCEvent.add_callback('part') { |event| partMessage event }
@@ -34,7 +31,7 @@ class IRCBridge < ModuleBase
         #$logger.info "State of message array: #{msg_in.nil?}"
         if !msg_in.nil?
           $logger.info msg_in
-          @bot.send_message("#bridge-test", "[#{msg_in["source_network_type"]}][#{msg_in["nick"]}]#{msg_in["message"]}")
+          @bot.send_message(@user_assoc[msg_in["user_id"]]["ident_value"], "[#{msg_in["source_network_type"]}][#{msg_in["nick"]}]#{msg_in["message"]}")
         end
       end
     end
@@ -81,6 +78,14 @@ class IRCBridge < ModuleBase
         abort
       end
     end
+  end
+
+  def joinChannels
+    $logger.info "Got motd. Joining Channels."
+    @channels.each_key { | key |
+      $logger.info "Channel gejoint!"
+      @bot.add_channel(key)
+    }
   end
 end
 
