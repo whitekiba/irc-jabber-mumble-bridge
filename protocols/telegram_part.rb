@@ -15,14 +15,8 @@ class TelegramBridge < ModuleBase
     @telegram = Telegram::Bot::Client.new($config[:telegram][:token])
     @db = DbManager.new
 
-    @chat_ids = Hash.new
     @user_assoc = @db.loadService(@my_name)
-    #Wir erzeugen einen kleinen Hash mit ident_value => user_id Zuordnungen
-    @user_assoc.each do |u|
-      unless u.nil?
-        @chat_ids[u["ident_value"]] = u["user_ID"]
-      end
-    end
+    @chat_ids = @db.loadChatIDs(@my_name)
 
     subscribe(@my_name)
     subscribeAssistant(@my_name)
@@ -33,7 +27,7 @@ class TelegramBridge < ModuleBase
         #$logger.info "State of message array: #{msg_in.nil?}"
         if !msg_in.nil?
           $logger.info msg_in
-          @telegram.api.send_message(chat_id: @user_assoc[msg_in["user_id"]]["ident_value"], text: msg_in["message"])
+          @telegram.api.send_message(chat_id: @chat_ids[msg_in["user_id"]]["ident_value"], text: msg_in["message"])
         end
       end
     end

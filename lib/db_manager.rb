@@ -17,6 +17,15 @@ class DbManager
     services
   end
 
+  def loadChatIDs(service)
+    chat_ids = Hash.new
+    res = @db.query("SELECT ident_value, user_ID FROM services WHERE service LIKE '#{service}'");
+    res.each do |entry|
+      chat_ids[entry["ident_value"]] = entry["user_ID"]
+    end
+    chat_ids
+  end
+
   def addServiceToUser(user_id, service, ident_value, server = nil, server_username = nil)
     @db.query("INSERT INTO `services` (`ID`, `user_ID`, `ident_value`, `channel`) VALUES (NULL, '#{user_id}', '#{ident_value}', "")")
   end

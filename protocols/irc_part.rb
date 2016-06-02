@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'IRC'
 require_relative '../lib/module_base'
+require_relative '../lib/db_manager'
 require 'logger'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/irc.log')
@@ -10,8 +11,16 @@ class IRCBridge < ModuleBase
     @my_name = 'irc'
     @my_short = 'I'
 
+    @db = DbManager.new
+
+    @user_assoc = @db.loadService(@my_name)
+    @channels = @db.loadChatIDs(@my_name)
+
     @bot = IRC.new($config[:irc][:nick], $config[:irc][:server], $config[:irc][:port], $config[:irc][:name])
-    IRCEvent.add_callback('endofmotd') { |event| @bot.add_channel("#bridge-test") }
+    IRCEvent.add_callback('endofmotd') { |event|
+      @chat_ids.each_key { | key |
+        @bot.add_channel(key)
+    }}
     IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }
     IRCEvent.add_callback('join') { |event| joinMessage event }
     IRCEvent.add_callback('part') { |event| partMessage event }
@@ -36,28 +45,28 @@ class IRCBridge < ModuleBase
   def handleMessage(message)
     $logger.info "handleMessage wurde aufgerufen"
     if /^\x01ACTION (.)+\x01$/.match(message.message)
-      self.publish(source_network_type: @my_name, message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}", chat_id: '-145447289')
+      self.publish(source_network_type: @my_short, message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}", chat_id: '-145447289')
     else
-      self.publish(source_network_type: @my_name, source_network: @my_name, source_user: 'empty', nick: message.from, message: message.message, chat_id: '-145447289')
+      self.publish(source_network_type: @my_short, source_network: @my_name, nick: message.from, message: message.message, user_id: @chat_ids[message.channel])
     end
     $logger.info message.message
   end
 
   def joinMessage(event)
     if event.from != @conf[:nick]
-      self.publish(source_network_type: @my_name, message: "#{event.from} kam in den Channel.")
+      self.publish(source_network_type: @my_short, message: "#{event.from} kam in den Channel.")
     end
   end
 
   def partMessage(event)
     if event.from != @conf[:nick]
-      self.publish(source_network_type: @my_name, message: "#{event.from} hat den Channel verlassen")
+      self.publish(source_network_type: @my_short, message: "#{event.from} hat den Channel verlassen")
     end
   end
 
   def quitMessage(event)
     if event.from != @conf[:nick]
-      self.publish(source_network_type: @my_name, message: "#{event.from} hat den Server verlassen")
+      self.publish(source_network_type: @my_short, message: "#{event.from} hat den Server verlassen")
     end
   end
 
