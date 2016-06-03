@@ -30,6 +30,7 @@ loop do
   begin
     processes.each_key { |proc|
       if processes[proc].exited?
+        puts "#{proc} started or restarted."
         processes[proc].start
       end
     }
