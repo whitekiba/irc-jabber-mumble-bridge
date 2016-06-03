@@ -17,6 +17,7 @@ class TelegramBridge < ModuleBase
 
     @user_assoc = @db.loadService(@my_name)
     @chat_ids = @db.loadChatIDs(@my_name)
+    @chat_ids_invert = @chat_ids.invert
 
     subscribe(@my_name)
     subscribeAssistant(@my_name)
@@ -24,10 +25,15 @@ class TelegramBridge < ModuleBase
       loop do
         sleep 0.1
         msg_in = @messages.pop
-        #$logger.info "State of message array: #{msg_in.nil?}"
+        #$logger.debug("Length of @message seen by #{@my_name}: #{@messages.length}")
         if !msg_in.nil?
           $logger.info msg_in
-          @telegram.api.send_message(chat_id: @chat_ids[msg_in["user_id"]]["ident_value"], text: msg_in["message"])
+          begin
+            @telegram.api.send_message(chat_id: @chat_ids_invert[msg_in["user_id"]],
+                                       text: "[#{msg_in["source_network_type"]}][#{msg_in["nick"]}] #{msg_in["message"]}")
+          rescue StandardError => e
+            $logger.error e
+          end
         end
       end
     end

@@ -15,6 +15,7 @@ class IRCBridge < ModuleBase
 
     @user_assoc = @db.loadService(@my_name)
     @channels = @db.loadChatIDs(@my_name)
+    @channels_invert = @channels.invert
 
     @bot = IRC.new("test", "irc.rout0r.org", "6667", "blub")
     IRCEvent.add_callback('endofmotd') { |event| joinChannels }
@@ -44,7 +45,7 @@ class IRCBridge < ModuleBase
     if /^\x01ACTION (.)+\x01$/.match(message.message)
       self.publish(source_network_type: @my_short, message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}", chat_id: '-145447289')
     else
-      self.publish(source_network_type: @my_short, source_network: @my_name, nick: message.from, message: message.message, user_id: @chat_ids[message.channel])
+      self.publish(source_network_type: @my_short, source_network: @my_name, nick: message.from, message: message.message, user_id: @channels[message.channel])
     end
     $logger.info message.message
   end

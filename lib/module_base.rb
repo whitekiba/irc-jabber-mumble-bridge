@@ -18,8 +18,7 @@ class ModuleBase
       $logger.info('Thread gestartet!')
       @redis_sub.psubscribe('msg.*') do |on|
         on.psubscribe do |channel, subscriptions|
-          puts "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
-          $logger.info ('subscribed!')
+          $logger.info "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
         end
         on.pmessage do |pattern, channel, message|
           $logger.info ("Got message! #{message}")
@@ -39,8 +38,7 @@ class ModuleBase
       $logger.info('Thread gestartet!')
       @redis_assistant_sub.psubscribe('assistant.*') do |on|
         on.psubscribe do |channel, subscriptions|
-          puts "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
-          $logger.info ('subscribed to assistant channel!')
+          $logger.info "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
         end
         on.pmessage do |pattern, channel, message|
           $logger.info ("Got message! #{message}")
@@ -54,8 +52,8 @@ class ModuleBase
       end
     end
   end
-  def publish(api_ver: '1', source_network_type: nil, source_network: nil, source_user:,
-              message:, nick:, user_id: nil, network_id: nil , timestamp: nil,
+  def publish(api_ver: '1', source_network_type: nil, source_network: nil, source_user: nil,
+              message:, nick:, user_id:, network_id: nil , timestamp: nil,
               message_type: 'msg', attachment: nil, is_assistant: false, chat_id: nil)
     source_network_type = @my_name_short if source_network_type.nil?
     $logger.info ('publish wurde aufgerufen')
