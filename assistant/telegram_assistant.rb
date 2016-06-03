@@ -1,7 +1,9 @@
 require 'telegram/bot'
 require_relative '../lib/assistant_base'
+require_relative '../lib/db_manager'
 require 'json'
 class TelegramAssistant < AssistantBase
+  @db = DbManager.new
   def receive
     subscribe('telegram')
     loop do
@@ -9,8 +11,16 @@ class TelegramAssistant < AssistantBase
     end
   end
   def start(data)
-    buttons = ["Test1", "Test2", "Test3"]
+    buttons = ["New User", "Authenticate", "Donate"]
     publish(message: 'Bitte wählen!', chat_id: data["chat_id"], buttons: buttons)
+  end
+  #user erstellen
+  #solang user nil ist werden die buttons gesendet
+  def createUser(username = nil)
+
+  end
+  def addService
+
   end
 end
 ta = TelegramAssistant.new
