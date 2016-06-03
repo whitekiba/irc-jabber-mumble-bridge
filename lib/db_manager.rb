@@ -30,6 +30,10 @@ class DbManager
     @db.query("INSERT INTO `services` (`ID`, `user_ID`, `ident_value`, `channel`) VALUES (NULL, '#{user_id}', '#{ident_value}', "")")
   end
 
+  def addServer(server_url, server_port, server_type)
+    @db.query("")
+  end
+
   #erzeugt einen neuen Datensatz für den User
   #generiert außerdem auch ein secret für die Datenbank
   def addUser(username)

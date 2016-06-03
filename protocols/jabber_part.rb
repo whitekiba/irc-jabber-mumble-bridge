@@ -1,14 +1,11 @@
 require 'rubygems'
 require 'jabbot'
+require
 
-class JabberBridge
-	def self.start(conf, bridge)
-		if conf[:enabled] == false
-			exit
-		end
-		@my_name = :jabber
-		@conf = conf
-		@bridge = bridge
+class JabberBridge < ModuleBase
+	def self.start()
+		@my_name = "jabber"
+    @my_short = "J"
 		config = Jabbot::Config.new(
 			:login => conf[:id],
 			:password => conf[:pw],
