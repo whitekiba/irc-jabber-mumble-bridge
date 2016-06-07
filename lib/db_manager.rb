@@ -8,24 +8,24 @@ class DbManager
     @db.select_db(@config[:database])
   end
 
-  def loadService(service)
-    services = Array.new
-    res = @db.query("SELECT * FROM services WHERE service LIKE '#{service}'");
+  def loadChannels(server_ID)
+    channels = Hash.new
+    res = @db.query("SELECT channel_name, user_ID FROM channels WHERE server_ID = #{server_ID}");
     res.each do |entry|
-      services[entry["user_ID"]] = entry
+      channels[entry["channel_name"]] = entry["user_ID"]
     end
-    services
+    channels
   end
 
-  def loadChatIDs(service)
-    chat_ids = Hash.new
-    res = @db.query("SELECT ident_value, user_ID FROM services WHERE service LIKE '#{service}'");
+  def loadServers(service)
+    servers = Array.new
+    query = "SELECT * FROM servers WHERE server_type LIKE '#{service}'"
+    res = @db.query(query);
     res.each do |entry|
-      chat_ids[entry["ident_value"]] = entry["user_ID"]
+      servers[entry["ID"]] = entry
     end
-    chat_ids
+    servers
   end
-
   def addServiceToUser(user_id, service, ident_value, server = nil, server_username = nil)
     @db.query("INSERT INTO `services` (`ID`, `user_ID`, `ident_value`, `channel`) VALUES (NULL, '#{user_id}', '#{ident_value}', "")")
   end

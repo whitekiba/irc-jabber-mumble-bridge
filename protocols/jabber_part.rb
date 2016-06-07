@@ -1,21 +1,37 @@
 require 'rubygems'
 require 'jabbot'
 require '../lib/module_base'
+require '../lib/db_manager'
+
+$logger = Logger.new(File.dirname(__FILE__) + '/jabber.log')
 
 class JabberBridge < ModuleBase
-  def self.start()
+  def startServers
     @my_name = "jabber"
     @my_short = "J"
-
-    @user_assoc = @db.loadService(@my_name)
-    @channels = @db.loadChatIDs(@my_name)
+    @db = DbManager.new
+    servers = @db.loadServers(@my_name)
+    servers.each do |server|
+      begin
+        Thread.new do
+          server(server["ID"], server["server_url"], server["server_port"])
+          $logger.info "Server #{server["server_url"]} started..."
+        end
+      rescue StandardError => e
+        $logger.info "Server #{server["server_url"]} crashed while starting..."
+        $logger.info e
+      end
+    end
+  end
+  def server(id, address, port)
+    @channels = @db.loadChannels(id)
     @channels_invert = @channels.invert
 
     config = Jabbot::Config.new(
       :login => conf[:id],
       :password => conf[:pw],
       :nick => conf[:name],
-      :server => conf[:conference_room].split('@')[1],
+      :server => address,
       :channel => conf[:conference_room].split('@')[0],
       :channel_password => conf[:channel_password],
       :resource => conf[:resource]
@@ -45,15 +61,18 @@ class JabberBridge < ModuleBase
     end
     @bot.connect
   end
-  def self.handleMessage(message)
+  def handleMessage(message)
     nick = message.user.split('@').first
     @bridge.broadcast(@my_name, "[#{nick}]: #{message.text}")
     $logger.info message.text
   end
-  def self.handleJoin(message)
+  def handleJoin(message)
     @bridge.broadcast(@my_name, " #{message.user} betrat den Chat.")
   end
-  def self.handleLeave(message)
+  def handleLeave(message)
     @bridge.broadcast(@my_name, " #{message.user} hat den Chat verlassen.")
   end
 end
+
+jb = JabberBridge.new
+jb.startServers

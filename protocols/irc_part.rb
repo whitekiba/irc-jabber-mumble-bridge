@@ -14,7 +14,7 @@ class IRCBridge < ModuleBase
     @db = DbManager.new
 
     @user_assoc = @db.loadService(@my_name)
-    @channels = @db.loadChatIDs(@my_name)
+    @channels = @db.loadChannels(@my_name)
     @channels_invert = @channels.invert
 
     @bot = IRC.new("test", "irc.rout0r.org", "6667", "blub")

@@ -15,8 +15,7 @@ class TelegramBridge < ModuleBase
     @telegram = Telegram::Bot::Client.new($config[:telegram][:token])
     @db = DbManager.new
 
-    @user_assoc = @db.loadService(@my_name)
-    @chat_ids = @db.loadChatIDs(@my_name)
+    @chat_ids = @db.loadChannels(@my_name)
     @chat_ids_invert = @chat_ids.invert
 
     subscribe(@my_name)
