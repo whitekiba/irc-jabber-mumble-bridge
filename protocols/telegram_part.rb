@@ -11,11 +11,12 @@ class TelegramBridge < ModuleBase
   def receive
     @my_name = 'telegram'
     @my_short = 'T'
+    @my_id = 3
     $logger.info 'Telegram process starting...'
     @telegram = Telegram::Bot::Client.new($config[:telegram][:token])
     @db = DbManager.new
 
-    @chat_ids = @db.loadChannels(@my_name)
+    @chat_ids = @db.loadChannels(@my_id)
     @chat_ids_invert = @chat_ids.invert
 
     subscribe(@my_name)
@@ -66,7 +67,11 @@ class TelegramBridge < ModuleBase
     unless msg.text.nil?
       is_assistant = false
       is_assistant = true if msg.chat.type.eql?('private')
-      publish(source_network_type: @my_short, user_id: @chat_ids[msg.chat.id.to_s], source_network: @my_name, source_user: 'empty', nick: msg.from.first_name, message: msg.text, is_assistant: is_assistant, chat_id: msg.chat.id)
+      publish(source_network_type: @my_short,
+              user_id: @chat_ids[msg.chat.id.to_s],
+              source_network: @my_name, source_user: 'empty',
+              nick: msg.from.first_name, message: msg.text,
+              is_assistant: is_assistant, chat_id: msg.chat.id)
     end
   end
 end

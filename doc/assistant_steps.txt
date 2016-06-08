@@ -1,0 +1,5 @@
+Eine grobe Planung wie der Ablauf einer Sitzung mit dem Assistenten ablaufen
+könnte.
+
+1. New User, Authenticate, Donate
+2. 

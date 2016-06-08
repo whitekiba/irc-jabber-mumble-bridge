@@ -17,9 +17,9 @@ class DbManager
     channels
   end
 
-  def loadServers(service)
+  def loadServers(server_ID)
     servers = Array.new
-    query = "SELECT * FROM servers WHERE server_type LIKE '#{service}'"
+    query = "SELECT * FROM servers WHERE server_type LIKE '#{server_ID}'"
     res = @db.query(query);
     res.each do |entry|
       servers[entry["ID"]] = entry

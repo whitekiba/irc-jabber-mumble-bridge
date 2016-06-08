@@ -10,11 +10,11 @@ class IRCBridge < ModuleBase
   def receive
     @my_name = 'irc'
     @my_short = 'I'
+    @my_id = 2
 
     @db = DbManager.new
 
-    @user_assoc = @db.loadService(@my_name)
-    @channels = @db.loadChannels(@my_name)
+    @channels = @db.loadChannels(@my_id)
     @channels_invert = @channels.invert
 
     @bot = IRC.new("test", "irc.rout0r.org", "6667", "blub")
@@ -32,7 +32,7 @@ class IRCBridge < ModuleBase
         #$logger.info "State of message array: #{msg_in.nil?}"
         if !msg_in.nil?
           $logger.info msg_in
-          @bot.send_message(@user_assoc[msg_in["user_id"]]["ident_value"], "[#{msg_in["source_network_type"]}][#{msg_in["nick"]}]#{msg_in["message"]}")
+          @bot.send_message(@channels_invert[msg_in["user_id"]], "[#{msg_in["source_network_type"]}][#{msg_in["nick"]}]#{msg_in["message"]}")
         end
       end
     end
@@ -43,9 +43,12 @@ class IRCBridge < ModuleBase
   def handleMessage(message)
     $logger.info "handleMessage wurde aufgerufen"
     if /^\x01ACTION (.)+\x01$/.match(message.message)
-      self.publish(source_network_type: @my_short, message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}", chat_id: '-145447289')
+      self.publish(source_network_type: @my_short,
+                   message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}",
+                   chat_id: '-145447289')
     else
-      self.publish(source_network_type: @my_short, source_network: @my_name, nick: message.from, message: message.message, user_id: @channels[message.channel])
+      self.publish(source_network_type: @my_short, source_network: @my_name,
+                   nick: message.from, message: message.message, user_id: @channels[message.channel])
     end
     $logger.info message.message
   end
