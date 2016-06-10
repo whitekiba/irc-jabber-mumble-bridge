@@ -1,5 +1,6 @@
 require 'rubygems'
-require 'jabbot'
+require 'xmpp4r'
+require 'xmpp4r/muc/helper/simplemucclient'
 require '../lib/module_base'
 require '../lib/db_manager'
 
@@ -32,31 +33,37 @@ class JabberBridge < ModuleBase
     end
   end
   def startServer(id, address, port, username, password)
+    @db = DbManager.new
+    $logger.info "New Jabber Server started."
+    @muc = Hash.new
     @channels = @db.loadChannels(id)
+    $logger.info @channels
+    #wird genutzt für die channel zu user zuordnung. channel name => user id
     @channels_invert = @channels.invert
 
-    config = Jabbot::Config.new(
-      :login => username,
-      :password => password,
-      :server => address,
-      :channel => "test@conference.rout0r.org"
-    )
-    @bot = Jabbot::Bot.new(config)
+    begin
+      @jid = Jabber::JID.new(username)
+      @bot = Jabber::Client.new(@jid)
+      @bot.connect
+      $logger.info "Connected to server."
+      @bot.auth(password)
+    rescue StandardError => e
+      $logger.info e
+    end
+    #wir schreiben unsere Channel in den @muc hash.
     @channels_invert.each do |channel|
-      @bot.muc.join("#{channel}@#{address}")
+      $logger.info "Joining MUC #{channel}"
+      begin
+        @muc[channel] = Jabber::MUC::SimpleMUCClient.new(@bot)
+        @muc[channel].join("#{channel}@#{address}")
+        @muc[channel].on_message { |time,nick,text|
+          handleMessage(nick, channel, text)
+        }
+      rescue StandardError => e
+        $logger.info "Unable to join MUC. Stacktrace follows:"
+        $logger.info e
+      end
     end
-    msg_handler = Jabbot::Handler.new do |msg, params|
-      handleMessage(msg)
-    end
-    join_handler = Jabbot::Handler.new do |msg, params|
-      handleJoin(msg)
-    end
-    leave_handler = Jabbot::Handler.new do |msg, params|
-      handleLeave(msg)
-    end
-    @bot.handlers[:message] << msg_handler
-    @bot.handlers[:join] << join_handler
-    @bot.handlers[:leave] << leave_handler
     Thread.new do
       loop do
         sleep 0.1
@@ -65,13 +72,11 @@ class JabberBridge < ModuleBase
         end
       end
     end
-    @bot.connect
   end
-  def handleMessage(message)
+  def handleMessage(nick, channel, message)
     $logger.info message
-    nick = message.user.split('@').first
     self.publish(source_network_type: @my_short, source_network: @my_name,
-                 nick: nick, message: message.text, user_id: @channels[message.channel])
+                 nick: nick, message: message.text, user_id: @channels[channel])
   end
   def handleJoin(message)
     #@bridge.broadcast(@my_name, " #{message.user} betrat den Chat.")
@@ -82,4 +87,4 @@ class JabberBridge < ModuleBase
 end
 
 jb = JabberBridge.new
-jb.startServers
+jb.startServer(1, "rout0r.org", 5222, "bridge@rout0r.org", "Ulavewabe774")
