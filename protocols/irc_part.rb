@@ -7,18 +7,35 @@ require 'logger'
 $logger = Logger.new(File.dirname(__FILE__) + '/irc.log')
 
 class IRCBridge < ModuleBase
-  def receive
+  def startServers
+    @db = DbManager.new
+    servers = @db.loadServers("irc")
+    $logger.debug servers
+    servers.each do |server|
+      Thread.new do
+        begin
+          receive(server["ID"], server["server_url"], server["server_port"], server["user_name"])
+        rescue StandardError => e
+          $logger.debug "IRC crashed. Stacktrace follows."
+          $logger.debug e
+        end
+      end
+    end
+    loop do
+      sleep 0.1
+    end
+  end
+  def receive(serverID, server_url, server_port, server_username)
     @my_name = 'irc'
     @my_short = 'I'
-    @my_id = 2
 
-    @db = DbManager.new
-
-    @channels = @db.loadChannels(@my_id)
+    @channels = @db.loadChannels(serverID)
     @channels_invert = @channels.invert
+    $logger.debug @channels_invert
+    $logger.debug "Starting Server. Credentials: #{server_url}, #{server_port}, #{server_username}"
 
     #TODO: Hier muss noch die Logik für mehrere Server umgesetzt werden
-    @bot = IRC.new("test", "irc.rout0r.org", "6667", "blub")
+    @bot = IRC.new(server_username, server_url, server_port, server_username)
     IRCEvent.add_callback('endofmotd') { |event| joinChannels }
     IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }
     IRCEvent.add_callback('join') { |event| joinMessage event }
@@ -95,4 +112,4 @@ class IRCBridge < ModuleBase
 end
 
 irc = IRCBridge.new
-irc.receive
+irc.startServers
