@@ -23,8 +23,8 @@ class JabberBridge < ModuleBase
             $logger.info "Server #{server["server_url"]} started..."
           end
         rescue StandardError => e
-          $logger.info "Server #{server["server_url"]} crashed while starting..."
-          $logger.info e
+          $logger.error "Server #{server["server_url"]} crashed while starting..."
+          $logger.error e
         end
       end
     end
@@ -65,9 +65,11 @@ class JabberBridge < ModuleBase
               end
           end
         }
+        @muc[channel].on_join { |time, nick| handleJoin(nick) }
+        @muc[channel].on_leave { |time, nick| handleLeave(nick) }
       rescue StandardError => e
-        $logger.info "Unable to join MUC. Stacktrace follows:"
-        $logger.info e
+        $logger.error "Unable to join MUC. Stacktrace follows:"
+        $logger.error e
       end
     end
 
@@ -78,9 +80,9 @@ class JabberBridge < ModuleBase
         sleep 0.1
         msg_in = @messages.pop
         if !msg_in.nil?
-          $logger.info msg_in
+          $logger.debug msg_in
           begin
-            @muc[@channels_invert[msg_in["user_id"]]].say("[#{msg_in["source_network_type"]}][#{msg_in["nick"]}]#{msg_in["message"]}")
+            @muc[@channels_invert[msg_in["user_id"]]].say("[#{msg_in["source_network_type"]}][#{msg_in["nick"]}] #{msg_in["message"]}")
           rescue StandardError => e
             $logger.info "Unable to send message. Stacktrace follows:"
             $logger.info e
@@ -98,14 +100,17 @@ class JabberBridge < ModuleBase
     self.publish(source_network_type: @my_short, source_network: @my_name,
                  nick: nick, message: message, user_id: @channels[channel])
   end
-  def handleJoin(message)
-    #@bridge.broadcast(@my_name, " #{message.user} betrat den Chat.")
+  def handleJoin(nick)
+    $logger.debug "handleJoin called."
+    self.publish(source_network_type: @my_short, source_network: @my_name,
+                 nick: nick, user_id: @channels[channel], message_type: "join")
   end
-  def handleLeave(message)
-    #@bridge.broadcast(@my_name, " #{message.user} hat den Chat verlassen.")
+  def handleLeave(nick)
+    $logger.debug "handleLeave called."
+    self.publish(source_network_type: @my_short, source_network: @my_name,
+                 nick: nick, user_id: @channels[channel], message_type: "part")
   end
 end
 
 jb = JabberBridge.new
-#jb.startServer(1, "rout0r.org", 5222, "bridge@rout0r.org", "Ulavewabe774")
 jb.startServers

@@ -17,6 +17,7 @@ class IRCBridge < ModuleBase
     @channels = @db.loadChannels(@my_id)
     @channels_invert = @channels.invert
 
+    #TODO: Hier muss noch die Logik für mehrere Server umgesetzt werden
     @bot = IRC.new("test", "irc.rout0r.org", "6667", "blub")
     IRCEvent.add_callback('endofmotd') { |event| joinChannels }
     IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }

@@ -21,12 +21,12 @@ class ModuleBase
           $logger.info "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
         end
         on.pmessage do |pattern, channel, message|
-          $logger.info ("Got message! #{message}")
+          $logger.debug ("Got message! #{message}")
           data = JSON.parse(message)
           if data["source_network"] != name
-            $logger.info data
+            $logger.debug data
             @messages.unshift(data)
-            $logger.info("Length of @message #{@messages.length}")
+            $logger.debug("Length of @message #{@messages.length}")
           end
         end
       end
@@ -44,19 +44,23 @@ class ModuleBase
           $logger.info ("Got message! #{message}")
           data = JSON.parse(message)
           if data["source_network_type"] != name
-            $logger.info data
+            $logger.debug data
             @assistantMessages.unshift(data)
-            $logger.info("Length of @message #{@assistantMessages.length}")
+            $logger.debug("Length of @message #{@assistantMessages.length}")
           end
         end
       end
     end
   end
   def publish(api_ver: '1', source_network_type: nil, source_network: nil, source_user: nil,
-              message:, nick:, user_id:, network_id: nil , timestamp: nil,
+              message: nil, nick:, user_id:, network_id: nil , timestamp: nil,
               message_type: 'msg', attachment: nil, is_assistant: false, chat_id: nil)
     source_network_type = @my_name_short if source_network_type.nil?
-    $logger.info ('publish wurde aufgerufen')
+    #TODO: testen ob das wirklich funktioniert
+    unless message_type == "join" || message_type == "part"
+      $logger.error "Da wurde eine Fehlerhafte Nachricht gesendet." if message.nil?
+    end
+    $logger.debug ('publish wurde aufgerufen')
     json = JSON.generate ({
         'message' => message,
         'nick' => nick,
