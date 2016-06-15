@@ -1,0 +1,8 @@
+msg:
+  - Reguläre Nachrichten
+
+join:
+  - Benutzer kam in Channel, Gruppe, Chat
+
+part:
+  - Benutzer hat Channel, Gruppe, Chat verlassen
