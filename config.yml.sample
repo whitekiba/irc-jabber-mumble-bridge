@@ -15,7 +15,7 @@
    :id: 'example@rout0r.org'
 :mumble:
    :enabled: true
-:telegram
+:telegram:
    :enabled: true
    :token: 'API-KEY'
 :redis:
