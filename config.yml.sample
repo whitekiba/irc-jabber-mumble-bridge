@@ -1,18 +1,7 @@
 :irc:
    :enabled: true
-   :nick: 'bridge'
-   :ident: 'bridge'
-   :name: 'Jabber Bridge'
-   :server: 'irc.rout0r.org'
-   :channel: '#test'
-   :port: 6667
-   :master: 'WhiteKIBA'
-   :ignore:
-           - jenni
-           - example
 :jabber:
    :enabled: true
-   :id: 'example@rout0r.org'
 :mumble:
    :enabled: true
 :telegram:

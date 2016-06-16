@@ -6,9 +6,9 @@ class ModuleBase
   def initialize
     $config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')
     @single_con_networks = %w(I T)
-    @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
-    @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
-    @redis_assistant_sub = Redis.new(:host => 'localhost', :port => 7777)
+    @redis_pub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
+    @redis_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
+    @redis_assistant_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @messages = Array.new
     @assistantMessages = Array.new
   end
