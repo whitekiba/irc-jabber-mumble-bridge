@@ -76,6 +76,5 @@ class ModuleBase
               })
     @redis_pub.publish("msg.#{source_network}", json) if !is_assistant
     @redis_pub.publish("assistant.#{source_network}", json) if is_assistant
-    puts json
   end
 end

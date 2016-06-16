@@ -62,7 +62,9 @@ class TelegramBridge < ModuleBase
     #$logger.info 'handleMessage wurde aufgerufen!'
     $logger.info msg.to_hash()
     unless msg.new_chat_member.nil?
-      @telegram.api.send_message(chat_id: msg.chat.id, text: "Ohai. I am new. This chat has ID: #{msg.chat.id}")
+      if msg.from.first_name == "bridge"
+        @telegram.api.send_message(chat_id: msg.chat.id, text: "Ohai. I am new. This chat has ID: #{msg.chat.id}")
+      end
     end
     unless msg.text.nil?
       is_assistant = false

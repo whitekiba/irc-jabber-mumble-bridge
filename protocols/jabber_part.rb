@@ -7,32 +7,9 @@ require_relative '../lib/db_manager'
 $logger = Logger.new(File.dirname(__FILE__) + '/jabber.log')
 
 class JabberBridge < ModuleBase
-  def startServers
+  def startServer(id, address, port, username, password)
     @my_name = "jabber"
     @my_short = "J"
-    @db = DbManager.new
-    servers = @db.loadServers(@my_name)
-    servers.each do |server|
-      puts server
-      #TODO: Aus irgendeinem Grund sind ein paar Felder leer.
-      unless server.nil?
-        begin
-          Thread.new do
-            startServer(server["ID"], server["server_url"], server["server_port"],
-                        server["user_name"], server["user_password"])
-            $logger.info "Server #{server["server_url"]} started..."
-          end
-        rescue StandardError => e
-          $logger.error "Server #{server["server_url"]} crashed while starting..."
-          $logger.error e
-        end
-      end
-    end
-    loop do
-      sleep 0.1
-    end
-  end
-  def startServer(id, address, port, username, password)
     @db = DbManager.new
     $logger.info "New Jabber Server started."
     $logger.debug "My credentials are: Username: #{username} and Password: #{password}"
@@ -112,5 +89,24 @@ class JabberBridge < ModuleBase
   end
 end
 
-jb = JabberBridge.new
-jb.startServers
+db = DbManager.new
+servers = db.loadServers("jabber")
+servers.each do |server|
+  #TODO: Aus irgendeinem Grund sind ein paar Felder leer.
+  unless server.nil?
+    begin
+      Thread.new do
+        jb = JabberBridge.new
+        jb.startServer(server["ID"], server["server_url"], server["server_port"],
+                    server["user_name"], server["user_password"])
+        $logger.info "Server #{server["server_url"]} started..."
+      end
+    rescue StandardError => e
+      $logger.error "Server #{server["server_url"]} crashed while starting..."
+      $logger.error e
+    end
+  end
+end
+loop do
+  sleep 0.1
+end

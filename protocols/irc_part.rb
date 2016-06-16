@@ -7,25 +7,8 @@ require 'logger'
 $logger = Logger.new(File.dirname(__FILE__) + '/irc.log')
 
 class IRCBridge < ModuleBase
-  def startServers
-    @db = DbManager.new
-    servers = @db.loadServers("irc")
-    $logger.debug servers
-    servers.each do |server|
-      Thread.new do
-        begin
-          receive(server["ID"], server["server_url"], server["server_port"], server["user_name"])
-        rescue StandardError => e
-          $logger.debug "IRC crashed. Stacktrace follows."
-          $logger.debug e
-        end
-      end
-    end
-    loop do
-      sleep 0.1
-    end
-  end
   def receive(serverID, server_url, server_port, server_username)
+    @db = DbManager.new
     @my_name = 'irc'
     @my_short = 'I'
 
@@ -111,5 +94,26 @@ class IRCBridge < ModuleBase
   end
 end
 
-irc = IRCBridge.new
-irc.startServers
+#server starting stuff
+#wir müssen für jeden Server eine eigene Instanz der IRCBridge erzeugen
+db = DbManager.new
+servers = db.loadServers("irc")
+$logger.debug servers
+servers.each do |server|
+  #ich habe keine ahnung wieso da felder nil sind
+  unless server.nil?
+    Thread.new do
+      begin
+        irc = IRCBridge.new
+        irc.receive(server["ID"], server["server_url"], server["server_port"], server["user_name"])
+      rescue StandardError => e
+        $logger.debug "IRC crashed. Stacktrace follows."
+        $logger.debug e
+      end
+    end
+  end
+end
+
+loop do
+  sleep 0.1
+end
