@@ -16,18 +16,10 @@ class MumbleBridge < ModuleBase
     @channels = @db.loadChannels(serverID)
     @channels_invert = @channels.invert
 
-    @mumble = Mumble::Client.new(server_url, server_port) do |config|
-      config.username = server_username
-    end
-    @mumble.on_text_message do |msg|
-      handleMessage(msg)
-    end
-    @mumble.on_user_state do |msg|
-      handleUserChange(msg)
-    end
-    @mumble.on_user_remove do |msg|
-      handleUserRemove(msg)
-    end
+    @mumble = Mumble::Client.new(server_url, server_port) do |config| config.username = server_username end
+    @mumble.on_text_message do |msg| handleMessage(msg) end
+    @mumble.on_user_state do |msg| handleUserChange(msg) end
+    @mumble.on_user_remove do |msg| handleUserRemove(msg) end
     subscribe(@my_name)
     Thread.new do
       loop do
@@ -35,7 +27,7 @@ class MumbleBridge < ModuleBase
         msg_in = @messages.pop
         unless msg_in.nil?
           begin
-          @mumble.text_channel(@channels_invert[msg_in["user_id"]], CGI.escapeHTML(msg_in["message"]))
+            @mumble.text_channel(@channels_invert[msg_in["user_id"]], CGI.escapeHTML(msg_in["message"]))
           rescue Exception => e
             $logger.info 'Failed to send Message'
             $logger.info e
@@ -48,8 +40,8 @@ class MumbleBridge < ModuleBase
     begin
       @mumble.join_channel(conf[:channel])
     rescue Exception => e
-      $logger.info 'Failed to join channel'
-      $logger.info e
+      $logger.error 'Failed to join channel'
+      $logger.error e
     end
   end
   def handleMessage(msg)
