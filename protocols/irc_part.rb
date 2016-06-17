@@ -31,7 +31,7 @@ class IRCBridge < ModuleBase
         sleep 0.1
         msg_in = @messages.pop
         #$logger.info "State of message array: #{msg_in.nil?}"
-        if !msg_in.nil?
+        unless msg_in.nil?
           $logger.info msg_in
           @bot.send_message(@channels_invert[msg_in["user_id"]], "[#{msg_in["source_network_type"]}][#{msg_in["nick"]}]#{msg_in["message"]}")
         end
