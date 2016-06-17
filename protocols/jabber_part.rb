@@ -10,6 +10,7 @@ class JabberBridge < ModuleBase
   def startServer(id, address, port, username, password)
     @my_name = "jabber"
     @my_short = "J"
+    @my_id = id
     @db = DbManager.new
     $logger.info "New Jabber Server started."
     $logger.debug "My credentials are: Username: #{username} and Password: #{password}"

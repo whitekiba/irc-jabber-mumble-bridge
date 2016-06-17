@@ -11,6 +11,7 @@ class IRCBridge < ModuleBase
     @db = DbManager.new
     @my_name = 'irc'
     @my_short = 'I'
+    @my_id = serverID
 
     @channels = @db.loadChannels(serverID)
     @channels_invert = @channels.invert

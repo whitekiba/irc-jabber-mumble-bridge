@@ -76,6 +76,3 @@ class DbManager
     true
   end
 end
-
-#db_test = DbManager.new
-#db_test.addUser('leopold')

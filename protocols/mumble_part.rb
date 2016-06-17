@@ -12,6 +12,7 @@ class MumbleBridge < ModuleBase
   def startServer(serverID, server_url, server_port, server_username)
     @my_name = "mumble"
     @my_short = "M"
+    @my_id = serverID
 
     @channels = @db.loadChannels(serverID)
     @channels_invert = @channels.invert
