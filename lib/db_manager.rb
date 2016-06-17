@@ -10,7 +10,7 @@ class DbManager
 
   def loadChannels(server_ID)
     channels = Hash.new
-    res = @db.query("SELECT channel_name, user_ID FROM channels WHERE server_ID = #{server_ID}");
+    res = @db.query("SELECT channel_name, user_ID FROM channels WHERE server_ID = #{server_ID}")
     res.each do |entry|
       channels[entry["channel_name"]] = entry["user_ID"]
     end
@@ -26,12 +26,25 @@ class DbManager
     end
     servers
   end
-  def addServiceToUser(user_id, service, ident_value, server = nil, server_username = nil)
-    @db.query("INSERT INTO `services` (`ID`, `user_ID`, `ident_value`, `channel`) VALUES (NULL, '#{user_id}', '#{ident_value}', "")")
+
+  def addJabberServer(server_url, server_port, username, password, user_ID)
+    addServer(server_url, server_port, "jabber", username, password, user_ID)
+  end
+  def addMumbleServer(server_url, server_port, username)
+    addServer(server_url, server_port, "mumble", username)
+  end
+  def addIRCServer(server_url, server_port, username)
+    addServer(server_url, server_port, "irc", username)
   end
 
-  def addServer(server_url, server_port, server_type)
-    @db.query("")
+  def addServer(server_url, server_port, server_type, user_name, user_password = nil, user_ID = nil)
+    exit if user_name == ""
+    server_port.to_int if server_port.respond_to?(:to_int)
+    user_ID = "NULL" if user_ID.nil?
+    user_password = "NULL" if user_password.nil?
+    sql = "INSERT INTO `servers` (`ID`, `user_ID`, `server_url`, `server_port`, `server_type`, `user_name`, `user_password`)
+            VALUES (NULL, #{user_ID}, '#{server_url}', '#{server_port}', '#{server_type}', '#{user_name}', '#{user_password}');"
+    @db.query(sql)
   end
 
   #erzeugt einen neuen Datensatz für den User
