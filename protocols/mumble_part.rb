@@ -28,8 +28,7 @@ class MumbleBridge < ModuleBase
     @mumble.on_user_remove do |msg|
       handleUserRemove(msg)
     end
-    bridge.subscribe(@my_name)
-    bridge.addPrefix(@my_name, 'M')
+    subscribe(@my_name)
     Thread.new do
       loop do
         sleep 0.1
