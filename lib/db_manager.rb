@@ -27,6 +27,7 @@ class DbManager
     servers
   end
 
+  #server hinzufügen. Im Grunde nur aliase für addServer
   def addJabberServer(server_url, server_port, username, password, user_ID)
     addServer(server_url, server_port, "jabber", username, password, user_ID)
   end
@@ -44,6 +45,15 @@ class DbManager
     user_password = "NULL" if user_password.nil?
     sql = "INSERT INTO `servers` (`ID`, `user_ID`, `server_url`, `server_port`, `server_type`, `user_name`, `user_password`)
             VALUES (NULL, #{user_ID}, '#{server_url}', '#{server_port}', '#{server_type}', '#{user_name}', '#{user_password}');"
+    @db.query(sql)
+  end
+
+  #channel hinzufügen
+  #für channel sind user_IDs pflicht. Anders können wir die nicht zuordnen
+  def addChannel(user_ID, server_ID, channel, channel_password = nil)
+    channel_password = "NULL" if channel_password.nil?
+    sql = "INSERT INTO `channels` (`ID`, `user_ID`, `server_ID`, `channel_name`, `channel_password`)
+            VALUES (NULL, '#{user_ID}', '#{server_ID}', '#{channel}', #{channel_password})"
     @db.query(sql)
   end
 
