@@ -57,22 +57,26 @@ class IRCBridge < ModuleBase
 
   def joinMessage(event)
     if event.from != @conf[:nick]
-      self.publish(source_network_type: @my_short, message: "#{event.from} kam in den Channel.")
+      self.publish(source_network_type: @my_short, source_network: @my_name,
+                   nick: message.from, user_id: @channels[message.channel], message_type: "join")
     end
   end
 
   def partMessage(event)
     if event.from != @conf[:nick]
-      self.publish(source_network_type: @my_short, message: "#{event.from} hat den Channel verlassen")
+      self.publish(source_network_type: @my_short, source_network: @my_name,
+                   nick: message.from, user_id: @channels[message.channel], message_type: "part")
     end
   end
 
   def quitMessage(event)
     if event.from != @conf[:nick]
-      self.publish(source_network_type: @my_short, message: "#{event.from} hat den Server verlassen")
+      self.publish(source_network_type: @my_short, source_network: @my_name,
+                   nick: message.from, user_id: @channels[message.channel], message_type: "quit")
     end
   end
 
+  #TODO: Hier könnte man das interne befehlssystem reinhängen
   def command(user, command)
     if command == 'version'
       ver = `uname -a`

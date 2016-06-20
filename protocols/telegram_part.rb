@@ -61,11 +61,14 @@ class TelegramBridge < ModuleBase
   def handleMessage(msg)
     #$logger.info 'handleMessage wurde aufgerufen!'
     $logger.info msg.to_hash()
-    unless msg.new_chat_member.nil?
-      if msg.from.first_name == "bridge"
-        @telegram.api.send_message(chat_id: msg.chat.id, text: "Ohai. I am new. This chat has ID: #{msg.chat.id}")
+    if @chat_ids[msg.chat.id.to_s].nil?
+      unless msg.new_chat_member.nil?
+        if msg.from.first_name == "bridge"
+          @telegram.api.send_message(chat_id: msg.chat.id, text: "Ohai. I am new. This chat has ID: #{msg.chat.id}")
+        end
       end
     end
+
     unless msg.text.nil?
       is_assistant = false
       is_assistant = true if msg.chat.type.eql?('private')
