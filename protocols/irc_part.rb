@@ -10,6 +10,7 @@ class IRCBridge < ModuleBase
   def receive(serverID, server_url, server_port, server_username)
     @db = DbManager.new
     @my_name = 'irc'
+    @my_username = server_username
     @my_short = 'I'
     @my_id = serverID
 
@@ -56,21 +57,21 @@ class IRCBridge < ModuleBase
   end
 
   def joinMessage(event)
-    if event.from != @conf[:nick]
+    if event.from != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
                    nick: message.from, user_id: @channels[message.channel], message_type: "join")
     end
   end
 
   def partMessage(event)
-    if event.from != @conf[:nick]
+    if event.from != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
                    nick: message.from, user_id: @channels[message.channel], message_type: "part")
     end
   end
 
   def quitMessage(event)
-    if event.from != @conf[:nick]
+    if event.from != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
                    nick: message.from, user_id: @channels[message.channel], message_type: "quit")
     end
