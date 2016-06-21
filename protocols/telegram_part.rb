@@ -20,6 +20,7 @@ class TelegramBridge < ModuleBase
     @chat_ids_invert = @chat_ids.invert
 
     subscribe(@my_name)
+    subscribe_cmd(@my_name)
     subscribeAssistant(@my_name)
     Thread.new do
       loop do

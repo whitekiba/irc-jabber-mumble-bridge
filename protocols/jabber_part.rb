@@ -53,6 +53,7 @@ class JabberBridge < ModuleBase
 
     #subscribe stuff
     subscribe(@my_name)
+    subscribe_cmd(@my_name)
     Thread.new do
       loop do
         sleep 0.1

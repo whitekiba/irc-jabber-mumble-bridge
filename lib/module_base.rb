@@ -32,6 +32,22 @@ class ModuleBase
       end
     end
   end
+  #Der Commandchannel. Schläft mehr und subscribed
+  def subscribe_cmd(name)
+    Thread.new do
+      sleep 1
+      $logger.info('Thread gestartet!')
+      @redis_sub.psubscribe("cmd.#{name}") do |on|
+        on.psubscribe do |channel, subscriptions|
+          $logger.info "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
+        end
+        on.pmessage do |pattern, channel, message|
+          $logger.debug ("Got message! #{message}")
+          @messages.unshift(JSON.parse(message))
+        end
+      end
+    end
+  end
   def subscribeAssistant(name)
     Thread.new do
       sleep 0.1

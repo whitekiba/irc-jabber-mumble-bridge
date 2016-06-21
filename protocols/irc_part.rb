@@ -28,6 +28,7 @@ class IRCBridge < ModuleBase
     IRCEvent.add_callback('quit') { |event| quitMessage event }
 
     subscribe(@my_name)
+    subscribe_cmd(@my_name)
     Thread.new do
       loop do
         sleep 0.1
