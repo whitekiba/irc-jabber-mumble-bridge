@@ -69,6 +69,18 @@ class JabberBridge < ModuleBase
         end
       end
     end
+    #cmd thread
+    Thread.new do
+      loop do
+        sleep 1
+        msg_in = @messages.pop
+        if !msg_in.nil?
+            if msg_in["cmd"] == "reload"
+              
+            end
+        end
+      end
+    end
     loop do
       sleep 0.5
     end
