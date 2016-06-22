@@ -3,6 +3,7 @@ require 'rubygems'
 require 'mumble-ruby'
 require 'cgi'
 require 'sanitize'
+require 'logger'
 require_relative "../lib/db_manager"
 require_relative "../lib/module_base"
 
@@ -13,6 +14,8 @@ class MumbleBridge < ModuleBase
     @my_name = "mumble"
     @my_short = "M"
     @my_id = serverID
+    @db = DbManager.new
+    $logger.info "New Mumble Server started."
 
     @channels = @db.loadChannels(serverID)
     @channels_invert = @channels.invert
