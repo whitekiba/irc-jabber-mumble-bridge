@@ -6,3 +6,9 @@ join:
 
 part:
   - Benutzer hat Channel, Gruppe, Chat verlassen
+
+quit:
+  - Benutzer hat seinen Client beendet.
+  - vermutlich nur für Jabber und IRC relevant. Sollten aber alle verarbeiten
+
+

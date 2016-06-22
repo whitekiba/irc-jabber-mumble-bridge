@@ -1,0 +1,14 @@
+Dev:
+ - rvm
+ - the latest stable ruby
+ - redis
+ - tinc to access the dev db
+ - Dia (The Gnome project)
+
+Prod:
+ - Linux! (works on windows but performance is horrible)
+ - rvm
+ - latest stable ruby
+  - bundler
+ - redis
+ - MySQL/MariaDB

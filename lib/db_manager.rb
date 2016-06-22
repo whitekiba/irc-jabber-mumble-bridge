@@ -20,7 +20,7 @@ class DbManager
   def loadServers(server_type)
     servers = Array.new
     query = "SELECT * FROM servers WHERE server_type LIKE '#{server_type}'"
-    res = @db.query(query);
+    res = @db.query(query)
     res.each do |entry|
       servers[entry["ID"]] = entry
     end
@@ -59,13 +59,22 @@ class DbManager
 
   #erzeugt einen neuen Datensatz für den User
   #generiert außerdem auch ein secret für die Datenbank
-  def addUser(username)
+  def addUser(username, email = nil)
+    email = "NULL" if email.nil?
     secret = (0..32).map { (65 + rand(26)).chr }.join
     while !checkSecret(secret) do
       secret = (0..32).map { (65 + rand(26)).chr }.join
     end
-    @db.query("INSERT INTO `users` (`ID`, `username`, `secret`) VALUES (NULL, '#{username}', '#{secret}');")
+    @db.query("INSERT INTO `users` (`ID`, `username`, `email`, `secret`) VALUES (NULL, '#{username}', '#{email}', '#{secret}');")
     secret #return the secret
+  end
+
+  def authUser(username, secret)
+    res = @db.query("SELECT ID FROM `users` WHERE `username` LIKE '#{username}' AND `secret` LIKE '#{secret}'")
+    if res.count > 0
+      true
+    end
+    false
   end
 
   def checkSecret(secret)

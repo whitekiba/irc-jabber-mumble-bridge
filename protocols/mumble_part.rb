@@ -99,13 +99,14 @@ end
 
 #server starting stuff
 #wir müssen für jeden Server eine eigene Instanz der MumbleBridge erzeugen
+mumble_thread = Hash.new
 db = DbManager.new
 servers = db.loadServers("mumble")
 $logger.debug servers
 servers.each do |server|
   #ich habe keine ahnung wieso da felder nil sind
   unless server.nil?
-    Thread.new do
+    mumble_thread[server["ID"]] = Thread.new do
       begin
         mumble = MumbleBridge.new
         mumble.startServer(server["ID"], server["server_url"], server["server_port"], server["user_name"])
@@ -118,5 +119,5 @@ servers.each do |server|
 end
 
 loop do
-  sleep 0.1
+  sleep 10
 end

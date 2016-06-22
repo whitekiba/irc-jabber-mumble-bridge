@@ -10,6 +10,7 @@ class ModuleBase
     @redis_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @redis_assistant_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @messages = Array.new
+    @messages_cmd = Array.new
     @assistantMessages = Array.new
   end
   def subscribe(name)
@@ -43,7 +44,7 @@ class ModuleBase
         end
         on.pmessage do |pattern, channel, message|
           $logger.debug ("Got message! #{message}")
-          @messages.unshift(JSON.parse(message))
+          @messages_cmd.unshift(JSON.parse(message))
         end
       end
     end

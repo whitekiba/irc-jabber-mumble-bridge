@@ -40,6 +40,17 @@ class IRCBridge < ModuleBase
         end
       end
     end
+    Thread.new do
+      loop do
+        sleep 0.1
+        msg_in = @messages_cmd.pop
+        #$logger.info "State of message array: #{msg_in.nil?}"
+        unless msg_in.nil?
+          $logger.info msg_in
+          command(msg_in["cmd"])
+        end
+      end
+    end
 
     @bot.connect
   end
@@ -79,16 +90,9 @@ class IRCBridge < ModuleBase
   end
 
   #TODO: Hier könnte man das interne befehlssystem reinhängen
-  def command(user, command)
-    if command == 'version'
-      ver = `uname -a`
-      @bot.send_message(@conf[:channel], "Version? Oh... ich hab sowas nicht nicht :'(")
-      @bot.send_message(@conf[:channel], "Aber hey ich hab das hier! Mein OS: #{ver}")
-    end
-    if @conf[:master] == user
-      if command == 'ge wek'
-        abort
-      end
+  def command(command, args = nil)
+    if command == 'reload'
+
     end
   end
 
