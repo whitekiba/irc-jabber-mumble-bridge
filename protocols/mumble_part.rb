@@ -69,14 +69,9 @@ class MumbleBridge < ModuleBase
         @channel_id = msg.channel_id
       else
         if @mumble.channels[msg.channel_id].respond_to? :name
-          if @mumble.channels[msg.channel_id].name == @conf[:channel]
+          if @mumble.channels[msg.channel_id].name == @conf[:channel] || @mumble.users[msg.session].channel_id == @channel_id
             self.publish(source_network_type: @my_short, source_network: @my_name,
                          nick: username, user_id: @channels[channel], message_type: "join")
-          else
-            if @mumble.users[msg.session].channel_id == @channel_id
-              self.publish(source_network_type: @my_short, source_network: @my_name,
-                           nick: username, user_id: @channels[channel], message_type: "join")
-            end
           end
         end
       end
