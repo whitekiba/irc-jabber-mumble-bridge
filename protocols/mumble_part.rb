@@ -42,7 +42,11 @@ class MumbleBridge < ModuleBase
     @mumble.connect
     sleep 4 #wir muessen warten weil er den channel sonnst nicht joint
     begin
-      @mumble.join_channel(conf[:channel])
+      $logger.debug @channels_invert
+      #wir können nur einen einzigen Channel joinen. Das ist erst mal eine limitierung
+      key, value = @channels_invert.first
+      @user_id = key
+      @channel_id = @mumble.join_channel(value)
     rescue Exception => e
       $logger.error 'Failed to join channel'
       $logger.error e
@@ -57,7 +61,7 @@ class MumbleBridge < ModuleBase
       if @mumble.users[msg.actor].respond_to? :name
         username = @mumble.users[msg.actor].name
         self.publish(source_network_type: @my_short, source_network: @my_name,
-                     nick: username, message: Sanitize.clean(CGI.unescapeHTML(msg.to_hash()['message'])), user_id: @channels[message.channel])
+                     nick: username, message: Sanitize.clean(CGI.unescapeHTML(msg.to_hash()['message'])), user_id: @user_id)
         $logger.info msg.to_hash()['message']
       end
     end
@@ -74,14 +78,14 @@ class MumbleBridge < ModuleBase
         if @mumble.channels[msg.channel_id].respond_to? :name
           if @mumble.channels[msg.channel_id].name == @conf[:channel] || @mumble.users[msg.session].channel_id == @channel_id
             self.publish(source_network_type: @my_short, source_network: @my_name,
-                         nick: username, user_id: @channels[channel], message_type: "join")
+                         nick: username, user_id: @user_id, message_type: "join")
           end
         end
       end
-    else
-      self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: msg.name, user_id: @channels[channel], message_type: "join")
     end
+#      self.publish(source_network_type: @my_short, source_network: @my_name,
+#                   nick: msg.name, user_id: @channels[channel], message_type: "join")
+#    end
   end
   def handleUserRemove(msg)
     $logger.info 'handleUserRemove wurde aufgerufen.'
@@ -90,7 +94,7 @@ class MumbleBridge < ModuleBase
       username = @mumble.users[msg.session].name
       $logger.info 'Username wurde gefunden'
       self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: username, user_id: @channels[channel], message_type: "part")
+                   nick: username, user_id: @user_id, message_type: "part")
     end
   end
 end
