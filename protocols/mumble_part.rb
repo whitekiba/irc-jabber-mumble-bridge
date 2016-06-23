@@ -44,6 +44,7 @@ class MumbleBridge < ModuleBase
     begin
       $logger.debug @channels_invert
       #wir können nur einen einzigen Channel joinen. Das ist erst mal eine limitierung
+      #TODO: Möglichkeiten auf mehrere Channel zuzugreifen erforschen
       key, value = @channels_invert.first
       @user_id = key
       @channel_id = @mumble.join_channel(value)
