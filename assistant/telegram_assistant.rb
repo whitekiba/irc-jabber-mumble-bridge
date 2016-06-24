@@ -4,6 +4,9 @@ require_relative '../lib/db_manager'
 require 'json'
 class TelegramAssistant < AssistantBase
   @db = DbManager.new
+  def go
+    @cur_step = "start"
+  end
   def receive
     subscribe('telegram')
     loop do
@@ -22,6 +25,13 @@ class TelegramAssistant < AssistantBase
   def addService
 
   end
+  def checkStep(step)
+    if self.respond_to?(step)
+      true
+    end
+    false
+  end
 end
 ta = TelegramAssistant.new
+ta.go
 ta.receive
