@@ -14,8 +14,9 @@ class TelegramAssistant < AssistantBase
     end
   end
   def start(data)
+    next_steps :auth, :donate, :createUser
     buttons = ["New User", "Authenticate", "Donate"]
-    publish(message: 'Bitte wählen!', chat_id: data["chat_id"], buttons: buttons)
+    publish(message: 'Bitte wählen!', chat_id: data["chat_id"])
   end
   #user erstellen
   #solang user nil ist werden die buttons gesendet
@@ -25,11 +26,8 @@ class TelegramAssistant < AssistantBase
   def addService
 
   end
-  def checkStep(step)
-    if self.respond_to?(step)
-      true
-    end
-    false
+  def addButton
+    Telegram::Bot::Types::InlineKeyboardButton.new(text: btn_text, )
   end
 end
 ta = TelegramAssistant.new

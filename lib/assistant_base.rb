@@ -2,6 +2,7 @@ require 'redis'
 require 'json'
 class AssistantBase
   def initialize
+    @next_step = Array.new
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
   end
@@ -17,7 +18,7 @@ class AssistantBase
       end
     end
   end
-  def publish(api_ver: '1', message: nil, chat_id: nil, buttons: nil)
+  def publish(api_ver: '1', message: nil, chat_id: nil)
     json = JSON.generate ({
         'message' => message,
         'source_network_type' => 'assistant',
@@ -26,6 +27,18 @@ class AssistantBase
     })
     @redis_pub.publish("assistant.", json)
     puts json
+  end
+  def valid_step?(step)
+    unless @next_step.index(step).nil?
+      true
+    end
+    false
+  end
+  def next_steps(*args)
+    @next_step.clear
+    args.each do |arg|
+      @next_step << arg
+    end
   end
 end
 
