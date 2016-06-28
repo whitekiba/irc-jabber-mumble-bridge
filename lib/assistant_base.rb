@@ -3,6 +3,7 @@ require 'json'
 class AssistantBase
   def initialize
     @next_step = Array.new
+    @assistant_message = Array.new
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
   end
@@ -13,19 +14,20 @@ class AssistantBase
       @redis_sub.psubscribe('assistant.*') do |on|
         on.pmessage do |pattern, channel, message|
           data = JSON.parse(message)
-          start(data) if data['source_network_type'].eql?(name) & data['message'].eql?('/start')
+          #start(data) if data['source_network_type'].eql?(name) & data['message'].eql?('/start')
+          @assistant_message.unshift(data)
         end
       end
     end
   end
-  def publish(api_ver: '1', message: nil, chat_id: nil)
+  def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
     json = JSON.generate ({
         'message' => message,
         'source_network_type' => 'assistant',
         'chat_id' => chat_id,
-        'buttons' => buttons
+        'reply_markup' => reply_markup
     })
-    @redis_pub.publish("assistant.", json)
+    @redis_pub.publish("assistant.*", json)
     puts json
   end
   def valid_step?(step)

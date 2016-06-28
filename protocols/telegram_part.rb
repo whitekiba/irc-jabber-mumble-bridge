@@ -13,7 +13,7 @@ class TelegramBridge < ModuleBase
     @my_short = 'T'
     @my_id = 3
     $logger.info 'Telegram process starting...'
-    @telegram = Telegram::Bot::Client.new($config[:telegram][:token])
+    @telegram = Telegram::Bot::Client.new($config[:telegram][:token], logger: $logger)
     @db = DbManager.new
 
     @chat_ids = @db.loadChannels(@my_id)
@@ -42,15 +42,15 @@ class TelegramBridge < ModuleBase
       loop do
         sleep 0.1
         msg_in = @assistantMessages.pop
-        #$logger.info "State of message array: #{msg_in.nil?}"
         if !msg_in.nil?
-          $logger.info msg_in
-          kb = Array.new
-          msg_in["buttons"].each do |btn|
-            kb.push(Telegram::Bot::Types::InlineKeyboardButton.new(text: btn, callback_data: btn))
+          $logger.info "Got Assistant message"
+          begin
+            $logger.info msg_in
+            @telegram.api.send_message(chat_id: msg_in["chat_id"], text: msg_in["message"], reply_markup: msg_in["reply_markup"])
+          rescue StandardError => e
+            $logger.error "Got Exception!"
+            $logger.error e
           end
-          markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
-          @telegram.api.send_message(chat_id: msg_in["chat_id"], text: msg_in["message"], reply_markup: markup)
         end
       end
     end
