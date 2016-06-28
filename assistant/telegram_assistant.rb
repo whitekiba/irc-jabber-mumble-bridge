@@ -27,9 +27,6 @@ class TelegramAssistant < AssistantBase
         end
       end
     end
-    loop do
-      sleep 0.1
-    end
   end
   def start(data)
     valid_step? :start
@@ -42,7 +39,8 @@ class TelegramAssistant < AssistantBase
         btn_markup << addButton(btn, 'test')
         $logger.debug "Current btn_markup Array: #{btn_markup}"
       end
-      keyboard = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: btn_markup)
+      keyboard = Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: [%w(A B), %w(C D)], one_time_keyboard: true)
+      #keyboard = Telegram::Bot::Types::ReplyKeyboardMarkup.new(inline_keyboard: btn_markup)
       publish(message: 'Bitte wählen!', chat_id: data["chat_id"], reply_markup: keyboard.to_compact_hash)
     rescue StandardError => e
       $logger.debug "Got Exception!"
@@ -59,7 +57,7 @@ class TelegramAssistant < AssistantBase
   end
   def addButton(btn_text, callback)
     $logger.debug "Text for Button: #{btn_text}"
-    Telegram::Bot::Types::InlineKeyboardButton.new(text: btn_text, callback_data: callback)
+    Telegram::Bot::Types::KeyboardButton.new(text: btn_text, callback_data: callback)
   end
   #wir würgen den Assistenten ab wenn jemand einen falschen Schritt startet
   def wrongStep(data)
@@ -77,3 +75,4 @@ end
 ta = TelegramAssistant.new
 ta.go
 ta.receive
+ta.waitForTimeout

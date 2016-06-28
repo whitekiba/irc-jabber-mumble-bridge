@@ -59,11 +59,14 @@ class ModuleBase
         end
         on.pmessage do |pattern, channel, message|
           $logger.info ("Got message! #{message}")
+          $logger.info "Hi my name is #{name}"
           data = JSON.parse(message)
-          if data["source_network_type"] != name
+          if data["source_network"] != name
             $logger.debug data
             @assistantMessages.unshift(data)
-            $logger.debug("Length of @message #{@assistantMessages.length}")
+            $logger.debug("Length of @assistantMessages #{@assistantMessages.length}")
+          else
+            $logger.debug "Ignored message because it was mine"
           end
         end
       end
@@ -91,6 +94,7 @@ class ModuleBase
         'attachment' => attachment,
         'chat_id' => chat_id
               })
+    $logger.debug json
     @redis_pub.publish("msg.#{source_network}", json) if !is_assistant
     @redis_pub.publish("assistant.#{source_network}", json) if is_assistant
   end

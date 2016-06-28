@@ -46,6 +46,7 @@ class TelegramBridge < ModuleBase
           $logger.info "Got Assistant message"
           begin
             $logger.info msg_in
+            $logger.info msg_in["reply_markup"].class
             @telegram.api.send_message(chat_id: msg_in["chat_id"], text: msg_in["message"], reply_markup: msg_in["reply_markup"])
           rescue StandardError => e
             $logger.error "Got Exception!"
@@ -61,7 +62,7 @@ class TelegramBridge < ModuleBase
   end
   def handleMessage(msg)
     #$logger.info 'handleMessage wurde aufgerufen!'
-    $logger.info msg.to_hash()
+    $logger.info msg
     if @chat_ids[msg.chat.id.to_s].nil?
       unless msg.new_chat_member.nil?
         if msg.from.first_name == "bridge"

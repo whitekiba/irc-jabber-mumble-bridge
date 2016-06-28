@@ -2,6 +2,21 @@ require 'childprocess'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
 class AssistantManager
+  def initialize
+    @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
+    @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
+  end
+  def subscribe
+    @redis_sub.psubscribe("assistant.*") do |on|
+      on.psubscribe do |channel, subscriptions|
+        $logger.info "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
+      end
+      on.pmessage do |pattern, channel, message|
+        $logger.debug ("Got message! #{message}")
+        @messages_cmd.unshift(JSON.parse(message))
+      end
+    end
+  end
   def startAssistants
     @assistants = ['telegram']
 
@@ -28,5 +43,6 @@ class AssistantManager
 end
 
 a = AssistantManager.new
-a.startAssistants
-a.monitorAssistants
+
+#a.startAssistants
+#a.monitorAssistants
