@@ -1,5 +1,8 @@
 require 'mysql2'
 require 'yaml'
+require 'logger'
+
+$logger = Logger.new(File.dirname(__FILE__) + '/db_manager.log')
 
 class DbManager
   def initialize
@@ -71,8 +74,10 @@ class DbManager
 
   def authUser(username, secret)
     res = @db.query("SELECT ID FROM `users` WHERE `username` LIKE '#{username}' AND `secret` LIKE '#{secret}'")
+    $logger.info res
     if res.count > 0
-      true
+      #TODO: Da müssen wir die ID zurückgeben lassen
+      res
     end
     false
   end

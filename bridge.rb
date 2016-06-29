@@ -21,7 +21,7 @@ protocols.each { |proto|
   processes[proto].start
 }
 
-ChildProcess.build('ruby', "assistant/telegram_assistant.rb").start
+ChildProcess.build('ruby', "assistant/assistant_manager.rb").start
 
 puts "bridge-v2 starting up... (INTEGRATE ALL TEH THINGS!)"
 

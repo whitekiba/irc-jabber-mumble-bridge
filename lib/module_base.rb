@@ -96,6 +96,6 @@ class ModuleBase
               })
     $logger.debug json
     @redis_pub.publish("msg.#{source_network}", json) if !is_assistant
-    @redis_pub.publish("assistant.#{source_network}", json) if is_assistant
+    @redis_pub.publish("assistant_all", json) if is_assistant #wir publishen nicht auf assistant.*
   end
 end

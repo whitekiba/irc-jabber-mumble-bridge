@@ -2,6 +2,8 @@ require 'redis'
 require 'json'
 class AssistantBase
   def initialize
+    @userid = ARGV[0]
+
     @last_command = Time.now
     @next_step = Array.new
     @assistant_message = Array.new
@@ -12,7 +14,7 @@ class AssistantBase
   def subscribe(name)
     Thread.new do
       sleep 0.1
-      @redis_sub.psubscribe('assistant.*') do |on|
+      @redis_sub.psubscribe("assistant.#{@userid}") do |on|
         on.pmessage do |pattern, channel, message|
           data = JSON.parse(message)
           @last_command = Time.now
@@ -29,7 +31,7 @@ class AssistantBase
         'chat_id' => chat_id,
         'reply_markup' => reply_markup
     })
-    @redis_pub.publish("assistant.*", json)
+    @redis_pub.publish("assistant.#{@userid}", json)
     puts json
   end
   def waitForTimeout

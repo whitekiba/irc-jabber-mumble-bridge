@@ -1,37 +1,35 @@
 require 'childprocess'
+require 'logger'
+require 'redis'
+require 'json'
+require_relative "../lib/db_manager"
 
-$logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
+$logger = Logger.new(File.dirname(__FILE__) + '/assistant_manager.log')
 class AssistantManager
   def initialize
+    @db = DbManager.new
+    @assistants = Hash.new
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
   end
   def subscribe
-    @redis_sub.psubscribe("assistant.*") do |on|
+    @redis_sub.psubscribe("assistant_all") do |on|
       on.psubscribe do |channel, subscriptions|
         $logger.info "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
       end
       on.pmessage do |pattern, channel, message|
         $logger.debug ("Got message! #{message}")
-        @messages_cmd.unshift(JSON.parse(message))
+        sortMessage(JSON.parse(message))
       end
     end
   end
-  def startAssistants
-    @assistants = ['telegram']
 
-    @assistants.each { |proto|
-      @assistants[proto] = ChildProcess.build('ruby', "protocols/#{proto}_assistant.rb")
-      @assistants[proto].start
-    }
-  end
   def monitorAssistants
     loop do
       begin
         @assistants.each_key { |proc|
           if @assistants[proc].exited?
-            puts "#{proc} started or restarted."
-            @assistants[proc].start
+            puts "#{proc} exited. Thats all we know."
           end
         }
         sleep 1
@@ -40,9 +38,40 @@ class AssistantManager
       end
     end
   end
+  def sortMessage(message)
+    $logger.info "sortMessage called!"
+    $logger.info message
+    split_message = message["message"].split(' ')
+    $logger.info "Split message: #{split_message}"
+    if split_message[0].eql?("/auth")
+      userid = @db.authUser(split_message[1], split_message[2])
+      if userid
+        publish(message: "authenticated!", chat_id: message["chat_id"])
+      else
+        publish(message: "wrong username or password!", chat_id: message["chat_id"])
+      end
+    end
+    if @assistants["#{message["source_network"]}_#{message[""]}"]
+
+    end
+  end
+  def startNewAssistant(protocol, userid)
+    @assistants["#{protocol}_#{userid}"] = ChildProcess.build('ruby', "protocols/#{protocol}_assistant.rb #{userid}")
+  end
+  private
+  def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
+    json = JSON.generate ({
+        'message' => message,
+        'source_network_type' => 'assistant',
+        'chat_id' => chat_id,
+        'reply_markup' => reply_markup
+    })
+    @redis_pub.publish("assistant.#{@userid}", json)
+    puts json
+  end
 end
 
 a = AssistantManager.new
 
-#a.startAssistants
-#a.monitorAssistants
+a.subscribe
+a.monitorAssistants
