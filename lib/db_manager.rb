@@ -76,10 +76,11 @@ class DbManager
     res = @db.query("SELECT ID FROM `users` WHERE `username` LIKE '#{username}' AND `secret` LIKE '#{secret}'")
     $logger.info res
     if res.count > 0
-      #TODO: Da müssen wir die ID zurückgeben lassen
-      res
+      $logger.debug "Fetched ID: #{res.first["ID"]}"
+      res.first["ID"]
+    else
+      false
     end
-    false
   end
 
   def checkSecret(secret)

@@ -2,11 +2,13 @@ require 'childprocess'
 require 'logger'
 require 'redis'
 require 'json'
+require 'tempfile'
 require_relative "../lib/db_manager"
 
 $logger = Logger.new(File.dirname(__FILE__) + '/assistant_manager.log')
 class AssistantManager
   def initialize
+    @active_users = Hash.new
     @db = DbManager.new
     @assistants = Hash.new
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
@@ -29,6 +31,10 @@ class AssistantManager
       begin
         @assistants.each_key { |proc|
           if @assistants[proc].exited?
+            @assistants[proc].stop
+            userid = proc.split('_')[1]
+            #TODO: Wir müssen den User aus der liste der aktiven user entfernen
+            @assistants[proc] = nil #wir nillen den eintrag
             puts "#{proc} exited. Thats all we know."
           end
         }
@@ -47,16 +53,30 @@ class AssistantManager
       userid = @db.authUser(split_message[1], split_message[2])
       if userid
         publish(message: "authenticated!", chat_id: message["chat_id"])
+        begin
+          @active_users[message["chat_id"]] = userid
+          $logger.info "Starting new assistant"
+          startNewAssistant(message["source_network"], @active_users[message["chat_id"]])
+        rescue StandardError => e
+          $logger.error "Error while starting assistant"
+          $logger.error e
+        end
       else
         publish(message: "wrong username or password!", chat_id: message["chat_id"])
       end
-    end
-    if @assistants["#{message["source_network"]}_#{message[""]}"]
-
+    else
+      if @assistants["#{message["source_network"]}_#{@active_users[message["chat_id"]]}"].nil?
+        publish(message: "assistant timed out. Please authenticate again.", chat_id: message["chat_id"])
+      else
+        #hier publishen wir auf dem Ziel
+        #TODO: Fehlt bisher noch
+      end
     end
   end
   def startNewAssistant(protocol, userid)
-    @assistants["#{protocol}_#{userid}"] = ChildProcess.build('ruby', "protocols/#{protocol}_assistant.rb #{userid}")
+    @assistants["#{protocol}_#{userid}"] = ChildProcess.build('ruby', "assistant/#{protocol}_assistant.rb", "#{userid}")
+    @assistants["#{protocol}_#{userid}"].io.stdout = Tempfile.new("assistant_output_#{userid}.log")
+    @assistants["#{protocol}_#{userid}"].start
   end
   private
   def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
