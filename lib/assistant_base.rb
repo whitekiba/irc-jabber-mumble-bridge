@@ -17,7 +17,7 @@ class AssistantBase
       @redis_sub.psubscribe("assistant.#{@userid}") do |on|
         on.pmessage do |pattern, channel, message|
           data = JSON.parse(message)
-          @last_command = Time.now
+          resetTimeout
           #start(data) if data['source_network_type'].eql?(name) & data['message'].eql?('/start')
           @assistant_message.unshift(data)
         end
@@ -39,6 +39,10 @@ class AssistantBase
       sleep 1
       break if @last_command < (Time.now - (5*60)) #5 ist der timeout
     end
+  end
+  def resetTimeout
+    $logger.debug "resetTimeout triggered. New time!"
+    @last_command = Time.now
   end
   def valid_step?(step)
     unless @next_step.index(step).nil?

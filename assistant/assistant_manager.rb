@@ -21,7 +21,7 @@ class AssistantManager
       end
       on.pmessage do |pattern, channel, message|
         $logger.debug ("Got message! #{message}")
-        sortMessage(JSON.parse(message))
+        sortMessage(message)
       end
     end
   end
@@ -35,6 +35,7 @@ class AssistantManager
             userid = proc.split('_')[1]
             #TODO: Wir müssen den User aus der liste der aktiven user entfernen
             @assistants[proc] = nil #wir nillen den eintrag
+            @active_users.delete(@active_users.invert[userid])
             puts "#{proc} exited. Thats all we know."
           end
         }
@@ -45,31 +46,34 @@ class AssistantManager
     end
   end
   def sortMessage(message)
+    parsed_message = JSON.parse(message)
     $logger.info "sortMessage called!"
-    $logger.info message
-    split_message = message["message"].split(' ')
+    $logger.info parsed_message
+    split_message = parsed_message["message"].split(' ')
     $logger.info "Split message: #{split_message}"
+    #case wäre hier vermutlich sauberer. Aber wir brauchen das else
     if split_message[0].eql?("/auth")
       userid = @db.authUser(split_message[1], split_message[2])
       if userid
-        publish(message: "authenticated!", chat_id: message["chat_id"])
+        publish(message: "authenticated!", chat_id: parsed_message["chat_id"])
         begin
-          @active_users[message["chat_id"]] = userid
+          @active_users[parsed_message["chat_id"]] = userid
           $logger.info "Starting new assistant"
-          startNewAssistant(message["source_network"], @active_users[message["chat_id"]])
+          startNewAssistant(parsed_message["source_network"], @active_users[parsed_message["chat_id"]])
         rescue StandardError => e
           $logger.error "Error while starting assistant"
           $logger.error e
         end
       else
-        publish(message: "wrong username or password!", chat_id: message["chat_id"])
+        publish(message: "wrong username or password!", chat_id: parsed_message["chat_id"])
       end
+    elsif split_message[0].eql?("/start")
+      #TODO: Hier sollte eine Einführung hin
     else
-      if @assistants["#{message["source_network"]}_#{@active_users[message["chat_id"]]}"].nil?
-        publish(message: "assistant timed out. Please authenticate again.", chat_id: message["chat_id"])
+      if @assistants["#{parsed_message["source_network"]}_#{@active_users[parsed_message["chat_id"]]}"].nil?
+        publish(message: "assistant timed out. Please authenticate again.", chat_id: parsed_message["chat_id"])
       else
-        #hier publishen wir auf dem Ziel
-        #TODO: Fehlt bisher noch
+        @redis_pub.publish("assistant.#{@active_users[parsed_message["chat_id"]]}", message)
       end
     end
   end

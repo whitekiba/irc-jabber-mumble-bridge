@@ -4,13 +4,12 @@ require_relative '../lib/db_manager'
 require 'json'
 require 'logger'
 
-$logger = Logger.new(File.dirname(__FILE__) + '/tg_assistant.log')
-
 class TelegramAssistant < AssistantBase
   @db = DbManager.new
   def go
+    $logger = Logger.new(File.dirname(__FILE__) + "/tg_#{@userid}_assistant.log")
     @cur_step = "start"
-    next_steps :start
+    next_steps :start, :addServer, :test
   end
   def receive
     subscribe('telegram')
@@ -21,20 +20,23 @@ class TelegramAssistant < AssistantBase
         unless msg_in.nil?
           $logger.debug msg_in
           case msg_in["message"]
-            when '/start'
-              start(msg_in)
+            when '/test'
+              $logger.debug "test matched. calling method!"
+              test(msg_in)
+            when '/addServer'
+              addServer(msg_in)
           end
         end
       end
     end
   end
-  def start(data)
-    valid_step? :start
-    $logger.debug "start called. We are starting."
+  def test(data)
+    valid_step? :test
+    $logger.debug "test called. We are starting."
     next_steps :auth, :donate, :createUser
     begin
       btn_markup = Array.new
-      buttons = ["New User", "Authenticate", "Donate"]
+      buttons = ["New User", "Donate"]
       buttons.each do |btn|
         btn_markup << addButton(btn, 'test')
         $logger.debug "Current btn_markup Array: #{btn_markup}"
@@ -46,6 +48,9 @@ class TelegramAssistant < AssistantBase
       $logger.debug "Got Exception!"
       $logger.debug e
     end
+  end
+  def addServer(data)
+
   end
   #user erstellen
   #solang user nil ist werden die buttons gesendet
