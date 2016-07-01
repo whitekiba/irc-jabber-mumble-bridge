@@ -25,6 +25,8 @@ class TelegramAssistant < AssistantBase
               test(msg_in)
             when '/addServer'
               addServer(msg_in)
+            when '/addChannel'
+              addChannel(msg_in)
           end
         end
       end
@@ -50,6 +52,13 @@ class TelegramAssistant < AssistantBase
     end
   end
   def addServer(data)
+    begin
+      publish(message: get_valid_servers, chat_id: data["chat_id"])
+    rescue StandardError => e
+      $logger.error e
+    end
+  end
+  def addChannel(data)
 
   end
   #user erstellen

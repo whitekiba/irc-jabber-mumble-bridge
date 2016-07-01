@@ -4,10 +4,13 @@ require 'redis'
 require 'json'
 require 'tempfile'
 require_relative "../lib/db_manager"
+require_relative "../lib/language"
+require_relative '../lib/base_helpers'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/assistant_manager.log')
 class AssistantManager
   def initialize
+    @lang = Language.new
     @active_users = Hash.new
     @db = DbManager.new
     @assistants = Hash.new
@@ -30,7 +33,9 @@ class AssistantManager
     loop do
       begin
         @assistants.each_key { |proc|
+          #TODO: Der Code ist ungetestet. Ich hab keine Ahnung ob der funktioniert
           if @assistants[proc].exited?
+            $logger.info "#{proc} exited. Removing it from all lists"
             @assistants[proc].stop
             userid = proc.split('_')[1]
             #TODO: Wir müssen den User aus der liste der aktiven user entfernen
@@ -52,7 +57,7 @@ class AssistantManager
     split_message = parsed_message["message"].split(' ')
     $logger.info "Split message: #{split_message}"
     #case wäre hier vermutlich sauberer. Aber wir brauchen das else
-    if split_message[0].eql?("/auth")
+    if split_message[0].eql?("/auth") #auth ist der erste Schritt der nötig ist.
       userid = @db.authUser(split_message[1], split_message[2])
       if userid
         publish(message: "authenticated!", chat_id: parsed_message["chat_id"])
@@ -67,15 +72,24 @@ class AssistantManager
       else
         publish(message: "wrong username or password!", chat_id: parsed_message["chat_id"])
       end
-    elsif split_message[0].eql?("/start")
-      #TODO: Hier sollte eine Einführung hin
+    elsif split_message[0].eql?("/start") || !split_message[0].initial.eql?("/")
+      $logger.info "/start or non-command"
+      begin
+        aboutMe(parsed_message["chat_id"])
+      rescue StandardError => e
+        $logger.error e
+      end
     else
+      #TODO: Hier müssen wir noch etwas präziser bei den Fehlern werden.
       if @assistants["#{parsed_message["source_network"]}_#{@active_users[parsed_message["chat_id"]]}"].nil?
         publish(message: "assistant timed out. Please authenticate again.", chat_id: parsed_message["chat_id"])
       else
         @redis_pub.publish("assistant.#{@active_users[parsed_message["chat_id"]]}", message)
       end
     end
+  end
+  def aboutMe(chat_id)
+    publish(message: @lang.get("about_me"), chat_id: chat_id)
   end
   def startNewAssistant(protocol, userid)
     @assistants["#{protocol}_#{userid}"] = ChildProcess.build('ruby', "assistant/#{protocol}_assistant.rb", "#{userid}")
