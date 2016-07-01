@@ -1,0 +1,12 @@
+language: "english"
+test: "I am a test string!"
+about_me: "Hi!\nI am bridgie your friendly integration Bot\n
+Possible commands are:\n
+/auth - Authenticate with account\n
+/newUser - Create new User"
+new_user: "To create a new account use:\n
+/newUser <username> [emailaddress]\n
+The emailaddress is optional"
+add_server_usage: "/addServer " #TODO: fertig schreiben
+
+valid_server_intro: "These are the networks i support:\n"
