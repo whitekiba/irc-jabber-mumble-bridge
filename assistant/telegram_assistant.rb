@@ -52,6 +52,10 @@ class TelegramAssistant < AssistantBase
     end
   end
   def addServer(data)
+    parameters = data["message"].split(' ')
+    @username = parameters[1]
+    @email = parameters[2]
+    @email = nil if @email.eql?("")
     begin
       publish(message: get_valid_servers, chat_id: data["chat_id"])
     rescue StandardError => e
