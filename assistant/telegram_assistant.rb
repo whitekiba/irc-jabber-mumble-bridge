@@ -52,22 +52,17 @@ class TelegramAssistant < AssistantBase
     end
   end
   def addServer(data)
-    parameters = data["message"].split(' ')
-    @username = parameters[1]
-    @email = parameters[2]
-    @email = nil if @email.eql?("")
     begin
+      parameters = data["message"].split(' ')
+      username = parameters[1]
+      email = parameters[2]
+      email = nil if email.eql?("")
       publish(message: get_valid_servers, chat_id: data["chat_id"])
     rescue StandardError => e
       $logger.error e
     end
   end
   def addChannel(data)
-
-  end
-  #user erstellen
-  #solang user nil ist werden die buttons gesendet
-  def createUser(username = nil)
 
   end
   def addService

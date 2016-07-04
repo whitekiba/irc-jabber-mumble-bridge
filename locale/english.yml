@@ -10,3 +10,4 @@ The emailaddress is optional"
 add_server_usage: "/addServer " #TODO: fertig schreiben
 
 valid_server_intro: "These are the networks i support:\n"
+assistant_timeout: "Assistant timed out. Please authenticate again."
