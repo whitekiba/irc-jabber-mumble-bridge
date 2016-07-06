@@ -23,9 +23,9 @@ class TelegramAssistant < AssistantBase
             when '/test'
               $logger.debug "test matched. calling method!"
               test(msg_in)
-            when '/addServer'
+            when '/addServer', '/newServer'
               addServer(msg_in)
-            when '/addChannel'
+            when '/addChannel', '/newChannel'
               addChannel(msg_in)
           end
         end
@@ -34,7 +34,7 @@ class TelegramAssistant < AssistantBase
   end
   def test(data)
     valid_step? :test
-    $logger.debug "test called. We are starting."
+    $logger.debug "test called. We are testing."
     next_steps :auth, :donate, :createUser
     begin
       btn_markup = Array.new
@@ -53,18 +53,39 @@ class TelegramAssistant < AssistantBase
   end
   def addServer(data)
     begin
-      publish(message: get_valid_servers, chat_id: data["chat_id"])
+      split_message = data["message"].split(' ')
+      if split_message[5].nil?
+        publish(message: "Missing parameter.\nSyntax is: /newServer <type> <url> <port> <username> [optional: password]")
+        publish(message: get_valid_servers, chat_id: data["chat_id"])
+      else
+        server_type = split_message[1]
+        server_url = split_message[2]
+        server_port = split_message[3]
+        server_password = split_message[5]
+        server_username = split_message[4]
+        if @db.addServer(server_url, server_port, server_type, server_password, server_username)
+          publish(message: "Server sucessfully added.", chat_id: data["chat_id"])
+        end
+      end
     rescue StandardError => e
       $logger.error e
     end
   end
   def addChannel(data)
-
+    begin
+      if @db.getServerCount(@userid) > 0
+        #@db.addChannel(@userid, #serverid)
+      else
+        publish(message: @lang.get("no_server"), chat_id: data["chat_id"])
+      end
+    rescue StandardError => e
+      $logger.error e
+    end
   end
   #user erstellen
   #solang user nil ist werden die buttons gesendet
-  def createUser(username = nil)
-
+  def createUser(username)
+    @db.addUser(username)
   end
   def addService
 

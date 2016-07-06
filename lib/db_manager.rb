@@ -51,6 +51,34 @@ class DbManager
     @db.query(sql)
   end
 
+  def getServerCount(user_ID)
+    res = @db.query("SELECT ID FROM servers WHERE user_ID = #{user_ID}")
+    res.count
+  end
+  def hasServer?(user_ID, server_type)
+    if ['telegram', 'irc'].include? server_type
+      true
+    else
+      res = @db.query("SELECT ID FROM servers WHERE user_ID = #{user_ID} AND server_type LIKE '#{server_type}'")
+      if res.count > 0
+        true
+      else
+        false
+      end
+    end
+  end
+  def getServers(user_ID)
+    return_vars = Hash.new
+    res = @db.query("SELECT ID, server_url, server_port, server_type FROM servers WHERE user_ID = #{user_ID}")
+    res.each do |entry|
+      return_vars[entry["ID"]] = entry
+    end
+  end
+  def getServerID(server_url, server_port)
+    res = @db.query("SELECT ID FROM servers WHERE server_url LIKE '#{server_url}' AND server_port LIKE '#{server_port}'")
+    res.fetch_hash["ID"]
+  end
+
   #channel hinzufügen
   #für channel sind user_IDs pflicht. Anders können wir die nicht zuordnen
   def addChannel(user_ID, server_ID, channel, channel_password = nil)
