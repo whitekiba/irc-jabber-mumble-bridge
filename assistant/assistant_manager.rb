@@ -72,6 +72,16 @@ class AssistantManager
       else
         publish(message: "wrong username or password!", chat_id: parsed_message["chat_id"])
       end
+    elsif split_message[0].eql?("/newUser")
+      if split_message[1].nil? || split_message[2].nil?
+        publish(message: "missing parameter", chat_id: parsed_message["chat_id"])
+      else
+        begin
+          createUser(split_message[1], split_message[2])
+        rescue StandardError => e
+          $logger.error e
+        end
+      end
     elsif split_message[0].eql?("/start") || !split_message[0].initial.eql?("/")
       $logger.info "/start or non-command"
       begin
@@ -82,7 +92,7 @@ class AssistantManager
     else
       #TODO: Hier müssen wir noch etwas präziser bei den Fehlern werden.
       if @assistants["#{parsed_message["source_network"]}_#{@active_users[parsed_message["chat_id"]]}"].nil?
-        publish(message: "assistant timed out. Please authenticate again.", chat_id: parsed_message["chat_id"])
+        publish(message: @lang.get("assistant_timeout"), chat_id: parsed_message["chat_id"])
       else
         @redis_pub.publish("assistant.#{@active_users[parsed_message["chat_id"]]}", message)
       end
@@ -92,9 +102,19 @@ class AssistantManager
     publish(message: @lang.get("about_me"), chat_id: chat_id)
   end
   def startNewAssistant(protocol, userid)
-    @assistants["#{protocol}_#{userid}"] = ChildProcess.build('ruby', "assistant/#{protocol}_assistant.rb", "#{userid}")
-    @assistants["#{protocol}_#{userid}"].io.stdout = Tempfile.new("assistant_output_#{userid}.log")
-    @assistants["#{protocol}_#{userid}"].start
+    begin
+      @assistants["#{protocol}_#{userid}"] = ChildProcess.build('ruby', "assistant/#{protocol}_assistant.rb", "#{userid}")
+      @assistants["#{protocol}_#{userid}"].io.stdout = Tempfile.new("assistant_output_#{userid}.log")
+      @assistants["#{protocol}_#{userid}"].start
+      $logger.info "Neuer Assistenzprozess gestartet"
+    rescue StandardError => e
+      $logger.error e
+    end
+  end
+  #user erstellen
+  #solang user nil ist werden die buttons gesendet
+  def createUser(username = nil, email = nil)
+    @db.addUser(username, email)
   end
   private
   def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
