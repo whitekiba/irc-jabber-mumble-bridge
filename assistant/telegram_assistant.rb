@@ -27,6 +27,10 @@ class TelegramAssistant < AssistantBase
               addServer(msg_in)
             when '/addChannel', '/newChannel'
               addChannel(msg_in)
+            when '/showChannels', '/listChannels'
+              listChannels(msg_in)
+            when '/showServers', '/listServers'
+              listServers(msg_in)
           end
         end
       end
@@ -55,7 +59,7 @@ class TelegramAssistant < AssistantBase
     begin
       split_message = data["message"].split(' ')
       if split_message[5].nil?
-        publish(message: "Missing parameter.\nSyntax is: /newServer <type> <url> <port> <username> [optional: password]")
+        publish(message: "Missing parameter.\nSyntax is: /newServer <type> <url> <port> <username> [optional: password]", chat_id: data["chat_id"])
         publish(message: get_valid_servers, chat_id: data["chat_id"])
       else
         server_type = split_message[1]
@@ -68,6 +72,7 @@ class TelegramAssistant < AssistantBase
         end
       end
     rescue StandardError => e
+      $logger.error "Error ocurred while creating new Server. Stacktrace follows"
       $logger.error e
     end
   end
@@ -88,6 +93,12 @@ class TelegramAssistant < AssistantBase
     @db.addUser(username)
   end
   def addService
+
+  end
+  def listChannels(data)
+
+  end
+  def listServers(data)
 
   end
   def addButton(btn_text, callback)

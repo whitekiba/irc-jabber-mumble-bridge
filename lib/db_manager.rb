@@ -48,12 +48,12 @@ class DbManager
     user_password = "NULL" if user_password.nil?
     sql = "INSERT INTO `servers` (`ID`, `user_ID`, `server_url`, `server_port`, `server_type`, `user_name`, `user_password`)
             VALUES (NULL, #{user_ID}, '#{server_url}', '#{server_port}', '#{server_type}', '#{user_name}', '#{user_password}');"
-    @db.query(sql)
+    res = @db.query(sql)
+    $logger.debug res
   end
 
   def getServerCount(user_ID)
-    res = @db.query("SELECT ID FROM servers WHERE user_ID = #{user_ID}")
-    res.count
+    @db.query("SELECT ID FROM servers WHERE user_ID = #{user_ID}").count
   end
   def hasServer?(user_ID, server_type)
     if ['telegram', 'irc'].include? server_type
@@ -75,8 +75,7 @@ class DbManager
     end
   end
   def getServerID(server_url, server_port)
-    res = @db.query("SELECT ID FROM servers WHERE server_url LIKE '#{server_url}' AND server_port LIKE '#{server_port}'")
-    res.fetch_hash["ID"]
+    @db.query("SELECT ID FROM servers WHERE server_url LIKE '#{server_url}' AND server_port LIKE '#{server_port}'").fetch_hash["ID"]
   end
 
   #channel hinzufügen
