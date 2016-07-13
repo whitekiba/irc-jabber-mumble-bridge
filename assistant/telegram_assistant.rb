@@ -5,9 +5,9 @@ require 'json'
 require 'logger'
 
 class TelegramAssistant < AssistantBase
-  @db = DbManager.new
   def go
     $logger = Logger.new(File.dirname(__FILE__) + "/tg_#{@userid}_assistant.log")
+    @db = DbManager.new
     @cur_step = "start"
     next_steps :start, :addServer, :test
   end
@@ -16,22 +16,30 @@ class TelegramAssistant < AssistantBase
     Thread.new do
       loop do
         sleep 0.1
-        msg_in = @assistant_message.pop
-        unless msg_in.nil?
-          $logger.debug msg_in
-          case msg_in["message"]
-            when '/test'
-              $logger.debug "test matched. calling method!"
-              test(msg_in)
-            when '/addServer', '/newServer'
-              addServer(msg_in)
-            when '/addChannel', '/newChannel'
-              addChannel(msg_in)
-            when '/showChannels', '/listChannels'
-              listChannels(msg_in)
-            when '/showServers', '/listServers'
-              listServers(msg_in)
+        begin
+          msg_in = @assistant_message.pop
+          unless msg_in.nil?
+            $logger.debug "assistant got message. handling it!"
+            $logger.debug msg_in
+            split_message = msg_in["message"].split(' ')
+            $logger.debug split_message
+            case split_message[0]
+              when '/test'
+                $logger.debug "test matched. calling method!"
+                test(msg_in)
+              when '/addServer', '/newServer'
+                addServer(msg_in)
+              when '/addChannel', '/newChannel'
+                addChannel(msg_in)
+              when '/showChannels', '/listChannels'
+                listChannels(msg_in)
+              when '/showServers', '/listServers'
+                listServers(msg_in)
+            end
           end
+        rescue StandardError => e
+          logger.debug "Exception"
+          $logger.error e
         end
       end
     end
@@ -56,17 +64,30 @@ class TelegramAssistant < AssistantBase
     end
   end
   def addServer(data)
+    $logger.debug "We are in addServer. My data is #{data}"
     begin
       split_message = data["message"].split(' ')
-      if split_message[5].nil?
+      $logger.debug "Field 4 is: #{split_message[4]}"
+      if split_message[4].nil?
         publish(message: "Missing parameter.\nSyntax is: /newServer <type> <url> <port> <username> [optional: password]", chat_id: data["chat_id"])
         publish(message: get_valid_servers, chat_id: data["chat_id"])
       else
+        $logger.debug split_message
         server_type = split_message[1]
         server_url = split_message[2]
         server_port = split_message[3]
-        server_password = split_message[5]
-        server_username = split_message[4]
+        unless split_message[5].nil?
+          $logger.info "Setting server password to nil"
+          server_password = nil
+        else
+          server_password = split_message[5]
+        end
+        unless split_message[4].nil?
+          $logger.info "Setting server username to bridgie"
+          server_username = "bridgie"
+        else
+          server_username = split_message[4]
+        end
         if @db.addServer(server_url, server_port, server_type, server_password, server_username)
           publish(message: "Server sucessfully added.", chat_id: data["chat_id"])
         end
@@ -99,7 +120,7 @@ class TelegramAssistant < AssistantBase
 
   end
   def listServers(data)
-
+    servers = @db.loadServers(nil, @userid)
   end
   def addButton(btn_text, callback)
     $logger.debug "Text for Button: #{btn_text}"

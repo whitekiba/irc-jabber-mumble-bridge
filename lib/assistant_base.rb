@@ -13,7 +13,10 @@ class AssistantBase
     @assistant_message = Array.new
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
-    @valid_servers = ["Telegram", "IRC", "Mumble", "Jabber"]
+    @valid_servers = {"telegram" => "Telegram",
+                      "irc" => "IRC",
+                      "mumble" => "Mumble",
+                      "jabber" => "Jabber"}
   end
 
   def subscribe(name)
@@ -64,9 +67,14 @@ class AssistantBase
   def validate_parameters(*args)
 
   end
+  def is_valid_server?(server)
+    if @valid_servers.key?(server)
+      true
+    end
+  end
   def get_valid_servers
     valid_server_text = @lang.get("valid_server_intro")
-    @valid_servers.each do |server|
+    @valid_servers.each_value do |server|
       valid_server_text << "- #{server}\n"
     end
     valid_server_text

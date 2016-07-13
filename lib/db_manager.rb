@@ -2,7 +2,7 @@ require 'mysql2'
 require 'yaml'
 require 'logger'
 
-$logger = Logger.new(File.dirname(__FILE__) + '/db_manager.log')
+#$logger = Logger.new(File.dirname(__FILE__) + '/db_manager.log')
 
 class DbManager
   def initialize
@@ -20,9 +20,16 @@ class DbManager
     channels
   end
 
-  def loadServers(server_type)
+  def loadServers(server_type = nil, user_id = nil)
     servers = Array.new
-    query = "SELECT * FROM servers WHERE server_type LIKE '#{server_type}'"
+    if !server_type.nil?
+      query = "SELECT * FROM servers WHERE server_type LIKE '#{server_type}'"
+    elsif !user_id.nil?
+      query = "SELECT * FROM servers WHERE user_ID = '#{user_id}'"
+    else
+      query = "SELECT * FROM servers'"
+    end
+
     res = @db.query(query)
     res.each do |entry|
       servers[entry["ID"]] = entry
@@ -41,13 +48,14 @@ class DbManager
     addServer(server_url, server_port, "irc", username)
   end
 
-  def addServer(server_url, server_port, server_type, user_name, user_password = nil, user_ID = nil)
-    exit if user_name == ""
+  def addServer(server_url, server_port, server_type, user_name = "bridge", user_password = "NULL", user_ID = "NULL")
     server_port.to_int if server_port.respond_to?(:to_int)
     user_ID = "NULL" if user_ID.nil?
     user_password = "NULL" if user_password.nil?
+    user_name = "bridgie" if user_name.nil?
     sql = "INSERT INTO `servers` (`ID`, `user_ID`, `server_url`, `server_port`, `server_type`, `user_name`, `user_password`)
             VALUES (NULL, #{user_ID}, '#{server_url}', '#{server_port}', '#{server_type}', '#{user_name}', '#{user_password}');"
+    $logger.debug sql
     res = @db.query(sql)
     $logger.debug res
   end
