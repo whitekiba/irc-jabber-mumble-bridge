@@ -1,6 +1,8 @@
 require 'redis'
 require 'json'
+require 'uri'
 require_relative 'language'
+require_relative '../lib/db_manager'
 
 class AssistantBase
   def initialize
@@ -11,6 +13,7 @@ class AssistantBase
     @last_command = Time.now
     @next_step = Array.new
     @assistant_message = Array.new
+    @db = DbManager.new
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
     @valid_servers = {"telegram" => "Telegram",
@@ -26,6 +29,7 @@ class AssistantBase
         on.pmessage do |pattern, channel, message|
           data = JSON.parse(message)
           resetTimeout
+          #TODO: Code checken. Keine ahnung wofür das mal war
           #start(data) if data['source_network_type'].eql?(name) & data['message'].eql?('/start')
           @assistant_message.unshift(data)
         end
@@ -34,13 +38,12 @@ class AssistantBase
   end
   def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
     json = JSON.generate ({
-        'message' => message,
+        'message' => message.force_encoding("UTF-8"),
         'source_network_type' => 'assistant',
         'chat_id' => chat_id,
         'reply_markup' => reply_markup
     })
     @redis_pub.publish("assistant.#{@userid}", json)
-    puts json
   end
   def waitForTimeout
     loop do
@@ -72,12 +75,39 @@ class AssistantBase
       true
     end
   end
+  def get_available_servers(user_ID)
+    available_server_text = @lang.get("available_server_intro")
+    @db.userServers(user_ID).each_value do |av_server|
+      available_server_text << "#{av_server["ID"]} - #{av_server["server_url"]}\n"
+    end
+    available_server_text
+  end
+  def get_channels(user_ID)
+    message = @lang.get("your_channels")
+    @db.userChannels(user_ID).each_value do |av_channel|
+      message << "#{av_channel["ID"]} - #{av_channel["channel_name"]}\n"
+    end
+    message
+  end
   def get_valid_servers
     valid_server_text = @lang.get("valid_server_intro")
     @valid_servers.each_value do |server|
       valid_server_text << "- #{server}\n"
     end
     valid_server_text
+  end
+  def send_command(target, command)
+    if @db.valid_server?(target)
+      @redis_pub.publish("cmd.#{target}", command)
+    end
+  end
+  def reload(target)
+    send_command(target, command)
+  end
+  def start_new_servers(type)
+    #TODO: Da wir die Multiserver funktion noch nicht ganz stabil haben muss das noch geschrieben werden
+    #hier sollte ein command kommen welches den core anweist neue Server zu starten
+    #parameter sind noch nicht klar, einbindung ist noch nicht klar
   end
 end
 

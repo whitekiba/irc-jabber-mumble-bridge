@@ -13,7 +13,7 @@ class Language
     unless @lang[index].nil?
        @lang[index]
     else
-      "unknown index or string"
+      "[MISSING_TEXT: #{index}]\n"
     end
   end
 end

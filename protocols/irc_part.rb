@@ -19,7 +19,6 @@ class IRCBridge < ModuleBase
     $logger.debug @channels_invert
     $logger.debug "Starting Server. Credentials: #{server_url}, #{server_port}, #{server_username}"
 
-    #TODO: Hier muss noch die Logik für mehrere Server umgesetzt werden
     @bot = IRC.new(server_username, server_url, server_port, server_username)
     IRCEvent.add_callback('endofmotd') { |event| joinChannels }
     IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }

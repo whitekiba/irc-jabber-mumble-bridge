@@ -82,7 +82,7 @@ class ModuleBase
     end
     $logger.debug ('publish wurde aufgerufen')
     json = JSON.generate ({
-        'message' => message,
+        'message' => message.force_encoding("UTF-8"),
         'nick' => nick,
         'source_network_type' => source_network_type,
         'source_network' => source_network,

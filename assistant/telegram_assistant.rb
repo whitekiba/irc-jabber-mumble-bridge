@@ -1,13 +1,11 @@
 require 'telegram/bot'
 require_relative '../lib/assistant_base'
-require_relative '../lib/db_manager'
 require 'json'
 require 'logger'
 
 class TelegramAssistant < AssistantBase
   def go
     $logger = Logger.new(File.dirname(__FILE__) + "/tg_#{@userid}_assistant.log")
-    @db = DbManager.new
     @cur_step = "start"
     next_steps :start, :addServer, :test
   end
@@ -73,9 +71,13 @@ class TelegramAssistant < AssistantBase
         publish(message: get_valid_servers, chat_id: data["chat_id"])
       else
         $logger.debug split_message
-        server_type = split_message[1]
-        server_url = split_message[2]
-        server_port = split_message[3]
+        server_type = split_message[1] #server type
+        if split_message[2].valid_url?
+          server_url = split_message[2] #server url
+        else
+          publish(message: "Invalid URL! Exiting hard!", chat_id: data["chat_id"])
+        end
+        server_port = split_message[3] #server port
         unless split_message[5].nil?
           $logger.info "Setting server password to nil"
           server_password = nil
@@ -99,10 +101,21 @@ class TelegramAssistant < AssistantBase
   end
   def addChannel(data)
     begin
-      if @db.getServerCount(@userid) > 0
-        #@db.addChannel(@userid, #serverid)
+      split_message = data["message"].split(' ')
+      if split_message[2].nil?
+        publish(message: "Missing parameter.\nSyntax is: /newServer <server ID> <channel name>", chat_id: data["chat_id"])
+        publish(message: get_available_servers(@userid), chat_id: data["chat_id"])
       else
-        publish(message: @lang.get("no_server"), chat_id: data["chat_id"])
+        if @db.getServerCount(@userid) > 0
+          server_id = split_message[1]
+          channel_name = split_message[2]
+          if @db.addChannel(@userid, server_id, channel_name)
+            publish(message: "Server sucessfully added.", chat_id: data["chat_id"])
+            reload(server_id)
+          end
+        else
+          publish(message: @lang.get("no_server"), chat_id: data["chat_id"])
+        end
       end
     rescue StandardError => e
       $logger.error e
@@ -113,14 +126,15 @@ class TelegramAssistant < AssistantBase
   def createUser(username)
     @db.addUser(username)
   end
-  def addService
-
-  end
   def listChannels(data)
-
+    begin
+      publish(message: get_channels(@userid), chat_id: data["chat_id"])
+    rescue StandardError => e
+      $logger.error e
+    end
   end
   def listServers(data)
-    servers = @db.loadServers(nil, @userid)
+    publish(message: get_available_servers(@userid), chat_id: data["chat_id"])
   end
   def addButton(btn_text, callback)
     $logger.debug "Text for Button: #{btn_text}"

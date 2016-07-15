@@ -58,6 +58,7 @@ class DbManager
     $logger.debug sql
     res = @db.query(sql)
     $logger.debug res
+    #TODO: Reload starten oder planen
   end
 
   def getServerCount(user_ID)
@@ -75,12 +76,25 @@ class DbManager
       end
     end
   end
-  def getServers(user_ID)
+  def userServers(user_ID)
     return_vars = Hash.new
-    res = @db.query("SELECT ID, server_url, server_port, server_type FROM servers WHERE user_ID = #{user_ID}")
+    res = @db.query("SELECT ID, server_url, server_port, server_type FROM servers WHERE user_ID = #{user_ID} OR user_ID IS NULL")
     res.each do |entry|
       return_vars[entry["ID"]] = entry
     end
+    return_vars
+  end
+  def userChannels(user_ID)
+    return_vars = Hash.new
+    res = @db.query("SELECT ID, channel_name FROM channels WHERE user_ID = #{user_ID} OR user_ID IS NULL")
+    res.each do |entry|
+      return_vars[entry["ID"]] = entry
+    end
+    return_vars
+  end
+  def valid_server?(server_id)
+    res = @db.query("SELECT ID FROM servers WHERE ID = #{server_id}")
+    true if res.count > 0
   end
   def getServerID(server_url, server_port)
     @db.query("SELECT ID FROM servers WHERE server_url LIKE '#{server_url}' AND server_port LIKE '#{server_port}'").fetch_hash["ID"]
@@ -92,7 +106,8 @@ class DbManager
     channel_password = "NULL" if channel_password.nil?
     sql = "INSERT INTO `channels` (`ID`, `user_ID`, `server_ID`, `channel_name`, `channel_password`)
             VALUES (NULL, '#{user_ID}', '#{server_ID}', '#{channel}', #{channel_password})"
-    @db.query(sql)
+    res = @db.query(sql)
+    #TODO: Reload starten oder planen
   end
 
   #erzeugt einen neuen Datensatz für den User
