@@ -4,20 +4,20 @@ require 'mumble-ruby'
 require 'cgi'
 require 'sanitize'
 require 'logger'
-require_relative "../lib/db_manager"
-require_relative "../lib/module_base"
+require_relative '../lib/db_manager'
+require_relative '../lib/module_base'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/mumble.log')
 
 class MumbleBridge < ModuleBase
-  def startServer(serverID, server_url, server_port, server_username)
-    @my_name = "mumble"
-    @my_short = "M"
-    @my_id = serverID
+  def startServer(server_id, server_url, server_port, server_username)
+    @my_name = 'mumble'
+    @my_short = 'M'
+    @my_id = server_id
     @db = DbManager.new
-    $logger.info "New Mumble Server started."
+    $logger.info 'New Mumble Server started.'
 
-    @channels = @db.loadChannels(serverID)
+    @channels = @db.loadChannels(server_id)
     @channels_invert = @channels.invert
 
     @mumble = Mumble::Client.new(server_url, server_port) do |config| config.username = server_username end
@@ -25,13 +25,14 @@ class MumbleBridge < ModuleBase
     @mumble.on_user_state do |msg| handleUserChange(msg) end
     @mumble.on_user_remove do |msg| handleUserRemove(msg) end
     subscribe(@my_name)
+    subscribe_cmd(@my_id)
     Thread.new do
       loop do
         sleep 0.1
         msg_in = @messages.pop
         unless msg_in.nil?
           begin
-            @mumble.text_channel(@channels_invert[msg_in["user_id"]], CGI.escapeHTML(msg_in["message"]))
+            @mumble.text_channel(@channels_invert[msg_in['user_id']], CGI.escapeHTML(msg_in['message']))
           rescue Exception => e
             $logger.info 'Failed to send Message'
             $logger.info e
@@ -79,7 +80,7 @@ class MumbleBridge < ModuleBase
         if @mumble.channels[msg.channel_id].respond_to? :name
           if @mumble.channels[msg.channel_id].name == @conf[:channel] || @mumble.users[msg.session].channel_id == @channel_id
             self.publish(source_network_type: @my_short, source_network: @my_name,
-                         nick: username, user_id: @user_id, message_type: "join")
+                         nick: username, user_id: @user_id, message_type: 'join')
           end
         end
       end
@@ -95,7 +96,7 @@ class MumbleBridge < ModuleBase
       username = @mumble.users[msg.session].name
       $logger.info 'Username wurde gefunden'
       self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: username, user_id: @user_id, message_type: "part")
+                   nick: username, user_id: @user_id, message_type: 'part')
     end
   end
 end
@@ -104,17 +105,17 @@ end
 #wir müssen für jeden Server eine eigene Instanz der MumbleBridge erzeugen
 mumble_thread = Hash.new
 db = DbManager.new
-servers = db.loadServers("mumble")
+servers = db.loadServers('mumble')
 $logger.debug servers
 servers.each do |server|
   #ich habe keine ahnung wieso da felder nil sind
   unless server.nil?
-    mumble_thread[server["ID"]] = Thread.new do
+    mumble_thread[server['ID']] = Thread.new do
       begin
         mumble = MumbleBridge.new
-        mumble.startServer(server["ID"], server["server_url"], server["server_port"], server["user_name"])
+        mumble.startServer(server['ID'], server['server_url'], server['server_port'], server['user_name'])
       rescue StandardError => e
-        $logger.debug "Mumble crashed. Stacktrace follows."
+        $logger.debug 'Mumble crashed. Stacktrace follows.'
         $logger.debug e
       end
     end

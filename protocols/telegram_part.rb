@@ -30,8 +30,8 @@ class TelegramBridge < ModuleBase
         if !msg_in.nil?
           $logger.info msg_in
           begin
-            @telegram.api.send_message(chat_id: @chat_ids_invert[msg_in["user_id"]],
-                                       text: "[#{msg_in["source_network_type"]}][#{msg_in["nick"]}] #{msg_in["message"]}")
+            @telegram.api.send_message(chat_id: @chat_ids_invert[msg_in['user_id']],
+                                       text: "[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
           rescue StandardError => e
             $logger.error e
           end
@@ -43,13 +43,13 @@ class TelegramBridge < ModuleBase
         sleep 0.1
         msg_in = @assistantMessages.pop
         if !msg_in.nil?
-          $logger.info "Got Assistant message"
+          $logger.info 'Got Assistant message'
           begin
             $logger.info msg_in
-            $logger.info msg_in["reply_markup"].class
-            @telegram.api.send_message(chat_id: msg_in["chat_id"], text: msg_in["message"], reply_markup: msg_in["reply_markup"])
+            $logger.info msg_in['reply_markup'].class
+            @telegram.api.send_message(chat_id: msg_in['chat_id'], text: msg_in['message'], reply_markup: msg_in['reply_markup'])
           rescue StandardError => e
-            $logger.error "Got Exception!"
+            $logger.error 'Got Exception!'
             $logger.error e
           end
         end
@@ -65,7 +65,7 @@ class TelegramBridge < ModuleBase
     $logger.info msg
     if @chat_ids[msg.chat.id.to_s].nil?
       unless msg.new_chat_member.nil?
-        if msg.from.first_name == "bridge"
+        if msg.from.first_name == 'bridge'
           @telegram.api.send_message(chat_id: msg.chat.id, text: "Ohai. I am new. This chat has ID: #{msg.chat.id}")
         end
       end

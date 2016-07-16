@@ -3,8 +3,8 @@ require 'logger'
 require 'redis'
 require 'json'
 require 'tempfile'
-require_relative "../lib/db_manager"
-require_relative "../lib/language"
+require_relative '../lib/db_manager'
+require_relative '../lib/language'
 require_relative '../lib/base_helpers'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/assistant_manager.log')
@@ -18,7 +18,7 @@ class AssistantManager
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
   end
   def subscribe
-    @redis_sub.psubscribe("assistant_all") do |on|
+    @redis_sub.psubscribe('assistant_all') do |on|
       on.psubscribe do |channel, subscriptions|
         $logger.info "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
       end
@@ -52,29 +52,29 @@ class AssistantManager
   end
   def sortMessage(message)
     parsed_message = JSON.parse(message)
-    $logger.info "sortMessage called!"
+    $logger.info 'sortMessage called!'
     $logger.info parsed_message
-    split_message = parsed_message["message"].split(' ')
+    split_message = parsed_message['message'].split(' ')
     $logger.info "Split message: #{split_message}"
     #case wäre hier vermutlich sauberer. Aber wir brauchen das else
-    if split_message[0].eql?("/auth") #auth ist der erste Schritt der nötig ist.
+    if split_message[0].eql?('/auth') #auth ist der erste Schritt der nötig ist.
       userid = @db.authUser(split_message[1], split_message[2])
       if userid
-        publish(message: "authenticated!", chat_id: parsed_message["chat_id"])
+        publish(message: 'authenticated!', chat_id: parsed_message['chat_id'])
         begin
-          @active_users[parsed_message["chat_id"]] = userid
-          $logger.info "Starting new assistant"
-          startNewAssistant(parsed_message["source_network"], @active_users[parsed_message["chat_id"]])
+          @active_users[parsed_message['chat_id']] = userid
+          $logger.info 'Starting new assistant'
+          startNewAssistant(parsed_message['source_network'], @active_users[parsed_message['chat_id']])
         rescue StandardError => e
-          $logger.error "Error while starting assistant"
+          $logger.error 'Error while starting assistant'
           $logger.error e
         end
       else
-        publish(message: "wrong username or password!", chat_id: parsed_message["chat_id"])
+        publish(message: 'wrong username or password!', chat_id: parsed_message['chat_id'])
       end
-    elsif split_message[0].eql?("/newUser")
+    elsif split_message[0].eql?('/newUser')
       if split_message[1].nil? || split_message[2].nil?
-        publish(message: "missing parameter", chat_id: parsed_message["chat_id"])
+        publish(message: 'missing parameter', chat_id: parsed_message['chat_id'])
       else
         begin
           createUser(split_message[1], split_message[2])
@@ -82,31 +82,31 @@ class AssistantManager
           $logger.error e
         end
       end
-    elsif split_message[0].eql?("/start") || !split_message[0].initial.eql?("/")
-      $logger.info "/start or non-command"
+    elsif split_message[0].eql?('/start') || !split_message[0].initial.eql?('/')
+      $logger.info '/start or non-command'
       begin
-        aboutMe(parsed_message["chat_id"])
+        aboutMe(parsed_message['chat_id'])
       rescue StandardError => e
         $logger.error e
       end
     else
       #TODO: Hier müssen wir noch etwas präziser bei den Fehlern werden.
-      if @assistants["#{parsed_message["source_network"]}_#{@active_users[parsed_message["chat_id"]]}"].nil?
-        publish(message: @lang.get("assistant_timeout"), chat_id: parsed_message["chat_id"])
+      if @assistants["#{parsed_message['source_network']}_#{@active_users[parsed_message['chat_id']]}"].nil?
+        publish(message: @lang.get('assistant_timeout'), chat_id: parsed_message['chat_id'])
       else
-        @redis_pub.publish("assistant.#{@active_users[parsed_message["chat_id"]]}", message)
+        @redis_pub.publish("assistant.#{@active_users[parsed_message['chat_id']]}", message)
       end
     end
   end
   def aboutMe(chat_id)
-    publish(message: @lang.get("about_me"), chat_id: chat_id)
+    publish(message: @lang.get('about_me'), chat_id: chat_id)
   end
   def startNewAssistant(protocol, userid)
     begin
       @assistants["#{protocol}_#{userid}"] = ChildProcess.build('ruby', "assistant/#{protocol}_assistant.rb", "#{userid}")
       @assistants["#{protocol}_#{userid}"].io.stdout = Tempfile.new("assistant_output_#{userid}.log")
       @assistants["#{protocol}_#{userid}"].start
-      $logger.info "Neuer Assistenzprozess gestartet"
+      $logger.info 'Neuer Assistenzprozess gestartet'
     rescue StandardError => e
       $logger.error e
     end

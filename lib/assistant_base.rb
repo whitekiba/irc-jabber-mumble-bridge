@@ -16,10 +16,10 @@ class AssistantBase
     @db = DbManager.new
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
-    @valid_servers = {"telegram" => "Telegram",
-                      "irc" => "IRC",
-                      "mumble" => "Mumble",
-                      "jabber" => "Jabber"}
+    @valid_servers = {'telegram' => 'Telegram',
+                      'irc' => 'IRC',
+                      'mumble' => 'Mumble',
+                      'jabber' => 'Jabber'}
   end
 
   def subscribe(name)
@@ -38,7 +38,7 @@ class AssistantBase
   end
   def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
     json = JSON.generate ({
-        'message' => message.force_encoding("UTF-8"),
+        'message' => message.force_encoding('UTF-8'),
         'source_network_type' => 'assistant',
         'chat_id' => chat_id,
         'reply_markup' => reply_markup
@@ -52,7 +52,7 @@ class AssistantBase
     end
   end
   def resetTimeout
-    $logger.debug "resetTimeout triggered. New time!"
+    $logger.debug 'resetTimeout triggered. New time!'
     @last_command = Time.now
   end
   def valid_step?(step)
@@ -76,21 +76,21 @@ class AssistantBase
     end
   end
   def get_available_servers(user_ID)
-    available_server_text = @lang.get("available_server_intro")
+    available_server_text = @lang.get('available_server_intro')
     @db.userServers(user_ID).each_value do |av_server|
-      available_server_text << "#{av_server["ID"]} - #{av_server["server_url"]}\n"
+      available_server_text << "#{av_server['ID']} - #{av_server['server_url']}\n"
     end
     available_server_text
   end
   def get_channels(user_ID)
-    message = @lang.get("your_channels")
+    message = @lang.get('your_channels')
     @db.userChannels(user_ID).each_value do |av_channel|
-      message << "#{av_channel["ID"]} - #{av_channel["channel_name"]}\n"
+      message << "#{av_channel['ID']} - #{av_channel['channel_name']}\n"
     end
     message
   end
   def get_valid_servers
-    valid_server_text = @lang.get("valid_server_intro")
+    valid_server_text = @lang.get('valid_server_intro')
     @valid_servers.each_value do |server|
       valid_server_text << "- #{server}\n"
     end

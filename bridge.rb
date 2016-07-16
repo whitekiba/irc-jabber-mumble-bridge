@@ -21,11 +21,11 @@ protocols.each { |proto|
   processes[proto].start
 }
 
-ChildProcess.build('ruby', "assistant/assistant_manager.rb").start
+ChildProcess.build('ruby', 'assistant/assistant_manager.rb').start
 
-puts "bridge-v2 starting up... (INTEGRATE ALL TEH THINGS!)"
+puts 'bridge-v2 starting up... (INTEGRATE ALL TEH THINGS!)'
 
-puts "Starting Mainloop and services."
+puts 'Starting Mainloop and services.'
 loop do
   begin
     processes.each_key { |proc|
