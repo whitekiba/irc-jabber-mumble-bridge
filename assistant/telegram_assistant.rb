@@ -67,7 +67,7 @@ class TelegramAssistant < AssistantBase
       split_message = data['message'].split(' ')
       $logger.debug "Field 4 is: #{split_message[4]}"
       if split_message[4].nil?
-        publish(message: "Missing parameter.\nSyntax is: /newServer <type> <url> <port> <username> [optional: password]", chat_id: data['chat_id'])
+        publish(message: "Missing parameter.\nSyntax is: #{split_message[0]} <type> <url> <port> <username> [optional: password]", chat_id: data['chat_id'])
         publish(message: get_valid_servers, chat_id: data['chat_id'])
       else
         $logger.debug split_message
@@ -103,7 +103,7 @@ class TelegramAssistant < AssistantBase
     begin
       split_message = data['message'].split(' ')
       if split_message[2].nil?
-        publish(message: "Missing parameter.\nSyntax is: /newServer <server ID> <channel name>", chat_id: data['chat_id'])
+        publish(message: "Missing parameter.\nSyntax is: #{split_message[0]} <server ID> <channel name>", chat_id: data['chat_id'])
         publish(message: get_available_servers(@userid), chat_id: data['chat_id'])
       else
         if @db.getServerCount(@userid) > 0

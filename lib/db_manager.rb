@@ -2,11 +2,10 @@ require 'mysql2'
 require 'yaml'
 require 'logger'
 
-#$logger = Logger.new(File.dirname(__FILE__) + '/db_manager.log')
-
 class DbManager
   def initialize
     @config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:database]
+    @logger = Logger.new(File.dirname(__FILE__) + '/db_manager.log')
     @db = Mysql2::Client.new(:host => @config[:host], :username => @config[:user], :password => @config[:password])
     @db.select_db(@config[:database])
   end
@@ -55,9 +54,9 @@ class DbManager
     user_name = 'bridgie' if user_name.nil?
     sql = "INSERT INTO `servers` (`ID`, `user_ID`, `server_url`, `server_port`, `server_type`, `user_name`, `user_password`)
             VALUES (NULL, #{user_id}, '#{server_url}', '#{server_port}', '#{server_type}', '#{user_name}', '#{user_password}');"
-    $logger.debug sql
+    @logger.debug sql
     res = @db.query(sql)
-    $logger.debug res
+    @logger.debug res
     #TODO: Reload starten oder planen
   end
 
@@ -102,11 +101,12 @@ class DbManager
 
   #channel hinzufügen
   #für channel sind user_IDs pflicht. Anders können wir die nicht zuordnen
-  def addChannel(user_ID, server_id, channel, channel_password = nil)
+  def addChannel(user_id, server_id, channel, channel_password = nil)
     channel_password = 'NULL' if channel_password.nil?
     sql = "INSERT INTO `channels` (`ID`, `user_ID`, `server_ID`, `channel_name`, `channel_password`)
-            VALUES (NULL, '#{user_ID}', '#{server_id}', '#{channel}', #{channel_password})"
+            VALUES (NULL, '#{user_id}', '#{server_id}', '#{channel}', #{channel_password})"
     res = @db.query(sql)
+    @logger.info res
     #TODO: Reload starten oder planen
   end
 
@@ -124,9 +124,9 @@ class DbManager
 
   def authUser(username, secret)
     res = @db.query("SELECT ID FROM `users` WHERE `username` LIKE '#{username}' AND `secret` LIKE '#{secret}'")
-    $logger.info res
+    @logger.info res
     if res.count > 0
-      $logger.debug "Fetched ID: #{res.first['ID']}"
+      @logger.debug "Fetched ID: #{res.first['ID']}"
       res.first['ID']
     else
       false

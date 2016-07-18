@@ -98,4 +98,10 @@ class ModuleBase
     @redis_pub.publish("msg.#{source_network}", json) if !is_assistant
     @redis_pub.publish('assistant_all', json) if is_assistant #wir publishen nicht auf assistant.*
   end
+  #TODO: Hier könnte man das interne befehlssystem reinhängen
+  def command(command, args = nil)
+    if command == 'reload'
+      reload if self.respond_to? :reload
+    end
+  end
 end

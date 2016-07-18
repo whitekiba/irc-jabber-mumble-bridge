@@ -88,19 +88,21 @@ class IRCBridge < ModuleBase
                    nick: message.from, user_id: @channels[message.channel], message_type: 'quit')
     end
   end
-
-  #TODO: Hier könnte man das interne befehlssystem reinhängen
-  def command(command, args = nil)
-    if command == 'reload'
-
-    end
+  #Wir reloaden das Modul
+  def reload
+    $logger.info "Starting IRC reload."
+    #Als erstes neue Channels
+    @channels = @db.loadChannels(server_id)
+    joinChannels #wir nutzen dafür die bestehende methode
   end
 
   def joinChannels
     $logger.info 'Got motd. Joining Channels.'
     @channels.each_key { | key |
       $logger.info 'Channel gejoint!'
-      @bot.add_channel(key)
+      if !@bot.channels.include? key
+        @bot.add_channel(key)
+      end
     }
   end
 end

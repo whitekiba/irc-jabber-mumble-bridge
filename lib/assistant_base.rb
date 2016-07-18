@@ -75,14 +75,14 @@ class AssistantBase
       true
     end
   end
-  def get_available_servers(user_ID)
+  def get_available_servers(user_id)
     available_server_text = @lang.get('available_server_intro')
-    @db.userServers(user_ID).each_value do |av_server|
+    @db.userServers(user_id).each_value do |av_server|
       available_server_text << "#{av_server['ID']} - #{av_server['server_url']}\n"
     end
     available_server_text
   end
-  def get_channels(user_ID)
+  def get_channels(user_id)
     message = @lang.get('your_channels')
     @db.userChannels(user_ID).each_value do |av_channel|
       message << "#{av_channel['ID']} - #{av_channel['channel_name']}\n"
