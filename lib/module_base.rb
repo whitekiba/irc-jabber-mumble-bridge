@@ -8,6 +8,7 @@ class ModuleBase
     @single_con_networks = %w(I T)
     @redis_pub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @redis_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
+    @redis_cmd_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @redis_assistant_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @messages = Array.new
     @messages_cmd = Array.new
@@ -34,17 +35,28 @@ class ModuleBase
     end
   end
   #Der Commandchannel. Schläft mehr und subscribed
-  def subscribe_cmd(name)
+  def subscribe_cmd(id)
     Thread.new do
       sleep 1
       $logger.info('Thread gestartet!')
-      @redis_sub.psubscribe("cmd.#{name}") do |on|
-        on.psubscribe do |channel, subscriptions|
+      @redis_cmd_sub.subscribe("cmd.#{id}") do |on|
+        on.subscribe do |channel, subscriptions|
           $logger.info "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
         end
-        on.pmessage do |pattern, channel, message|
-          $logger.debug ("Got message! #{message}")
-          @messages_cmd.unshift(JSON.parse(message))
+        on.message do |channel, message|
+          $logger.debug ("Got cmd! Message: #{message} Channel: #{channel}")
+          @messages_cmd.unshift(message)
+        end
+      end
+    end
+    Thread.new do
+      loop do
+        sleep 0.1
+        msg_in = @messages_cmd.pop
+        #$logger.info "State of cmd array: #{msg_in.nil?}"
+        unless msg_in.nil?
+          $logger.info "New message in cmd array: #{msg_in}"
+          command(msg_in)
         end
       end
     end
@@ -100,8 +112,16 @@ class ModuleBase
   end
   #TODO: Hier könnte man das interne befehlssystem reinhängen
   def command(command, args = nil)
-    if command == 'reload'
-      reload if self.respond_to? :reload
+    begin
+      $logger.info 'Received command from Redis. running methods'
+      if command == 'reload'
+        #if self.respond_to? reload
+          reload
+        #end
+      end
+    rescue StandardError => e
+      $logger.error "Command triggered exception:"
+      $logger.error e
     end
   end
 end

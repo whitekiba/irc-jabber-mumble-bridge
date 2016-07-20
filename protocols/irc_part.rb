@@ -14,8 +14,7 @@ class IRCBridge < ModuleBase
     @my_short = 'I'
     @my_id = server_id
 
-    @channels = @db.loadChannels(server_id)
-    @channels_invert = @channels.invert
+    loadSettings
     $logger.debug @channels_invert
     $logger.debug "Starting Server. Credentials: #{server_url}, #{server_port}, #{server_username}"
 
@@ -37,17 +36,6 @@ class IRCBridge < ModuleBase
           $logger.info msg_in
           #user_id ist die zuordnungsnummer
           @bot.send_message(@channels_invert[msg_in['user_id']], "[#{msg_in['source_network_type']}][#{msg_in['nick']}]#{msg_in['message']}")
-        end
-      end
-    end
-    Thread.new do
-      loop do
-        sleep 0.1
-        msg_in = @messages_cmd.pop
-        #$logger.info "State of message array: #{msg_in.nil?}"
-        unless msg_in.nil?
-          $logger.info msg_in
-          command(msg_in['cmd'])
         end
       end
     end
@@ -90,20 +78,31 @@ class IRCBridge < ModuleBase
   end
   #Wir reloaden das Modul
   def reload
-    $logger.info "Starting IRC reload."
-    #Als erstes neue Channels
-    @channels = @db.loadChannels(server_id)
-    joinChannels #wir nutzen dafür die bestehende methode
+    begin
+      $logger.info "Starting IRC reload."
+      #Als erstes neue Channels
+      loadSettings
+      joinChannels #wir nutzen dafür die bestehende methode
+    rescue StandardError => e
+      $logger.error "Reloading failed. Exception thrown:"
+      $logger.error e
+    end
   end
 
   def joinChannels
     $logger.info 'Got motd. Joining Channels.'
     @channels.each_key { | key |
-      $logger.info 'Channel gejoint!'
       if !@bot.channels.include? key
+        $logger.info "Channel gejoint! (#{key})"
         @bot.add_channel(key)
       end
     }
+  end
+  #diese Methode lädt settings aus der Datenbank und überschreibt bestehende
+  #wird von reload und receive aufgerufen
+  def loadSettings
+    @channels = @db.loadChannels(@my_id)
+    @channels_invert = @channels.invert
   end
 end
 

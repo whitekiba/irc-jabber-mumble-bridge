@@ -102,7 +102,7 @@ class AssistantBase
     end
   end
   def reload(target)
-    send_command(target, command)
+    send_command(target, "reload")
   end
   def start_new_servers(type)
     #TODO: Da wir die Multiserver funktion noch nicht ganz stabil haben muss das noch geschrieben werden
