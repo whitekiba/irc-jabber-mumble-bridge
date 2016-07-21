@@ -91,7 +91,7 @@ class IRCBridge < ModuleBase
 
   def joinChannels
     $logger.info 'Got motd. Joining Channels.'
-    @channels.each_key { | key |
+    @channels.each_key { |key|
       if !@bot.channels.include? key
         $logger.info "Channel gejoint! (#{key})"
         @bot.add_channel(key)
@@ -106,26 +106,28 @@ class IRCBridge < ModuleBase
   end
 end
 
+$servers = Array.new
+
 #server starting stuff
 #wir müssen für jeden Server eine eigene Instanz der IRCBridge erzeugen
 db = DbManager.new
-servers = db.loadServers('irc')
-$logger.debug servers
-servers.each do |server|
-  #ich habe keine ahnung wieso da felder nil sind
-  unless server.nil?
-    Thread.new do
-      begin
-        irc = IRCBridge.new
-        irc.receive(server['ID'], server['server_url'], server['server_port'], server['user_name'])
-      rescue StandardError => e
-        $logger.debug 'IRC crashed. Stacktrace follows.'
-        $logger.debug e
+#TODO: Wir müssen irgendwie neue Server starten. Vorerst pollen wir die Datenbank
+#Ja das ist scheiße unschön.
+#TODO: Unschön. Das muss sauberer umgesetzt werden. Alle 60 Sekunden die Datenbank anzufragen ist scheiße
+#Es wäre möglich auf nem Redis Channel zu horchen und dann den reload zu triggern. Dafür müsste hier aber noch ein redis listener rein
+loop do
+  sleep 60 #60 sekunden sollte ausreichend häufig sein
+  servers = db.loadServers('irc')
+  $logger.debug servers
+  servers.each do |server|
+    #ich habe keine ahnung wieso da felder nil sind
+    unless server.nil?
+      if $servers[server['ID']].nil?
+        Thread.new do
+          $servers[server['ID']] = IRCBridge.new
+          $servers[server['ID']].receive(server['ID'], server['server_url'], server['server_port'], server['user_name'])
+        end
       end
     end
   end
-end
-
-loop do
-  sleep 0.1
 end

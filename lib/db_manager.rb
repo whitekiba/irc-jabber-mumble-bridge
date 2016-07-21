@@ -63,6 +63,16 @@ class DbManager
   def getServerCount(user_id)
     @db.query("SELECT ID FROM servers WHERE user_ID = #{user_id}").count
   end
+  def server_exists?(server_type, server_url, server_port)
+    if @db.query("SELECT ID FROM servers WHERE server_type LIKE '#{server_type}' AND server_url LIKE '#{server_url}' AND server_url LIKE '#{server_url}'").count > 0
+      true
+    end
+  end
+  def channel_exists?(user_id, server_id, channel_name)
+    if @db.query("SELECT ID FROM channels WHERE user_ID = #{user_id} AND server_ID = #{server_id} AND channel_name LIKE '#{channel_name}'").count > 0
+      true
+    end
+  end
   def hasServer?(user_id, server_type)
     if ['telegram', 'irc'].include? server_type
       true

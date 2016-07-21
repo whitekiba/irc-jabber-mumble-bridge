@@ -72,11 +72,9 @@ class TelegramAssistant < AssistantBase
       else
         $logger.debug split_message
         server_type = split_message[1] #server type
-        if split_message[2].valid_url?
-          server_url = split_message[2] #server url
-        else
-          publish(message: 'Invalid URL! Exiting hard!', chat_id: data['chat_id'])
-        end
+        split_message[2].valid_url? ?
+            server_url = split_message[2] :
+            publish(message: 'Invalid URL! Exiting hard!', chat_id: data['chat_id'])
         server_port = split_message[3] #server port
         unless split_message[5].nil?
           $logger.info 'Setting server password to nil'
@@ -90,8 +88,12 @@ class TelegramAssistant < AssistantBase
         else
           server_username = split_message[4]
         end
-        if @db.addServer(server_url, server_port, server_type, server_password, server_username)
-          publish(message: 'Server sucessfully added.', chat_id: data['chat_id'])
+        if @db.server_exists?(server_type, server_url, server_port)
+          publish(message: @lang.get("server_already_exists"), chat_id: data['chat_id'])
+        else
+          if @db.addServer(server_url, server_port, server_type, server_password, server_username)
+            publish(message: 'Server sucessfully added.', chat_id: data['chat_id'])
+          end
         end
       end
     rescue StandardError => e
@@ -109,9 +111,13 @@ class TelegramAssistant < AssistantBase
         if @db.getServerCount(@userid) > 0
           server_id = split_message[1]
           channel_name = split_message[2]
-          if @db.addChannel(@userid, server_id, channel_name)
-            publish(message: 'Channel sucessfully added.', chat_id: data['chat_id'])
-            reload(server_id)
+          if @db.channel_exists?(@userid, server_id, channel_name)
+            publish(message: @lang.get("channel_already_exists"), chat_id: data['chat_id'])
+          else
+            if @db.addChannel(@userid, server_id, channel_name)
+              publish(message: 'Channel sucessfully added.', chat_id: data['chat_id'])
+              reload(server_id)
+            end
           end
         else
           publish(message: @lang.get('no_server'), chat_id: data['chat_id'])
