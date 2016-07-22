@@ -6,7 +6,12 @@ require_relative '../lib/db_manager'
 
 class AssistantBase
   def initialize
-    @userid = ARGV[0]
+    if !ARGV[0].nil?
+      @userid = ARGV[0]
+    else
+      puts "Keine User ID. Ende!"
+      exit
+    end
     @lang = Language.new
     @timeout = 1 #das ist der timeout
 
