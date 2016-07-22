@@ -114,6 +114,27 @@ class AssistantBase
     #hier sollte ein command kommen welches den core anweist neue Server zu starten
     #parameter sind noch nicht klar, einbindung ist noch nicht klar
   end
+  #wir würgen den Assistenten ab wenn jemand einen falschen Schritt startet
+  def wrongStep(data)
+    $logger.error "User #{data['nick']} hat den falschen Schritt gestartet. Angriff oder Bug. Bitte prüfen"
+    publish(message: 'Da ging was schief. Der Schritt war hier nicht erlaubt! Zurück zum start.', chat_id: data['chat_id'])
+    go
+  end
+  #user erstellen
+  #solang user nil ist werden die buttons gesendet
+  def createUser(username)
+    @db.addUser(username)
+  end
+  def listChannels(data)
+    begin
+      publish(message: get_channels(@userid), chat_id: data['chat_id'])
+    rescue StandardError => e
+      $logger.error e
+    end
+  end
+  def listServers(data)
+    publish(message: get_available_servers(@userid), chat_id: data['chat_id'])
+  end
 end
 
 

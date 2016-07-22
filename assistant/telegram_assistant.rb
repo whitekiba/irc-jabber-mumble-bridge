@@ -127,30 +127,9 @@ class TelegramAssistant < AssistantBase
       $logger.error e
     end
   end
-  #user erstellen
-  #solang user nil ist werden die buttons gesendet
-  def createUser(username)
-    @db.addUser(username)
-  end
-  def listChannels(data)
-    begin
-      publish(message: get_channels(@userid), chat_id: data['chat_id'])
-    rescue StandardError => e
-      $logger.error e
-    end
-  end
-  def listServers(data)
-    publish(message: get_available_servers(@userid), chat_id: data['chat_id'])
-  end
   def addButton(btn_text, callback)
     $logger.debug "Text for Button: #{btn_text}"
     Telegram::Bot::Types::KeyboardButton.new(text: btn_text, callback_data: callback)
-  end
-  #wir würgen den Assistenten ab wenn jemand einen falschen Schritt startet
-  def wrongStep(data)
-    $logger.error "User #{data['nick']} hat den falschen Schritt gestartet. Angriff oder Bug. Bitte prüfen"
-    publish(message: 'Da ging was schief. Der Schritt war hier nicht erlaubt! Zurück zum start.', chat_id: data['chat_id'])
-    go
   end
   private
 
