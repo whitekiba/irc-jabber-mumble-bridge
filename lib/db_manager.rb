@@ -12,7 +12,7 @@ class DbManager
 
   def loadChannels(server_id)
     channels = Hash.new
-    res = @db.query("SELECT channel_name, user_ID FROM channels WHERE server_ID = #{server_id}")
+    res = @db.query("SELECT channel_name, user_ID FROM channels WHERE server_ID = #{@db.escape(server_id)}")
     res.each do |entry|
       channels[entry['channel_name']] = entry['user_ID']
     end
@@ -22,9 +22,9 @@ class DbManager
   def loadServers(server_type = nil, user_id = nil)
     servers = Array.new
     if !server_type.nil?
-      query = "SELECT * FROM servers WHERE server_type LIKE '#{server_type}'"
+      query = "SELECT * FROM servers WHERE server_type LIKE '#{@db.escape(server_type)}'"
     elsif !user_id.nil?
-      query = "SELECT * FROM servers WHERE user_ID = '#{user_id}'"
+      query = "SELECT * FROM servers WHERE user_ID = '#{@db.escape(user_id)}'"
     else
       query = "SELECT * FROM servers'"
     end
@@ -53,7 +53,7 @@ class DbManager
     user_password = 'NULL' if user_password.nil?
     user_name = 'bridgie' if user_name.nil?
     sql = "INSERT INTO `servers` (`ID`, `user_ID`, `server_url`, `server_port`, `server_type`, `user_name`, `user_password`)
-            VALUES (NULL, #{user_id}, '#{server_url}', '#{server_port}', '#{server_type}', '#{user_name}', '#{user_password}');"
+            VALUES (NULL, #{@db.escape(user_id)}, '#{@db.escape(server_url)}', '#{@db.escape(server_port)}', '#{@db.escape(server_type)}', '#{@db.escape(user_name)}', '#{@db.escape(user_password)}');"
     @logger.debug sql
     res = @db.query(sql)
     @logger.debug res
@@ -61,15 +61,15 @@ class DbManager
   end
 
   def getServerCount(user_id)
-    @db.query("SELECT ID FROM servers WHERE user_ID = #{user_id}").count
+    @db.query("SELECT ID FROM servers WHERE user_ID = #{@db.escape(user_id)}").count
   end
   def server_exists?(server_type, server_url, server_port)
-    if @db.query("SELECT ID FROM servers WHERE server_type LIKE '#{server_type}' AND server_url LIKE '#{server_url}' AND server_url LIKE '#{server_url}'").count > 0
+    if @db.query("SELECT ID FROM servers WHERE server_type LIKE '#{@db.escape(server_type)}' AND server_url LIKE '#{@db.escape(server_url)}' AND server_url LIKE '#{@db.escape(server_url)}'").count > 0
       true
     end
   end
   def channel_exists?(user_id, server_id, channel_name)
-    if @db.query("SELECT ID FROM channels WHERE user_ID = #{user_id} AND server_ID = #{server_id} AND channel_name LIKE '#{channel_name}'").count > 0
+    if @db.query("SELECT ID FROM channels WHERE user_ID = #{@db.escape(user_id)} AND server_ID = #{@db.escape(server_id)} AND channel_name LIKE '#{@db.escape(channel_name)}'").count > 0
       true
     end
   end
@@ -77,7 +77,7 @@ class DbManager
     if ['telegram', 'irc'].include? server_type
       true
     else
-      res = @db.query("SELECT ID FROM servers WHERE user_ID = #{user_id} AND server_type LIKE '#{server_type}'")
+      res = @db.query("SELECT ID FROM servers WHERE user_ID = #{@db.escape(user_id)} AND server_type LIKE '#{@db.escape(server_type)}'")
       if res.count > 0
         true
       else
@@ -87,7 +87,7 @@ class DbManager
   end
   def userServers(user_id)
     return_vars = Hash.new
-    res = @db.query("SELECT ID, server_url, server_port, server_type FROM servers WHERE user_ID = #{user_id} OR user_ID IS NULL")
+    res = @db.query("SELECT ID, server_url, server_port, server_type FROM servers WHERE user_ID = #{@db.escape(user_id)} OR user_ID IS NULL")
     res.each do |entry|
       return_vars[entry['ID']] = entry
     end
@@ -95,26 +95,26 @@ class DbManager
   end
   def userChannels(user_id)
     return_vars = Hash.new
-    res = @db.query("SELECT ID, channel_name FROM channels WHERE user_ID = #{user_id} OR user_ID IS NULL")
+    res = @db.query("SELECT ID, channel_name FROM channels WHERE user_ID = #{@db.escape(user_id)} OR user_ID IS NULL")
     res.each do |entry|
       return_vars[entry['ID']] = entry
     end
     return_vars
   end
   def valid_server?(server_id)
-    res = @db.query("SELECT ID FROM servers WHERE ID = #{server_id}")
+    res = @db.query("SELECT ID FROM servers WHERE ID = #{@db.escape(server_id)}")
     true if res.count > 0
   end
   def getServerID(server_url, server_port)
-    @db.query("SELECT ID FROM servers WHERE server_url LIKE '#{server_url}' AND server_port LIKE '#{server_port}'").fetch_hash['ID']
+    @db.query("SELECT ID FROM servers WHERE server_url LIKE '#{@db.escape(server_url)}' AND server_port LIKE '#{@db.escape(server_port)}'").fetch_hash['ID']
   end
 
   #channel hinzufügen
   #für channel sind user_IDs pflicht. Anders können wir die nicht zuordnen
   def addChannel(user_id, server_id, channel, channel_password = nil)
-    channel_password = 'NULL' if channel_password.nil?
+    channel_password.nil? ? channel_password = 'NULL' : channel_password = @db.escape(channel_password)
     sql = "INSERT INTO `channels` (`ID`, `user_ID`, `server_ID`, `channel_name`, `channel_password`)
-            VALUES (NULL, '#{user_id}', '#{server_id}', '#{channel}', #{channel_password})"
+            VALUES (NULL, '#{@db.escape(user_id)}', '#{@db.escape(server_id)}', '#{@db.escape(channel)}', #{channel_password})"
     res = @db.query(sql)
     @logger.info res
     #TODO: Reload starten oder planen
@@ -128,12 +128,12 @@ class DbManager
     while !checkSecret(secret) do
       secret = (0..32).map { (65 + rand(26)).chr }.join
     end
-    @db.query("INSERT INTO `users` (`ID`, `username`, `email`, `secret`) VALUES (NULL, '#{username}', '#{email}', '#{secret}');")
+    @db.query("INSERT INTO `users` (`ID`, `username`, `email`, `secret`) VALUES (NULL, '#{@db.escape(username)}', '#{@db.escape(email)}', '#{secret}');")
     secret #return the secret
   end
 
   def authUser(username, secret)
-    res = @db.query("SELECT ID FROM `users` WHERE `username` LIKE '#{username}' AND `secret` LIKE '#{secret}'")
+    res = @db.query("SELECT ID FROM `users` WHERE `username` LIKE '#{@db.escape(username)}' AND `secret` LIKE '#{@db.escape(secret)}'")
     @logger.info res
     if res.count > 0
       @logger.debug "Fetched ID: #{res.first['ID']}"
