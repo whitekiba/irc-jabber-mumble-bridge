@@ -2,6 +2,7 @@ require 'mysql2'
 require 'yaml'
 require 'logger'
 
+#TODO: Hier muss noch mal alles durchgegangen werden und escaped werde
 class DbManager
   def initialize
     @config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:database]
@@ -11,8 +12,12 @@ class DbManager
   end
 
   def loadChannels(server_id)
+    #TODO: Ich glaub hier ist was kaputtgegangen
+    # Server werden nicht mehr abgerufen
+    #return false if !server_id.is_a? Fixnum
     channels = Hash.new
-    res = @db.query("SELECT channel_name, user_ID FROM channels WHERE server_ID = #{@db.escape(server_id)}")
+    @logger.info "Loading channels"
+    res = @db.query("SELECT channel_name, user_ID FROM channels WHERE server_ID = #{server_id}")
     res.each do |entry|
       channels[entry['channel_name']] = entry['user_ID']
     end
@@ -63,6 +68,13 @@ class DbManager
   def getServerCount(user_id)
     @db.query("SELECT ID FROM servers WHERE user_ID = #{@db.escape(user_id)}").count
   end
+  def getChannelCount(user_id, server_id = nil)
+    if server_id.nil?
+      @db.query("SELECT ID FROM servers WHERE user_ID = #{@db.escape(user_id)}").count
+    else
+      @db.query("SELECT ID FROM servers WHERE user_ID = #{@db.escape(user_id)} AND server_ID LIKE '#{@db.escape(server_id)}'").count
+    end
+  end
   def server_exists?(server_type, server_url, server_port)
     if @db.query("SELECT ID FROM servers WHERE server_type LIKE '#{@db.escape(server_type)}' AND server_url LIKE '#{@db.escape(server_url)}' AND server_url LIKE '#{@db.escape(server_url)}'").count > 0
       true
@@ -79,10 +91,9 @@ class DbManager
     else
       res = @db.query("SELECT ID FROM servers WHERE user_ID = #{@db.escape(user_id)} AND server_type LIKE '#{@db.escape(server_type)}'")
       if res.count > 0
-        true
-      else
-        false
+        returntrue
       end
+      false
     end
   end
   def userServers(user_id)

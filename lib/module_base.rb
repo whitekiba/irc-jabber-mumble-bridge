@@ -5,6 +5,15 @@ require 'yaml'
 class ModuleBase
   def initialize
     $config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')
+    if $config[:dev]
+      require 'ruby-prof'
+      RubyProf.start
+      ObjectSpace.define_finalizer(self, proc {
+        result = RubyProf.stop
+        printer = RubyProf::FlatPrinter.new(result)
+        printer.print(STDOUT)
+      })
+    end
     @single_con_networks = %w(I T)
     @redis_pub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @redis_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
@@ -115,9 +124,9 @@ class ModuleBase
     begin
       $logger.info 'Received command from Redis. running methods'
       if command == 'reload'
-        #if self.respond_to? reload
+        if self.respond_to? self.reload
           reload
-        #end
+        end
       end
     rescue StandardError => e
       $logger.error "Command triggered exception:"

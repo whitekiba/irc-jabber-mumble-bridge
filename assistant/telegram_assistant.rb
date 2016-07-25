@@ -105,7 +105,7 @@ class TelegramAssistant < AssistantBase
     begin
       split_message = data['message'].split(' ')
       if split_message[2].nil?
-        publish(message: "Missing parameter.\nSyntax is: #{split_message[0]} <server ID> <channel name>", chat_id: data['chat_id'])
+        publish(message: @lang.get("add_channel_usage"), chat_id: data['chat_id'])
         publish(message: get_available_servers(@userid), chat_id: data['chat_id'])
       else
         if @db.getServerCount(@userid) > 0
@@ -114,9 +114,14 @@ class TelegramAssistant < AssistantBase
           if @db.channel_exists?(@userid, server_id, channel_name)
             publish(message: @lang.get("channel_already_exists"), chat_id: data['chat_id'])
           else
-            if @db.addChannel(@userid, server_id, channel_name)
-              publish(message: 'Channel sucessfully added.', chat_id: data['chat_id'])
-              reload(server_id)
+            if @db.getChannelCount(@user_id, server_id) > 1
+              #TODO: Message anpassen
+              publish(message: '1 Channel max.', chat_id: data['chat_id'])
+            else
+              if @db.addChannel(@userid, server_id, channel_name)
+                publish(message: 'Channel sucessfully added.', chat_id: data['chat_id'])
+                reload(server_id)
+              end
             end
           end
         else

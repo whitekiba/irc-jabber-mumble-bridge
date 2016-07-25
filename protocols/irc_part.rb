@@ -116,7 +116,6 @@ db = DbManager.new
 #TODO: Unschön. Das muss sauberer umgesetzt werden. Alle 60 Sekunden die Datenbank anzufragen ist scheiße
 #Es wäre möglich auf nem Redis Channel zu horchen und dann den reload zu triggern. Dafür müsste hier aber noch ein redis listener rein
 loop do
-  sleep 60 #60 sekunden sollte ausreichend häufig sein
   servers = db.loadServers('irc')
   $logger.debug servers
   servers.each do |server|
@@ -130,4 +129,5 @@ loop do
       end
     end
   end
+  sleep 60 #60 sekunden sollte ausreichend häufig sein
 end

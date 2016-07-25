@@ -1,6 +1,6 @@
 language: "english"
 test: "I am a test string!"
-about_me: "Hi!\nI am bridgie your friendly integration Bot\n
+about_me: "Hi!\nI am bridgie (beta!) your friendly integration Bot\n
 Possible commands are:\n
 /auth - Authenticate with account\n
 /newUser - Create new User"
@@ -8,6 +8,8 @@ new_user: "To create a new account use:\n
 /newUser <username> [emailaddress]\n
 The emailaddress is optional"
 add_server_usage: "/addServer " #TODO: fertig schreiben
+add_channel_usage: "/addChannel [server_id] [channel_name] [optional: channel_password]\n
+Currently we are only able to join one channel per server"
 
 valid_server_intro: "These are the networks i support:\n"
 no_servers: "You have no valid server configured."
