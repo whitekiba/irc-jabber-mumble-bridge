@@ -1,4 +1,6 @@
 config.yml
 bridge.log
 *_cert/
+assistant/*.log
+protocols/*.log
 Gemfile.lock
