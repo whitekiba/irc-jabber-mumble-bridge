@@ -7,7 +7,8 @@ Possible commands are:\n
 new_user: "To create a new account use:\n
 /newUser <username> [emailaddress]\n
 The emailaddress is optional"
-add_server_usage: "/addServer " #TODO: fertig schreiben
+missing_parameter: "Missing parameter"
+add_server_usage: "Syntax is: #{split_message[0]} <type> <url> <port> <username> [optional: password]"
 add_channel_usage: "/addChannel [server_id] [channel_name] [optional: channel_password]\n
 Currently we are only able to join one channel per server"
 
