@@ -25,6 +25,7 @@ class AssistantBase
                       'irc' => 'IRC',
                       'mumble' => 'Mumble',
                       'jabber' => 'Jabber'}
+    @static_servers = [ 'telegram', 'irc' ]
   end
 
   def subscribe(name)
