@@ -9,6 +9,7 @@ class TelegramAssistant < AssistantBase
     @cur_step = 'start'
     next_steps :start, :addServer, :test
   end
+
   def receive
     subscribe('telegram')
     Thread.new do

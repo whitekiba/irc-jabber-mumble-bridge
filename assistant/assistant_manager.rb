@@ -17,6 +17,7 @@ class AssistantManager
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
   end
+  
   def subscribe
     @redis_sub.psubscribe('assistant_all') do |on|
       on.psubscribe do |channel, subscriptions|
@@ -50,6 +51,7 @@ class AssistantManager
       end
     end
   end
+
   def sortMessage(message)
     parsed_message = JSON.parse(message)
     $logger.info 'sortMessage called!'
@@ -88,6 +90,7 @@ class AssistantManager
             publish(message: @lang.get("invalid_username"), chat_id: parsed_message['chat_id'])
           end
         rescue StandardError => e
+          publish(message: @lang.get("error_occured"), chat_id: parsed_message['chat_id'])
           $logger.error e
         end
       end
@@ -107,9 +110,11 @@ class AssistantManager
       end
     end
   end
+
   def aboutMe(chat_id)
     publish(message: @lang.get('about_me'), chat_id: chat_id)
   end
+
   def startNewAssistant(protocol, userid)
     begin
       @assistants["#{protocol}_#{userid}"] = ChildProcess.build('ruby', "assistant/#{protocol}_assistant.rb", "#{userid}")
@@ -120,6 +125,7 @@ class AssistantManager
       $logger.error e
     end
   end
+
   #user erstellen
   #solang user nil ist werden die buttons gesendet
   def createUser(username = nil, email = nil)
