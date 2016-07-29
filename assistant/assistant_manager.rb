@@ -60,6 +60,12 @@ class AssistantManager
     $logger.info "Split message: #{split_message}"
     #case wäre hier vermutlich sauberer. Aber wir brauchen das else
     if split_message[0].eql?('/auth') #auth ist der erste Schritt der nötig ist.
+      #checken ob nötige parameter gesetzt sind
+      if split_message[1].nil? || split_message[2].nil?
+        publish(message: @lang.get("missing_parameter"), chat_id: parsed_message['chat_id'])
+        publish(message: @lang.get("auth_usage"), chat_id: parsed_message['chat_id'])
+        return #abwürgen
+      end
       userid = @db.authUser(split_message[1], split_message[2])
       if userid
         publish(message: 'authenticated!', chat_id: parsed_message['chat_id'])
