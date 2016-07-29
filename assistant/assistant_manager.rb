@@ -80,6 +80,7 @@ class AssistantManager
         publish(message: @lang.get("new_user_usage"), chat_id: parsed_message['chat_id'])
       else #wir erstellen einen neuen User. Alle Parameter sind okay
         begin
+          #wir checken den Usernamen
           if /^[a-z0-9_]+$/.match(split_message[1])
             secret = createUser(split_message[1], split_message[2]) #createUser handlet das falls split_message[2] nil ist
             if secret
@@ -88,6 +89,13 @@ class AssistantManager
             end
           else
             publish(message: @lang.get("invalid_username"), chat_id: parsed_message['chat_id'])
+          end
+          #wir checken die Emailadresse (falls sie denn gesetzt wurde)
+          if !split_message[2].nil?
+            if !/\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/.match(split_message[2])
+              publish(message: @lang.get("invalid_username"), chat_id: parsed_message['chat_id'])
+              return #abwürgen um jeden Preis
+            end
           end
         rescue StandardError => e
           publish(message: @lang.get("error_occured"), chat_id: parsed_message['chat_id'])
