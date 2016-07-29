@@ -72,12 +72,21 @@ class AssistantManager
       else
         publish(message: 'wrong username or password!', chat_id: parsed_message['chat_id'])
       end
-    elsif split_message[0].eql?('/newUser')
-      if split_message[1].nil? || split_message[2].nil?
-        publish(message: 'missing parameter', chat_id: parsed_message['chat_id'])
-      else
+    elsif split_message[0].eql?('/newUser') #user erstellen
+      if split_message[1].nil?
+        publish(message: @lang.get("missing_parameter"), chat_id: parsed_message['chat_id'])
+        publish(message: @lang.get("new_user_usage"), chat_id: parsed_message['chat_id'])
+      else #wir erstellen einen neuen User. Alle Parameter sind okay
         begin
-          createUser(split_message[1], split_message[2])
+          if /^[a-z0-9_]+$/.match(split_message[1])
+            secret = createUser(split_message[1], split_message[2]) #createUser handlet das falls split_message[2] nil ist
+            if secret
+              publish(message: @lang.get("user_created"), chat_id: parsed_message['chat_id'])
+              publish(message: "#{@lang.get("your_secret")}: #{secret}", chat_id: parsed_message['chat_id'])
+            end
+          else
+            publish(message: @lang.get("invalid_username"), chat_id: parsed_message['chat_id'])
+          end
         rescue StandardError => e
           $logger.error e
         end
@@ -117,6 +126,7 @@ class AssistantManager
     @db.addUser(username, email)
   end
   private
+
   def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
     json = JSON.generate ({
         'message' => message,

@@ -14,7 +14,7 @@ $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
 
 processes = Hash.new
 
-protocols = ['irc', 'telegram', 'jabber', 'dummy']
+protocols = ['irc', 'telegram', 'jabber']
 
 protocols.each { |proto|
   processes[proto] = ChildProcess.build('ruby', "protocols/#{proto}_part.rb")

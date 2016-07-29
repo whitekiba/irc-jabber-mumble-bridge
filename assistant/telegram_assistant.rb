@@ -42,6 +42,8 @@ class TelegramAssistant < AssistantBase
       end
     end
   end
+
+  #TODO: Das muss eventuell entfernt oder deaktiviert werden
   def test(data)
     valid_step? :test
     $logger.debug 'test called. We are testing.'
