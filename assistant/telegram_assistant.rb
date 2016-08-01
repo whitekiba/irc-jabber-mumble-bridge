@@ -77,6 +77,7 @@ class TelegramAssistant < AssistantBase
       else
         $logger.debug split_message
         server_type = split_message[1] #server type
+
         #Wir checken ob server_type ein fester typ ist welchen wir intern nutzen
         # oooooder aber ob server_type überhaupt ein erlaubter Server ist
         if !@static_servers.has_value?(server_type) && @valid_servers.has_value?(server_type)
@@ -84,18 +85,28 @@ class TelegramAssistant < AssistantBase
               server_url = split_message[2] :
               publish(message: 'Invalid URL! Exiting hard!', chat_id: data['chat_id'])
           server_port = split_message[3] #server port
+
+          #server passwort checken
           unless split_message[5].nil?
             $logger.info 'Setting server password to nil'
             server_password = nil
           else
             server_password = split_message[5]
           end
+
+          #username checken
           unless split_message[4].nil?
             $logger.info 'Setting server username to bridgie'
             server_username = 'bridgie'
           else
-            server_username = split_message[4]
+            if /^[a-z0-9_]+$/.match(split_message[4])
+              server_username = split_message[4]
+            else
+              publish(message: @lang.get("invalid_username"), chat_id: data['chat_id'])
+              return
+            end
           end
+
           if @db.server_exists?(server_type, server_url, server_port)
             publish(message: @lang.get("server_already_exists"), chat_id: data['chat_id'])
           else
@@ -103,6 +114,7 @@ class TelegramAssistant < AssistantBase
               publish(message: 'Server sucessfully added.', chat_id: data['chat_id'])
             end
           end
+
         else
           publish(message: 'You are not allowed to add a server of that type', chat_id: data['chat_id'])
         end
@@ -123,7 +135,14 @@ class TelegramAssistant < AssistantBase
       else
         if @db.getServerCount(@userid) > 0
           server_id = split_message[1]
-          channel_name = split_message[2]
+          channel_name = split_message[2] #es ist schwierig den Channel Namen zu checken
+
+          #server_id checken ob es ne nummer ist
+          if !server_id.is_a?(Fixnum)
+            publish(message: @lang.get('invalid_id'), chat_id: data['chat_id'])
+            return
+          end
+
           if @db.channel_exists?(@userid, server_id, channel_name)
             publish(message: @lang.get("channel_already_exists"), chat_id: data['chat_id'])
           else

@@ -71,6 +71,7 @@ class AssistantManager
         publish(message: @lang.get("auth_usage"), chat_id: parsed_message['chat_id'])
         return #abwürgen
       end
+
       userid = @db.authUser(split_message[1], split_message[2])
       if userid
         publish(message: 'authenticated!', chat_id: parsed_message['chat_id'])
@@ -92,6 +93,7 @@ class AssistantManager
         publish(message: @lang.get("new_user_usage"), chat_id: parsed_message['chat_id'])
       else #wir erstellen einen neuen User. Alle Parameter sind okay
         begin
+
           #wir checken den Usernamen
           if /^[a-z0-9_]+$/.match(split_message[1])
             secret = createUser(split_message[1], split_message[2]) #createUser handlet das falls split_message[2] nil ist
@@ -102,6 +104,7 @@ class AssistantManager
           else
             publish(message: @lang.get("invalid_username"), chat_id: parsed_message['chat_id'])
           end
+
           #wir checken die Emailadresse (falls sie denn gesetzt wurde)
           if !split_message[2].nil?
             if !/\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/.match(split_message[2])

@@ -42,7 +42,7 @@ class AssistantBase
       end
     end
   end
-  
+
   def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
     json = JSON.generate ({
         'message' => message.force_encoding('UTF-8'),
