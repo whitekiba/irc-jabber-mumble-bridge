@@ -24,8 +24,12 @@ class AssistantManager
         $logger.info "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
       end
       on.pmessage do |pattern, channel, message|
-        $logger.debug ("Got message! #{message}")
-        sortMessage(message)
+        begin
+          $logger.debug ("Got message! #{message}")
+          sortMessage(message)
+        rescue StandardError => e
+          $logger.error e
+        end
       end
     end
   end
@@ -60,6 +64,7 @@ class AssistantManager
     $logger.info "Split message: #{split_message}"
     #case wäre hier vermutlich sauberer. Aber wir brauchen das else
     if split_message[0].eql?('/auth') #auth ist der erste Schritt der nötig ist.
+
       #checken ob nötige parameter gesetzt sind
       if split_message[1].nil? || split_message[2].nil?
         publish(message: @lang.get("missing_parameter"), chat_id: parsed_message['chat_id'])
@@ -81,6 +86,7 @@ class AssistantManager
         publish(message: 'wrong username or password!', chat_id: parsed_message['chat_id'])
       end
     elsif split_message[0].eql?('/newUser') #user erstellen
+
       if split_message[1].nil?
         publish(message: @lang.get("missing_parameter"), chat_id: parsed_message['chat_id'])
         publish(message: @lang.get("new_user_usage"), chat_id: parsed_message['chat_id'])
@@ -120,6 +126,8 @@ class AssistantManager
       if @assistants["#{parsed_message['source_network']}_#{@active_users[parsed_message['chat_id']]}"].nil?
         publish(message: @lang.get('assistant_timeout'), chat_id: parsed_message['chat_id'])
       else
+        #alles was nicht behandelt wurde wird an den Assistenten gepusht. Falls er denn läuft
+        # hier kann nichts schlimmeres passieren. Läuft der Assistent nicht nimmt die nachricht ungefähr 150 byte ein
         @redis_pub.publish("assistant.#{@active_users[parsed_message['chat_id']]}", message)
       end
     end
