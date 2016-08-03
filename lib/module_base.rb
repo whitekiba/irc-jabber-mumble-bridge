@@ -6,6 +6,7 @@ class ModuleBase
   def initialize
     $config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')
     if $config[:dev]
+      $logger.info "Devmode active. loading profiler."
       require 'ruby-prof'
       RubyProf.start
       ObjectSpace.define_finalizer(self, proc {
@@ -15,6 +16,7 @@ class ModuleBase
       })
     end
     @single_con_networks = %w(I T)
+    $logger.info "Subscribing on redis..."
     @redis_pub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @redis_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @redis_cmd_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])

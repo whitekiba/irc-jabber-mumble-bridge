@@ -5,11 +5,13 @@ gem 'xmpp4r'
 gem 'mumble-ruby'
 gem 'sanitize'
 gem 'telegram-bot-ruby'
+gem 'teamspeak-ruby'
 gem 'eventmachine'
 
 #helper
 gem 'childprocess'
 gem 'hashie'
+gem 'ruby-prof'
 
 #Datenbankstuff für die bridge
 gem 'redis'
