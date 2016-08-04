@@ -74,7 +74,7 @@ class TeamspeakBridge < ModuleBase
           $logger.info response
           $logger.info "Got response"
           parsed_response = parse_response(response)
-          if parsed_response[0]['invokeruid'] != @my_username
+          if parsed_response[0]['invokeruid'] != @my_username && !parsed_response[0]['invokername'].nil?
             self.publish(source_network_type: @my_short, source_network: @my_name,
                          nick: parsed_response[0]['invokername'],
                          message: parsed_response[0]['msg'],
