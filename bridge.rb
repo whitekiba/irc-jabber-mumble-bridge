@@ -8,16 +8,22 @@ require 'yaml'
 require 'logger'
 require 'redis'
 require 'childprocess'
+require 'tempfile'
 
 $config = YAML.load_file(File.dirname(__FILE__) + '/config.yml')
 $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
 
 processes = Hash.new
 
-protocols = ['irc', 'telegram', 'jabber', 'teamspeak']
+protocols = ['irc', 'telegram', 'jabber', 'dummy']
+
+out      = Tempfile.new("duplex")
+out.sync = true
 
 protocols.each { |proto|
   processes[proto] = ChildProcess.build('ruby', "protocols/#{proto}_part.rb")
+  processes[proto].io.stdout = processes[proto].io.stderr = out
+  processes[proto].duplex    = true # sets up pipe so process.io.stdin will be available after .start
   processes[proto].start
 }
 
@@ -29,9 +35,14 @@ puts 'Starting Mainloop and services.'
 loop do
   begin
     processes.each_key { |proc|
-      if processes[proc].exited?
+      if processes[proc].respond_to?(:exited?) && processes[proc].exited?
+        processes[proc] = nil #nil setzen damit die gb das ding entfernt
+
+        #und frisch starten
+        processes[proc] = ChildProcess.build('ruby', "protocols/#{proc}_part.rb")
         puts "#{proc} started or restarted."
         processes[proc].start
+        sleep 3
       end
     }
     sleep 1
