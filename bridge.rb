@@ -14,19 +14,7 @@ $config = YAML.load_file(File.dirname(__FILE__) + '/config.yml')
 $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
 
 processes = Hash.new
-
 protocols = $config[:enabled_services]
-
-out      = Tempfile.new("duplex")
-out.sync = true
-
-protocols.each { |proto|
-  processes[proto] = ChildProcess.build('ruby', "protocols/#{proto}_part.rb")
-  processes[proto].io.stdout = processes[proto].io.stderr = out
-  processes[proto].duplex    = true # sets up pipe so process.io.stdin will be available after .start
-  processes[proto].start
-}
-
 ChildProcess.build('ruby', 'assistant/assistant_manager.rb').start
 
 puts 'bridge-v2 starting up... (INTEGRATE ALL TEH THINGS!)'
@@ -34,15 +22,20 @@ puts 'bridge-v2 starting up... (INTEGRATE ALL TEH THINGS!)'
 puts 'Starting Mainloop and services.'
 loop do
   begin
-    processes.each_key { |proc|
-      if processes[proc].respond_to?(:exited?) && processes[proc].exited?
-        processes[proc] = nil #nil setzen damit die gb das ding entfernt
-
-        #und frisch starten
+    protocols.each { |proc|
+      #wir haben die if getrennt weil wir sonnst ständig neue prozesse starten
+      #wir checken erst ob der auf die methode reagiert
+      # falls ja checken wir obs true ist. Falls nicht tun wir nix
+      if processes[proc].respond_to?(:exited?)
+        if processes[proc].exited?
+          puts "#{proc} crashed!"
+          processes[proc] = nil #nil setzen damit die gb das ding entfernt
+        end
+      else
+        #starten
         processes[proc] = ChildProcess.build('ruby', "protocols/#{proc}_part.rb")
-        puts "#{proc} started or restarted."
+        puts "#{proc} started."
         processes[proc].start
-        sleep 3
       end
     }
     sleep 1
