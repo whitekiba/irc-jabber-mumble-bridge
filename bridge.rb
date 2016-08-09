@@ -15,7 +15,7 @@ $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
 
 processes = Hash.new
 
-protocols = ['irc', 'telegram', 'jabber', 'dummy']
+protocols = $config[:enabled_services]
 
 out      = Tempfile.new("duplex")
 out.sync = true
