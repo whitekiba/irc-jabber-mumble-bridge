@@ -11,7 +11,8 @@ gem 'eventmachine'
 #helper
 gem 'childprocess'
 gem 'hashie'
-gem 'ruby-prof'
+gem 'try_again'
+gem 'ruby-prof', :platforms => :mri
 
 #Datenbankstuff für die bridge
 gem 'redis'

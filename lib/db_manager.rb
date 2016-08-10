@@ -116,6 +116,7 @@ class DbManager
     res = @db.query("SELECT ID FROM servers WHERE ID = #{@db.escape(server_id)}")
     true if res.count > 0
   end
+
   #check if user is allowed to use this server
   def allowed_server?(server_id, user_id = nil)
     if user_id.nil?
@@ -125,6 +126,7 @@ class DbManager
     end
     true if res.count > 0
   end
+
   def getServerID(server_url, server_port)
     @db.query("SELECT ID FROM servers WHERE server_url LIKE '#{@db.escape(server_url)}' AND server_port LIKE '#{@db.escape(server_port)}'").fetch_hash['ID']
   end
