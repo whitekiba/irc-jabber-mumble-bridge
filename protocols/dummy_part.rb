@@ -10,11 +10,12 @@ class DummyBridge < ModuleBase
   @my_network_id = 1
   @my_user_id = 1
   def gen_messages
-    puts 'Dummy starting... Generating test messages'
+    puts 'Dummy starting... Generating test messages (and crashing after 10 seconds)'
     @my_name = :dummy
     loop do
-      sleep 1
-      self.publish(source_user: @my_user_id, message: 'test', nick: 'nickname')
+      sleep 10
+      exit 0
+      #self.publish(source_user: @my_user_id, message: 'test', nick: 'nickname')
       $logger.info 'Message gesendet!'
     end
     $logger.info 'Dummy... Dead!'
