@@ -31,6 +31,8 @@ loop do
     processes.each_key { |proc|
       if processes[proc].exited?
         puts "#{proc} started or restarted."
+        processes[proc].send_kill
+        sleep 5
         processes[proc].start
       end
     }
