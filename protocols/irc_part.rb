@@ -34,7 +34,7 @@ class IRCBridge < ModuleBase
         unless msg_in.nil?
           $logger.info msg_in
           #user_id ist die zuordnungsnummer
-          @bot.send_message(@channels_invert[msg_in['user_id']], "[#{msg_in['source_network_type']}][#{msg_in['nick']}]#{msg_in['message']}")
+          @bot.send_message(@channels_invert[msg_in['user_id']], "[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
         end
       end
     end
