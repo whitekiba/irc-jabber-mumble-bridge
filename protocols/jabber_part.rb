@@ -56,7 +56,6 @@ class JabberBridge < ModuleBase
     subscribe_cmd(@my_name)
     Thread.new do
       loop do
-        sleep 0.1
         msg_in = @messages.pop
         if !msg_in.nil?
           $logger.debug msg_in
@@ -72,7 +71,6 @@ class JabberBridge < ModuleBase
     #cmd thread
     Thread.new do
       loop do
-        sleep 1
         msg_in = @messages.pop
         if !msg_in.nil?
             if msg_in['cmd'] == 'reload'
@@ -122,5 +120,5 @@ servers.each do |server|
   end
 end
 loop do
-  sleep 0.1
+  sleep 10
 end
