@@ -21,13 +21,12 @@ class ModuleBase
     @redis_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @redis_cmd_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @redis_assistant_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
-    @messages = Array.new
-    @messages_cmd = Array.new
-    @assistantMessages = Array.new
+    @messages = Queue.new
+    @messages_cmd = Queue.new
+    @assistantMessages = Queue.new
   end
   def subscribe(name)
     Thread.new do
-      sleep 0.1
       $logger.info('Thread gestartet!')
       @redis_sub.psubscribe('msg.*') do |on|
         on.psubscribe do |channel, subscriptions|
@@ -38,7 +37,7 @@ class ModuleBase
           data = JSON.parse(message)
           if data['source_network'] != name
             $logger.debug data
-            @messages.unshift(data)
+            @messages.push(data)
             $logger.debug("Length of @message #{@messages.length}")
           end
         end
@@ -48,7 +47,6 @@ class ModuleBase
   #Der Commandchannel. Schläft mehr und subscribed
   def subscribe_cmd(id)
     Thread.new do
-      sleep 1
       $logger.info('Thread gestartet!')
       @redis_cmd_sub.subscribe("cmd.#{id}") do |on|
         on.subscribe do |channel, subscriptions|
@@ -56,13 +54,12 @@ class ModuleBase
         end
         on.message do |channel, message|
           $logger.debug ("Got cmd! Message: #{message} Channel: #{channel}")
-          @messages_cmd.unshift(message)
+          @messages_cmd.push(message)
         end
       end
     end
     Thread.new do
       loop do
-        sleep 0.1
         msg_in = @messages_cmd.pop
         #$logger.info "State of cmd array: #{msg_in.nil?}"
         unless msg_in.nil?
@@ -74,7 +71,6 @@ class ModuleBase
   end
   def subscribeAssistant(name)
     Thread.new do
-      sleep 0.1
       $logger.info('Thread gestartet!')
       @redis_assistant_sub.psubscribe('assistant.*') do |on|
         on.psubscribe do |channel, subscriptions|
@@ -86,7 +82,7 @@ class ModuleBase
           data = JSON.parse(message)
           if data['source_network'] != name
             $logger.debug data
-            @assistantMessages.unshift(data)
+            @assistantMessages.push(data)
             $logger.debug("Length of @assistantMessages #{@assistantMessages.length}")
           else
             $logger.debug 'Ignored message because it was mine'

@@ -14,7 +14,12 @@ $config = YAML.load_file(File.dirname(__FILE__) + '/config.yml')
 $logger = Logger.new(File.dirname(__FILE__) + '/bridge.log')
 
 processes = Hash.new
-protocols = $config[:enabled_services]
+if $config[:enabled_services].nil?
+  puts "No services enabled! Killing myself! *poof*"
+  abort
+else
+  protocols = $config[:enabled_services]
+end
 ChildProcess.build('ruby', 'assistant/assistant_manager.rb').start
 
 puts 'bridge-v2 starting up... (INTEGRATE ALL TEH THINGS!)'

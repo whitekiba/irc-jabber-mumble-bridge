@@ -24,7 +24,6 @@ class TelegramBridge < ModuleBase
     subscribeAssistant(@my_name)
     Thread.new do
       loop do
-        sleep 0.1
         msg_in = @messages.pop
         #$logger.debug("Length of @message seen by #{@my_name}: #{@messages.length}")
         if !msg_in.nil?
@@ -40,7 +39,6 @@ class TelegramBridge < ModuleBase
     end
     Thread.new do
       loop do
-        sleep 0.1
         msg_in = @assistantMessages.pop
         if !msg_in.nil?
           $logger.info 'Got Assistant message'
@@ -56,7 +54,6 @@ class TelegramBridge < ModuleBase
       end
     end
     @telegram.listen do |msg|
-      sleep 0.1
       handleMessage(msg)
     end
   end

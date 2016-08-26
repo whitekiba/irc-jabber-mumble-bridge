@@ -89,7 +89,6 @@ class TeamspeakBridge < ModuleBase
     #Dieser thread sendet Nachrichten
     Thread.new do
       loop do
-        sleep 3
         msg_in = @messages.pop
         unless msg_in.nil?
           begin

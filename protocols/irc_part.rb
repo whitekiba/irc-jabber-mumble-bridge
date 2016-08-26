@@ -29,7 +29,6 @@ class IRCBridge < ModuleBase
     subscribe_cmd(@my_id)
     Thread.new do
       loop do
-        sleep 0.1
         msg_in = @messages.pop
         #$logger.info "State of message array: #{msg_in.nil?}"
         unless msg_in.nil?

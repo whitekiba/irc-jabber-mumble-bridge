@@ -28,7 +28,6 @@ class MumbleBridge < ModuleBase
     subscribe_cmd(@my_id)
     Thread.new do
       loop do
-        sleep 0.1
         msg_in = @messages.pop
         unless msg_in.nil?
           begin
