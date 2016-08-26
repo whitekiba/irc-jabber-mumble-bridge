@@ -117,6 +117,7 @@ class AssistantManager
           $logger.error e
         end
       end
+
     elsif split_message[0].eql?('/start') || !split_message[0].initial.eql?('/')
       $logger.info '/start or non-command'
       begin
