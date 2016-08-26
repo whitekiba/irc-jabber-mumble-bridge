@@ -95,7 +95,7 @@ class AssistantManager
         begin
 
           #wir checken den Usernamen
-          if /^[a-z0-9_]+$/.match(split_message[1])
+          if /^[a-zA-Z0-9_]+$/.match(split_message[1])
             secret = createUser(split_message[1], split_message[2]) #createUser handlet das falls split_message[2] nil ist
             if secret
               publish(message: @lang.get("user_created"), chat_id: parsed_message['chat_id'])
