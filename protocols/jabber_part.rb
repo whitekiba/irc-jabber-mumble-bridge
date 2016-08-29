@@ -99,6 +99,16 @@ class JabberBridge < ModuleBase
     self.publish(source_network_type: @my_short, source_network: @my_name,
                  nick: nick, user_id: @channels[channel], message_type: 'part')
   end
+  #Wir reloaden das Modul
+  def reload
+    begin
+      $logger.info "Starting Jabber reload."
+      #TODO: Fehlt noch. Jabber hat aber erst mal keine Prio
+    rescue StandardError => e
+      $logger.error "Reloading failed. Exception thrown:"
+      $logger.error e
+    end
+  end
 end
 
 db = DbManager.new
