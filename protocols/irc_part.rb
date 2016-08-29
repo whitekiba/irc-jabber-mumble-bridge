@@ -30,16 +30,25 @@ class IRCBridge < ModuleBase
     Thread.new do
       loop do
         msg_in = @messages.pop
-        #$logger.info "State of message array: #{msg_in.nil?}"
         unless msg_in.nil?
-          $logger.info msg_in
-          #user_id ist die zuordnungsnummer
-          @bot.send_message(@channels_invert[msg_in['user_id']], "[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
+          begin
+            $logger.info msg_in
+            #user_id ist die zuordnungsnummer
+            @bot.send_message(@channels_invert[msg_in['user_id']], "[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
+          rescue StandardError => e
+            $logger.debug 'Failed to send message. Stacktrace:'
+            $logger.debug e
+          end
         end
       end
     end
 
-    @bot.connect
+    begin
+      @bot.connect
+    rescue StandardError => e
+      $logger.debug 'Connect failed. STacktrace follows.'
+      $logger.debug e
+    end
   end
 
   def handleMessage(message)
@@ -121,9 +130,14 @@ loop do
     #ich habe keine ahnung wieso da felder nil sind
     unless server.nil?
       if $servers[server['ID']].nil?
-        Thread.new do
-          $servers[server['ID']] = IRCBridge.new
-          $servers[server['ID']].receive(server['ID'], server['server_url'], server['server_port'], server['user_name'])
+        begin
+          Thread.new do
+            $servers[server['ID']] = IRCBridge.new
+            $servers[server['ID']].receive(server['ID'], server['server_url'], server['server_port'], server['user_name'])
+          end
+        rescue StandardError => e
+          $logger.debug 'IRC crashed. Stacktrace follows.'
+          $logger.debug e
         end
       end
     end
