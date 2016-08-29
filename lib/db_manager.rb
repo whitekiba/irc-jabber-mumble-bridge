@@ -119,6 +119,14 @@ class DbManager
   def getServerID(server_url, server_port)
     @db.query("SELECT ID FROM servers WHERE server_url LIKE '#{@db.escape(server_url)}' AND server_port LIKE '#{@db.escape(server_port)}'").fetch_hash['ID']
   end
+  def blacklist
+    return_vars = Hash.new
+    res = @db.query('SELECT * FROM ignorelist')
+    res.each do |entry|
+      return_vars[entry['ID']] = entry
+    end
+    return_vars
+  end
 
   #channel hinzufügen
   #für channel sind user_IDs pflicht. Anders können wir die nicht zuordnen

@@ -1,6 +1,7 @@
 require 'redis'
 require 'json'
 require 'yaml'
+require 'blacklist'
 
 class ModuleBase
   def initialize
@@ -17,6 +18,7 @@ class ModuleBase
     end
     @single_con_networks = %w(I T)
     $logger.info "Subscribing on redis..."
+    @blacklist = Blacklist.new
     @redis_pub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @redis_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
     @redis_cmd_sub = Redis.new(:host => $config[:redis][:host], :port => $config[:redis][:port])
@@ -94,6 +96,7 @@ class ModuleBase
   def publish(api_ver: '1', source_network_type: nil, source_network: nil, source_user: nil,
               message: nil, nick:, user_id:, network_id: nil , timestamp: nil,
               message_type: 'msg', attachment: nil, is_assistant: false, chat_id: nil)
+    return false if @blacklist.blacklisted?(user_id, nick)
     source_network_type = @my_name_short if source_network_type.nil?
     #TODO: testen ob das wirklich funktioniert
     unless message_type == 'join' || message_type == 'part'
