@@ -167,7 +167,6 @@ class AssistantManager
         'reply_markup' => reply_markup
     })
     @redis_pub.publish("assistant.#{@userid}", json)
-    puts json
   end
 end
 
