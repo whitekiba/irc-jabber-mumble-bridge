@@ -17,8 +17,8 @@ class TelegramBridge < ModuleBase
     @telegram = Telegram::Bot::Client.new($config[:telegram][:token], logger: $logger)
     @db = DbManager.new
 
-    @chat_ids = @db.loadChannels(@my_id)
-    @chat_ids_invert = @chat_ids.invert
+    #Channel laden
+    loadChannels
 
     subscribe(@my_name)
     subscribe_cmd(@my_name)
@@ -27,7 +27,7 @@ class TelegramBridge < ModuleBase
       loop do
         msg_in = @messages.pop
         #$logger.debug("Length of @message seen by #{@my_name}: #{@messages.length}")
-        if !msg_in.nil?
+        unless msg_in.nil?
           $logger.info msg_in
           begin
             @telegram.api.send_message(chat_id: @chat_ids_invert[msg_in['user_id']],
@@ -41,7 +41,7 @@ class TelegramBridge < ModuleBase
     Thread.new do
       loop do
         msg_in = @assistantMessages.pop
-        if !msg_in.nil?
+        unless msg_in.nil?
           $logger.info 'Got Assistant message'
           begin
             $logger.info msg_in
@@ -57,6 +57,22 @@ class TelegramBridge < ModuleBase
     @telegram.listen do |msg|
       handleMessage(msg)
     end
+  end
+  #Wir reloaden das Modul
+  def reload
+    begin
+      $logger.info "Starting Telegram reload."
+      loadChannels
+    rescue StandardError => e
+      $logger.error "Reloading failed. Exception thrown:"
+      $logger.error e
+    end
+  end
+  def loadChannels
+    @chat_ids = nil unless @chat_ids.nil? #löschen wir den Kram mal
+    @chat_ids_invert = nil unless @chat_ids_invert.nil?
+    @chat_ids = @db.loadChannels(@my_id)
+    @chat_ids_invert = @chat_ids.invert
   end
   def handleMessage(msg)
     #$logger.info 'handleMessage wurde aufgerufen!'
