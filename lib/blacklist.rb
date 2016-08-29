@@ -1,4 +1,4 @@
-require 'db_manager'
+require_relative '../lib/db_manager'
 
 class Blacklist
   @blacklist = Hash.new

@@ -1,7 +1,7 @@
 require 'redis'
 require 'json'
 require 'yaml'
-require 'blacklist'
+require_relative '../lib/blacklist'
 
 class ModuleBase
   def initialize
