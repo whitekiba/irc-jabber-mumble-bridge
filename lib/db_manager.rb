@@ -116,6 +116,17 @@ class DbManager
     res = @db.query("SELECT ID FROM servers WHERE ID = #{@db.escape(server_id)}")
     true if res.count > 0
   end
+
+  #check if user is allowed to use this server
+  def allowed_server?(server_id, user_id = nil)
+    if user_id.nil?
+      res = @db.query("SELECT ID FROM servers WHERE ID = #{@db.escape(server_id)}")
+    else
+      res = @db.query("SELECT ID FROM servers WHERE ID = #{@db.escape(server_id)} AND (user_ID = '#{user_id}' OR user_ID IS NULL)")
+    end
+    true if res.count > 0
+  end
+
   def getServerID(server_url, server_port)
     @db.query("SELECT ID FROM servers WHERE server_url LIKE '#{@db.escape(server_url)}' AND server_port LIKE '#{@db.escape(server_port)}'").fetch_hash['ID']
   end
@@ -131,11 +142,13 @@ class DbManager
   #channel hinzufügen
   #für channel sind user_IDs pflicht. Anders können wir die nicht zuordnen
   def addChannel(user_id, server_id, channel, channel_password = nil)
-    channel_password.nil? ? channel_password = 'NULL' : channel_password = @db.escape(channel_password)
-    sql = "INSERT INTO `channels` (`ID`, `user_ID`, `server_ID`, `channel_name`, `channel_password`)
-            VALUES (NULL, '#{@db.escape(user_id)}', '#{@db.escape(server_id)}', '#{@db.escape(channel)}', #{channel_password})"
-    res = @db.query(sql)
-    @logger.info res
+    if (self.allowed_server?(server_id, user_id))
+      channel_password.nil? ? channel_password = 'NULL' : channel_password = @db.escape(channel_password)
+      sql = "INSERT INTO `channels` (`ID`, `user_ID`, `server_ID`, `channel_name`, `channel_password`)
+              VALUES (NULL, '#{@db.escape(user_id)}', '#{@db.escape(server_id)}', '#{@db.escape(channel)}', #{channel_password})"
+      res = @db.query(sql)
+      @logger.info res
+    end
     #TODO: Reload starten oder planen
   end
 

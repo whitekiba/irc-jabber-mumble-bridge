@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'telegram/bot'
 require 'cgi'
 require 'sanitize'
