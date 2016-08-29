@@ -97,6 +97,9 @@ class TeamspeakBridge < ModuleBase
           rescue Exception => e
             $logger.info 'Failed to send Message'
             $logger.info e
+            #theoretisch sollte sowas nicht nötig sein.
+            #TODO: Wir müssen dringend Verbindungsverluste intern abfangen. Aber um Zeit zu sparen machen wir das
+            Kernel.exit(1)
           end
         end
       end
