@@ -220,7 +220,7 @@ class AssistantBase
     @db.addUser(username)
   end
 
-  def listChannels(data)
+  def list_channels(data)
     begin
       publish(message: get_channels(@userid), chat_id: data['chat_id'])
     rescue StandardError => e
@@ -228,7 +228,7 @@ class AssistantBase
     end
   end
 
-  def listServers(data)
+  def list_servers(data)
     publish(message: get_available_servers(@userid), chat_id: data['chat_id'])
   end
 end

@@ -48,7 +48,7 @@ class TelegramAssistant < AssistantBase
   def test(data)
     valid_step? :test
     $logger.debug 'test called. We are testing.'
-    next_steps :auth, :donate, :createUser
+    next_steps :auth, :donate, :create_user
     begin
       btn_markup = Array.new
       buttons = ['New User', 'Donate']

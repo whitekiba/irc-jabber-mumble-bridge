@@ -62,6 +62,7 @@ class AssistantManager
     $logger.info parsed_message
     split_message = parsed_message['message'].split(' ')
     $logger.info "Split message: #{split_message}"
+
     #case wäre hier vermutlich sauberer. Aber wir brauchen das else
     if split_message[0].eql?('/auth') #auth ist der erste Schritt der nötig ist.
 
@@ -86,32 +87,16 @@ class AssistantManager
       else
         publish(message: 'wrong username or password!', chat_id: parsed_message['chat_id'])
       end
-    elsif split_message[0].eql?('/newUser') #user erstellen
 
+    elsif split_message[0].eql?('/newUser') #user erstellen
       if split_message[1].nil?
         publish(message: @lang.get("missing_parameter"), chat_id: parsed_message['chat_id'])
         publish(message: @lang.get("new_user_usage"), chat_id: parsed_message['chat_id'])
       else #wir erstellen einen neuen User. Alle Parameter sind okay
+
+        #User erstellen
         begin
-
-          #wir checken den Usernamen
-          if /^[a-zA-Z0-9_]+$/.match(split_message[1])
-            secret = createUser(split_message[1], split_message[2]) #createUser handlet das falls split_message[2] nil ist
-            if secret
-              publish(message: @lang.get("user_created"), chat_id: parsed_message['chat_id'])
-              publish(message: "#{@lang.get("your_secret")}: #{secret}", chat_id: parsed_message['chat_id'])
-            end
-          else
-            publish(message: @lang.get("invalid_username"), chat_id: parsed_message['chat_id'])
-          end
-
-          #wir checken die Emailadresse (falls sie denn gesetzt wurde)
-          unless split_message[2].nil?
-            unless /\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/.match(split_message[2])
-              publish(message: @lang.get("invalid_username"), chat_id: parsed_message['chat_id'])
-              return #abwürgen um jeden Preis
-            end
-          end
+          publish(message: create_user(split_message[1], split_message[2]), chat_id: parsed_message['chat_id'])
         rescue StandardError => e
           publish(message: @lang.get("error_occured"), chat_id: parsed_message['chat_id'])
           $logger.error e
@@ -154,8 +139,18 @@ class AssistantManager
 
   #user erstellen
   #solang user nil ist werden die buttons gesendet
-  def createUser(username = nil, email = nil)
-    @db.addUser(username, email)
+  def create_user(username = nil, email = nil)
+    #wir checken den Usernamen
+    if /^[a-zA-Z0-9_]+$/.match(username)
+      #wir checken die Emailadresse (falls sie denn gesetzt wurde)
+      return @lang.get("invalid_email") unless /\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/.match(email) unless email.nil?
+      secret = @db.addUser(username, email)
+      if secret
+        return "#{@lang.get("user_created")}\n#{@lang.get("your_secret")}: #{secret}"
+      end
+    else
+      return@lang.get("invalid_username")
+    end
   end
   private
 
