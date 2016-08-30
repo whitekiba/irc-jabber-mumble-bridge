@@ -54,6 +54,11 @@ class TelegramBridge < ModuleBase
         end
       end
     end
+    #TODO: Weiterer Thread um Nachrichten direkt an User zu senden.
+    # Das ganze kriegt einen eigenen Channel
+    # In der eingehenden Nachricht wird es keine chat_id geben. Stattdessen wird die Userid aus der Datenbank gesendet.
+    # Der Thread macht dann einen Lookup der Userid und sucht sich das für sein Protokoll passende Merkmal raus
+    # Auf Basis dieser ID wird die Nachricht dass als Privatnachricht gesendet. 
     @telegram.listen do |msg|
       handleMessage(msg)
     end

@@ -106,8 +106,8 @@ class AssistantManager
           end
 
           #wir checken die Emailadresse (falls sie denn gesetzt wurde)
-          if !split_message[2].nil?
-            if !/\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/.match(split_message[2])
+          unless split_message[2].nil?
+            unless /\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/.match(split_message[2])
               publish(message: @lang.get("invalid_username"), chat_id: parsed_message['chat_id'])
               return #abwürgen um jeden Preis
             end
