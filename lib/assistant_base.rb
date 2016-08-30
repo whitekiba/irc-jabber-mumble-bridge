@@ -43,6 +43,84 @@ class AssistantBase
     end
   end
 
+  def add_server(server_type, server_url, server_port, server_username = nil, server_password = nil)
+    $logger.debug "We are in addServer. My data is #{data}"
+    begin
+      #Wir checken ob server_type ein fester typ ist welchen wir intern nutzen
+      # oooooder aber ob server_type überhaupt ein erlaubter Server ist
+      if !@static_servers.has_value?(server_type) && @valid_servers.has_value?(server_type)
+
+        #url validieren
+        unless server_url.valid_url?
+          publish(message: 'Invalid URL! Exiting hard!', chat_id: data['chat_id'])
+          return
+        end
+
+        #server passwort checken
+        unless server_password.nil?
+          $logger.info 'Setting server password to nil'
+          server_password = nil
+        end
+
+        #username checken
+        unless server_username.nil?
+          $logger.info 'Setting server username to bridgie'
+          server_username = 'bridgie'
+        else
+          unless /^[a-z0-9_]+$/.match(server_username)
+            publish(message: @lang.get("invalid_username"), chat_id: data['chat_id'])
+            return
+          end
+        end
+
+        if @db.server_exists?(server_type, server_url, server_port)
+          publish(message: @lang.get("server_already_exists"), chat_id: data['chat_id'])
+        else
+          if @db.addServer(server_url, server_port, server_type, server_password, server_username)
+            publish(message: 'Server sucessfully added.', chat_id: data['chat_id'])
+          end
+        end
+
+      else
+        publish(message: 'You are not allowed to add a server of that type', chat_id: data['chat_id'])
+      end
+    rescue StandardError => e
+      $logger.error 'Error ocurred while creating new Server. Stacktrace follows'
+      $logger.error e
+    end
+  end
+
+  def add_channel(server_id, channel_name)
+    begin
+      if @db.getServerCount(@userid) > 0
+
+        #server_id checken ob es ne nummer ist
+        if !server_id.is_a?(Fixnum)
+          publish(message: @lang.get('invalid_id'), chat_id: data['chat_id'])
+          return
+        end
+
+        if @db.channel_exists?(@userid, server_id, channel_name)
+          publish(message: @lang.get("channel_already_exists"), chat_id: data['chat_id'])
+        else
+          if @db.getChannelCount(@user_id, server_id) > 1
+            #TODO: Message anpassen
+            publish(message: '1 Channel max.', chat_id: data['chat_id'])
+          else
+            if @db.addChannel(@userid, server_id, channel_name)
+              publish(message: @lang.get("channel_added"), chat_id: data['chat_id'])
+              reload(server_id)
+            end
+          end
+        end
+      else
+        publish(message: @lang.get('no_server'), chat_id: data['chat_id'])
+      end
+    rescue StandardError => e
+      $logger.error e
+    end
+  end
+
   def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
     json = JSON.generate ({
         'message' => message.force_encoding('UTF-8'),
