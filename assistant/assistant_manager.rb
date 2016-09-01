@@ -65,58 +65,16 @@ class AssistantManager
 
     #TODO: Hier müssen wir noch etwas präziser bei den Fehlern werden.
     if @assistants["#{parsed_message['source_network']}_#{@active_users[parsed_message['chat_id']]}"].nil?
-      #case wäre hier vermutlich sauberer. Aber wir brauchen das else
-      if split_message[0].eql?('/auth') #auth ist der erste Schritt der nötig ist.
-
-        #checken ob nötige parameter gesetzt sind
-        if split_message[1].nil? || split_message[2].nil?
-          publish(message: @lang.get("missing_parameter"), chat_id: parsed_message['chat_id'])
-          publish(message: @lang.get("auth_usage"), chat_id: parsed_message['chat_id'])
-          return #abwürgen
-        end
-
-        userid = @db.authUser(split_message[1], split_message[2])
-        if userid
-          publish(message: 'authenticated!', chat_id: parsed_message['chat_id'])
-          begin
-            @active_users[parsed_message['chat_id']] = userid
-            $logger.info 'Starting new assistant'
-            startNewAssistant(parsed_message['source_network'], @active_users[parsed_message['chat_id']])
-          rescue StandardError => e
-            $logger.error 'Error while starting assistant'
-            $logger.error e
-          end
+      case split_message[0]
+        when '/auth'
+          auth(split_message[1], split_message[2])
+        when '/newUser'
+          new_user(split_message[1], split_message[2])
         else
-          publish(message: 'wrong username or password!', chat_id: parsed_message['chat_id'])
-        end
-
-      elsif split_message[0].eql?('/newUser') #user erstellen
-        if split_message[1].nil?
-          publish(message: @lang.get("missing_parameter"), chat_id: parsed_message['chat_id'])
-          publish(message: @lang.get("new_user_usage"), chat_id: parsed_message['chat_id'])
-        else #wir erstellen einen neuen User. Alle Parameter sind okay
-
-          #User erstellen
-          begin
-            publish(message: create_user(split_message[1], split_message[2]), chat_id: parsed_message['chat_id'])
-          rescue StandardError => e
-            publish(message: @lang.get("error_occured"), chat_id: parsed_message['chat_id'])
-            $logger.error e
-          end
-        end
-
-      elsif split_message[0].eql?('/start') || !split_message[0].initial.eql?('/')
-        $logger.info '/start or non-command'
-        begin
           aboutMe(parsed_message['chat_id'])
-        rescue StandardError => e
-          $logger.error e
-        end
       end
-
     else
-      #alles was nicht behandelt wurde wird an den Assistenten gepusht. Falls er denn läuft
-      # hier kann nichts schlimmeres passieren. Läuft der Assistent nicht nimmt die nachricht ungefähr 150 byte ein
+      #wir sind authentifiziert. Das handlet nun alles der assistant prozess
       @redis_pub.publish("assistant.#{@active_users[parsed_message['chat_id']]}", message)
     end
   end
@@ -139,19 +97,58 @@ class AssistantManager
   #user erstellen
   #solang user nil ist werden die buttons gesendet
   def create_user(username = nil, email = nil)
+
     #wir checken den Usernamen
-    if /^[a-zA-Z0-9_]+$/.match(username)
-      #wir checken die Emailadresse (falls sie denn gesetzt wurde)
-      return @lang.get("invalid_email") unless /\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/.match(email) unless email.nil?
-      secret = @db.addUser(username, email)
-      if secret
-        return "#{@lang.get("user_created")}\n#{@lang.get("your_secret")}: #{secret}"
-      end
-    else
-      return@lang.get("invalid_username")
+    return @lang.get("invalid_username")unless /^[a-zA-Z0-9_]+$/.match(username)
+
+    #wir checken die Emailadresse (falls sie denn gesetzt wurde)
+    return @lang.get("invalid_email") unless /\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/.match(email) unless email.nil?
+
+    secret = @db.addUser(username, email)
+    if secret
+      return "#{@lang.get("user_created")}\n#{@lang.get("your_secret")}: #{secret}"
     end
   end
   private
+
+  def new_user(username, email = nil)
+    if username.nil?
+      publish(message: @lang.get("missing_parameter"), chat_id: parsed_message['chat_id'])
+      publish(message: @lang.get("new_user_usage"), chat_id: parsed_message['chat_id'])
+    else #wir erstellen einen neuen User. Alle Parameter sind okay
+      #User erstellen
+      begin
+        publish(message: create_user(username, email), chat_id: parsed_message['chat_id'])
+      rescue StandardError => e
+        publish(message: @lang.get("error_occured"), chat_id: parsed_message['chat_id'])
+        $logger.error e
+      end
+    end
+  end
+
+  def auth(username, password)
+    #checken ob nötige parameter gesetzt sind
+    if username.nil? || password.nil?
+      publish(message: @lang.get("missing_parameter"), chat_id: parsed_message['chat_id'])
+      publish(message: @lang.get("auth_usage"), chat_id: parsed_message['chat_id'])
+      return #abwürgen
+    end
+
+    userid = @db.authUser(username, password)
+    if userid
+      publish(message: 'authenticated!', chat_id: parsed_message['chat_id'])
+      begin
+        @active_users[parsed_message['chat_id']] = userid
+        $logger.info 'Starting new assistant'
+        startNewAssistant(parsed_message['source_network'], @active_users[parsed_message['chat_id']])
+      rescue StandardError => e
+        $logger.error 'Error while starting assistant'
+        $logger.error e
+      end
+    else
+      publish(message: 'wrong username or password!', chat_id: parsed_message['chat_id'])
+    end
+  end
 
   def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
     json = JSON.generate ({
