@@ -13,7 +13,7 @@ class AssistantBase
       exit
     end
     @lang = Language.new
-    @timeout = 1 #das ist der timeout
+    @timeout = 15 #das ist der timeout
 
     @last_command = Time.now
     @next_step = Array.new
