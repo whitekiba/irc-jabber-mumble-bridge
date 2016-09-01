@@ -156,9 +156,9 @@ class DbManager
   #generiert außerdem auch ein secret für die Datenbank
   def addUser(username, email = nil)
     email = 'NULL' if email.nil?
-    secret = (0..32).map { (65 + rand(26)).chr }.join
+    secret = (0..31).map { (65 + rand(26)).chr }.join
     while !checkSecret(secret) do
-      secret = (0..32).map { (65 + rand(26)).chr }.join
+      secret = (0..31).map { (65 + rand(26)).chr }.join
     end
     @db.query("INSERT INTO `users` (`ID`, `username`, `email`, `secret`) VALUES (NULL, '#{@db.escape(username)}', '#{@db.escape(email)}', '#{secret}');")
     secret #return the secret
