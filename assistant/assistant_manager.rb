@@ -99,7 +99,7 @@ class AssistantManager
   def create_user(username = nil, email = nil)
 
     #wir checken den Usernamen
-    return @lang.get("invalid_username")unless /^[a-zA-Z0-9_]+$/.match(username)
+    return @lang.get("invalid_username") unless /^[a-zA-Z0-9_]+$/.match(username)
 
     #wir checken die Emailadresse (falls sie denn gesetzt wurde)
     return @lang.get("invalid_email") unless /\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/.match(email) unless email.nil?
