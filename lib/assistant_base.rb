@@ -122,17 +122,21 @@ class AssistantBase
   end
 
   def edit_server(server_id, server_url, server_port, server_username = nil, server_password = nil)
+    if @db.allowed_server?(server_id, @userid)
 
+    end
   end
 
   def edit_channel(channel_id, channel_name)
+    if @db.allowed_channel?(channel_id, @userid)
 
+    end
   end
 
   #Hier müssen wir zusehen dass wir das sehr gut sichern und alle Channel mitlöschen
   #
   def del_server(server_id)
-    if (@db.allowed_server?(server_id, @userid)) #user darf das ding benutzen
+    if @db.allowed_server?(server_id, @userid) #user darf das ding benutzen
       begin
         @db.loadChannels(server_id).each do |key, value|
           @db.del_channel(key)
@@ -149,7 +153,7 @@ class AssistantBase
   end
 
   def del_channel(channel_id)
-    if (@db.allowed_channel?(channel_id, @userid))
+    if @db.allowed_channel?(channel_id, @userid)
       @db.del_channel(channel_id)
     end
   end

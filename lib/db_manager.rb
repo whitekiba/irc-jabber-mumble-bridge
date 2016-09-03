@@ -65,6 +65,18 @@ class DbManager
     #TODO: Reload starten oder planen
   end
 
+  #TODO: Eine ziemlich unschöne Lösung
+  # Eventuell wäre hier eine komplette Klasse nur für Server praktischer
+  def edit_server(server_id, server_url, server_port, server_type, user_name = 'bridge', user_password = 'NULL', user_id = 'NULL')
+
+  end
+
+  #Wie bei der edit_server methode. Es wäre vielleicht eine Channel Klasse besser geeignet
+  # TODO: Klasse für Channel schreiben oder das so fertigbauen
+  def edit_channel(channel_id, channel_name)
+
+  end
+
   def getServerCount(user_id)
     @db.query("SELECT ID FROM servers WHERE user_ID = #{@db.escape(user_id)}").count
   end
