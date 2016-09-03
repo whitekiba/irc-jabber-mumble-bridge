@@ -121,6 +121,39 @@ class AssistantBase
     end
   end
 
+  def edit_server(server_id, server_url, server_port, server_username = nil, server_password = nil)
+
+  end
+
+  def edit_channel(channel_id, channel_name)
+
+  end
+
+  #Hier müssen wir zusehen dass wir das sehr gut sichern und alle Channel mitlöschen
+  #
+  def del_server(server_id)
+    if (@db.allowed_server?(server_id, @userid)) #user darf das ding benutzen
+      begin
+        @db.loadChannels(server_id).each do |key, value|
+          @db.del_channel(key)
+        end
+      rescue StandardError => e
+        $logger.error "Fehler beim löschen! Schau dir die Exception an:"
+        $logger.error e
+        publish(message: @lang.get("unable_delete_channel"), chat_id: data['chat_id'])
+        publish(message: @lang.get("unable_delete_server"), chat_id: data['chat_id'])
+        return #wir würgen den aufruf der methode ab
+      end
+      @db.del_server(server_id)
+    end
+  end
+
+  def del_channel(channel_id)
+    if (@db.allowed_channel?(channel_id, @userid))
+      @db.del_channel(channel_id)
+    end
+  end
+
   def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
     json = JSON.generate ({
         'message' => message.force_encoding('UTF-8'),

@@ -117,6 +117,14 @@ class DbManager
     true if res.count > 0
   end
 
+  def del_server(server_id)
+    @db.query("DELETE FROM servers WHERE ID = #{@db.escape(server_id)}")
+  end
+
+  def del_channel(channel_id)
+    @db.query("DELETE FROM channels WHERE ID = #{@db.escape(channel_id)}")
+  end
+
   #check if user is allowed to use this server
   def allowed_server?(server_id, user_id = nil)
     if user_id.nil?
@@ -124,6 +132,11 @@ class DbManager
     else
       res = @db.query("SELECT ID FROM servers WHERE ID = #{@db.escape(server_id)} AND (user_ID = '#{user_id}' OR user_ID IS NULL)")
     end
+    true if res.count > 0
+  end
+
+  def allowed_channel?(channel_id, user_id)
+    res = @db.query("SELECT ID FROM channels WHERE ID = #{@db.escape(channel_id)} AND user_ID = '#{user_id}'")
     true if res.count > 0
   end
 
