@@ -56,9 +56,10 @@ class JabberBridge < ModuleBase
       end
     end
     loop do
-      sleep 0.5
+      sleep 60
     end
   end
+
   def handleMessage(nick, channel, message)
     $logger.debug 'handleMessage called.'
     $logger.debug message
@@ -123,24 +124,32 @@ class JabberBridge < ModuleBase
   end
 end
 
+#server starting stuff
 db = DbManager.new
-servers = db.loadServers('jabber')
-servers.each do |server|
-  #TODO: Aus irgendeinem Grund sind ein paar Felder leer.
-  unless server.nil?
-    begin
-      Thread.new do
-        jb = JabberBridge.new
-        jb.startServer(server['ID'], server['server_url'], server['server_port'],
-                       server['user_name'], server['user_password'])
-        $logger.info "Server #{server['server_url']} started..."
+#TODO: Wir müssen irgendwie neue Server starten. Vorerst pollen wir die Datenbank
+#Ja das ist scheiße unschön.
+#TODO: Unschön. Das muss sauberer umgesetzt werden. Alle 60 Sekunden die Datenbank anzufragen ist scheiße
+#Es wäre möglich auf nem Redis Channel zu horchen und dann den reload zu triggern. Dafür müsste hier aber noch ein redis listener rein
+loop do
+  servers = db.loadServers('jabber')
+  $logger.debug servers
+  servers.each do |server|
+    #TODO: Aus irgendeinem Grund sind ein paar Felder leer.
+    unless server.nil?
+      if $servers[server['ID']].nil? #wir starten nur falls da noch kein Objekt von existiert
+        begin
+          Thread.new do
+            jb = JabberBridge.new
+            jb.startServer(server['ID'], server['server_url'], server['server_port'],
+                           server['user_name'], server['user_password'])
+            $logger.info "Server #{server['server_url']} started..."
+          end
+        rescue StandardError => e
+          $logger.error "Server #{server['server_url']} crashed while starting..."
+          $logger.error e
+        end
       end
-    rescue StandardError => e
-      $logger.error "Server #{server['server_url']} crashed while starting..."
-      $logger.error e
     end
   end
-end
-loop do
-  sleep 10
+  sleep 60
 end
