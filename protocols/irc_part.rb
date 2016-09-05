@@ -46,22 +46,28 @@ class IRCBridge < ModuleBase
     begin
       @bot.connect
     rescue StandardError => e
-      $logger.debug 'Connect failed. STacktrace follows.'
+      $logger.debug 'Connect failed. Stacktrace follows.'
       $logger.debug e
     end
   end
 
   def handleMessage(message)
     $logger.info 'handleMessage wurde aufgerufen'
-    if /^\x01ACTION (.)+\x01$/.match(message.message)
-      self.publish(source_network_type: @my_short,
-                   message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}",
-                   chat_id: '-145447289')
-    else
-      self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: message.from, message: message.message, user_id: @channels[message.channel])
+    begin
+      if /^\x01ACTION (.)+\x01$/.match(message.message)
+        self.publish(source_network_type: @my_short,
+                     message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}",
+                     chat_id: '-145447289')
+      else
+        self.publish(source_network_type: @my_short, source_network: @my_name,
+                     nick: message.from, message: message.message, user_id: @channels[message.channel])
+      end
+      $logger.info message.message
+    rescue StandardError => e
+      $logger.error "Nachricht konnte nicht gesendet werden. Eventuell ist die Verbindung weg. Ich starte mal neu."
+      $logger.error e
+      abort #hart abwürgen
     end
-    $logger.info message.message
   end
 
   def joinMessage(event)
