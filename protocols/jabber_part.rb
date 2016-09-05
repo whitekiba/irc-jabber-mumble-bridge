@@ -50,7 +50,7 @@ class JabberBridge < ModuleBase
         msg_in = @messages.pop
         if !msg_in.nil?
             if msg_in['cmd'] == 'reload'
-
+              reload
             end
         end
       end
