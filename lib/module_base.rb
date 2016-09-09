@@ -6,7 +6,7 @@ require_relative '../lib/blacklist'
 class ModuleBase
   def initialize
     $config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')
-    @timeout = 3
+    @timeout = 10
     @last_ping = Time.now
     if $config[:dev]
       $logger.info "Devmode active. loading profiler."
