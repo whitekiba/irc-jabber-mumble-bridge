@@ -24,6 +24,8 @@ class IRCBridge < ModuleBase
     IRCEvent.add_callback('join') { |event| joinMessage event }
     IRCEvent.add_callback('part') { |event| partMessage event }
     IRCEvent.add_callback('quit') { |event| quitMessage event }
+    IRCEvent.add_callback('ping') { |event| gotPing event }
+
 
     subscribe(@my_name)
     subscribe_cmd(@my_id)
@@ -43,11 +45,21 @@ class IRCBridge < ModuleBase
       end
     end
 
+    #pingchecker
+    Thread.new do
+      loop do
+        waitForTimeout
+        $logger.info "waitForTimeout ist durch. Wir brechen ab!"
+        abort #sollte waitForTimeout irgendwie beenden aborten wir in der nächsten Zeile
+      end
+    end
+
     begin
       @bot.connect
     rescue StandardError => e
       $logger.debug 'Connect failed. Stacktrace follows.'
       $logger.debug e
+      abort
     end
   end
 
@@ -89,6 +101,11 @@ class IRCBridge < ModuleBase
       self.publish(source_network_type: @my_short, source_network: @my_name,
                    nick: message.from, user_id: @channels[message.channel], message_type: 'quit')
     end
+  end
+  def gotPing(event)
+    $logger.info "Ping!"
+    $logger.debug 'resetTimeout triggered. New time!'
+    @last_ping = Time.now
   end
   #Wir reloaden das Modul
   def reload

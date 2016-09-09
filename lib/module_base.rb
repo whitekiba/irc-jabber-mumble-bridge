@@ -6,6 +6,8 @@ require_relative '../lib/blacklist'
 class ModuleBase
   def initialize
     $config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')
+    @timeout = 3
+    @last_ping = Time.now
     if $config[:dev]
       $logger.info "Devmode active. loading profiler."
       require 'ruby-prof'
@@ -133,5 +135,16 @@ class ModuleBase
       $logger.error "Command triggered exception:"
       $logger.error e
     end
+  end
+  def waitForTimeout
+    loop do
+      sleep 1
+      break if @last_ping < (Time.now - (@timeout*60))
+    end
+  end
+
+  def gotPing
+    $logger.debug 'resetTimeout triggered. New time!'
+    @last_ping = Time.now
   end
 end

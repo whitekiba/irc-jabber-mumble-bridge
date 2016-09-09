@@ -2,8 +2,17 @@ require 'mysql2'
 require 'yaml'
 require 'logger'
 
+require 'active_record'
+require 'sqlite3'
+require 'logger'
+
+#ActiveRecord::Base.logger = Logger.new('database.log')
+#configuration = YAML::load(IO.read(File.dirname(__FILE__) + '/../db/database.yml'))
+#ActiveRecord::Base.establish_connection(configuration['development'])
+
 #TODO: Hier muss noch mal alles durchgegangen werden und escaped werde
 class DbManager
+  attr_accessor :db
   def initialize
     @config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:database]
     @logger = Logger.new(File.dirname(__FILE__) + '/db_manager.log')
@@ -33,6 +42,7 @@ class DbManager
     else
       query = "SELECT * FROM servers'"
     end
+    @logger.debug query
 
     res = @db.query(query)
     res.each do |entry|
