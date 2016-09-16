@@ -97,23 +97,25 @@ class IRCBridge < ModuleBase
   end
 
   def joinMessage(event)
+    $logger.info "Join wurde aufgerufen."
+    $logger.info event
     if event.from != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: message.from, user_id: @channels[message.channel], message_type: 'join')
+                   nick: event.from, user_id: @channels[event.channel], message_type: 'join')
     end
   end
 
   def partMessage(event)
     if event.from != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: message.from, user_id: @channels[message.channel], message_type: 'part')
+                   nick: event.from, user_id: @channels[event.channel], message_type: 'part')
     end
   end
 
   def quitMessage(event)
     if event.from != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: message.from, user_id: @channels[message.channel], message_type: 'quit')
+                   nick: event.from, user_id: @channels[event.channel], message_type: 'quit')
     end
   end
   def gotPing(event)

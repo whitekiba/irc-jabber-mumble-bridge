@@ -98,13 +98,14 @@ class ModuleBase
   def publish(api_ver: '1', source_network_type: nil, source_network: nil, source_user: nil,
               message: nil, nick:, user_id:, network_id: nil , timestamp: nil,
               message_type: 'msg', attachment: nil, is_assistant: false, chat_id: nil)
+    $logger.debug ('publish wurde aufgerufen')
+
     return false if @blacklist.blacklisted?(user_id, nick)
     source_network_type = @my_name_short if source_network_type.nil?
     #TODO: testen ob das wirklich funktioniert
     unless message_type == 'join' || message_type == 'part'
       $logger.error 'Da wurde eine Fehlerhafte Nachricht gesendet.' if message.nil?
     end
-    $logger.debug ('publish wurde aufgerufen')
     json = JSON.generate ({
         'message' => message.force_encoding('UTF-8'),
         'nick' => nick,

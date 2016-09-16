@@ -17,6 +17,7 @@ gem 'ruby-prof', :platforms => :mri
 #Datenbankstuff für die bridge
 gem 'redis'
 gem 'mysql2' #mysql ist legacy. Wir stellen auf ActiveRecord um
+gem 'sqlite3'
 
 #ActiveRecord und helper
 gem 'activerecord'

@@ -150,7 +150,7 @@ loop do
   servers.each do |server|
     #TODO: Aus irgendeinem Grund sind ein paar Felder leer.
     unless server.nil?
-      if $servers[server['ID']].nil? #wir starten nur falls da noch kein Objekt von existiert
+      if servers[server['ID']].nil? #wir starten nur falls da noch kein Objekt von existiert
         begin
           Thread.new do
             jb = JabberBridge.new
