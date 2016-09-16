@@ -30,8 +30,22 @@ class TelegramBridge < ModuleBase
         unless msg_in.nil?
           $logger.info msg_in
           begin
-            @telegram.api.send_message(chat_id: @chat_ids_invert[msg_in['user_id']],
-                                       text: "[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
+            if msg_in["message_type"] == 'msg'
+              @telegram.api.send_message(chat_id: @chat_ids_invert[msg_in['user_id']],
+                                         text: "[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
+            else
+              case msg_in["message_type"]
+                when 'join'
+                  @telegram.api.send_message(chat_id: @chat_ids_invert[msg_in['user_id']],
+                                             text: "#{msg_in["nick"]} kam in den Channel")
+                when 'part'
+                  @telegram.api.send_message(chat_id: @chat_ids_invert[msg_in['user_id']],
+                                             text: "#{msg_in["nick"]} hat den Channel verlassen")
+                when 'quit'
+                  @telegram.api.send_message(chat_id: @chat_ids_invert[msg_in['user_id']],
+                                             text: "#{msg_in["nick"]} hat den Server verlassen")
+              end
+            end
           rescue StandardError => e
             $logger.error e
           end

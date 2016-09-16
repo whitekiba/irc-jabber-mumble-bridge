@@ -93,7 +93,22 @@ class TeamspeakBridge < ModuleBase
         unless msg_in.nil?
           begin
             $logger.debug "Got Textmessage from redis"
-            ts.command("sendtextmessage targetmode=2 target=#{@channel_id}", {'sid' => 1, 'msg' => "[#{msg_in['source_network_type']}][#{msg_in['nick']}]#{msg_in['message']}"})
+            if msg_in["message_type"] == 'msg'
+              ts.command("sendtextmessage targetmode=2 target=#{@channel_id}",
+                         {'sid' => 1, 'msg' => "[#{msg_in['source_network_type']}][#{msg_in['nick']}]#{msg_in['message']}"})
+            else
+              case msg_in["message_type"]
+                when 'join'
+                  ts.command("sendtextmessage targetmode=2 target=#{@channel_id}",
+                             {'sid' => 1, 'msg' => "#{msg_in["nick"]} kam in den Channel"})
+                when 'part'
+                  ts.command("sendtextmessage targetmode=2 target=#{@channel_id}",
+                             {'sid' => 1, 'msg' => "#{msg_in["nick"]} hat den Channel verlassen"})
+                when 'quit'
+                  ts.command("sendtextmessage targetmode=2 target=#{@channel_id}",
+                             {'sid' => 1, 'msg' => "#{msg_in["nick"]} hat den Server verlassen"})
+              end
+            end
           rescue Exception => e
             $logger.info 'Failed to send Message'
             $logger.info e

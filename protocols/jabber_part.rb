@@ -35,8 +35,22 @@ class JabberBridge < ModuleBase
         if !msg_in.nil?
           $logger.debug msg_in
           begin
-            @muc[@channels_invert[msg_in['user_id']]]
-                .say("[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
+            if msg_in["message_type"] == 'msg'
+              @muc[@channels_invert[msg_in['user_id']]]
+                  .say("[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
+            else
+              case msg_in["message_type"]
+                when 'join'
+                  @muc[@channels_invert[msg_in['user_id']]]
+                      .say("#{msg_in["nick"]} kam in den Channel")
+                when 'part'
+                  @muc[@channels_invert[msg_in['user_id']]]
+                      .say("#{msg_in["nick"]} hat den Channel verlassen")
+                when 'quit'
+                  @muc[@channels_invert[msg_in['user_id']]]
+                      .say("#{msg_in["nick"]} hat den Server verlassen")
+              end
+            end
           rescue StandardError => e
             $logger.error 'Unable to send message. Stacktrace follows:'
             $logger.error e

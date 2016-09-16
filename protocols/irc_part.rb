@@ -36,7 +36,22 @@ class IRCBridge < ModuleBase
           begin
             $logger.info msg_in
             #user_id ist die zuordnungsnummer
-            @bot.send_message(@channels_invert[msg_in['user_id']], "[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
+            if msg_in["message_type"] == 'msg'
+              @bot.send_message(@channels_invert[msg_in['user_id']],
+                                "[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
+            else
+              case msg_in["message_type"]
+                when 'join'
+                  @bot.send_message(@channels_invert[msg_in['user_id']],
+                                    "#{msg_in["nick"]} kam in den Channel")
+                when 'part'
+                  @bot.send_message(@channels_invert[msg_in['user_id']],
+                                    "#{msg_in["nick"]} hat den Channel verlassen")
+                when 'quit'
+                  @bot.send_message(@channels_invert[msg_in['user_id']],
+                                    "#{msg_in["nick"]} hat den Server verlassen")
+              end
+            end
           rescue StandardError => e
             $logger.debug 'Failed to send message. Stacktrace:'
             $logger.debug e
@@ -67,9 +82,8 @@ class IRCBridge < ModuleBase
     $logger.info 'handleMessage wurde aufgerufen'
     begin
       if /^\x01ACTION (.)+\x01$/.match(message.message)
-        self.publish(source_network_type: @my_short,
-                     message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}",
-                     chat_id: '-145447289')
+        self.publish(source_network_type: @my_short, source_network: @my_name,
+                     nick: message.from, message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}", user_id: @channels[message.channel])
       else
         self.publish(source_network_type: @my_short, source_network: @my_name,
                      nick: message.from, message: message.message, user_id: @channels[message.channel])
