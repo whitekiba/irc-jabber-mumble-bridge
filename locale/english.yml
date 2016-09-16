@@ -9,7 +9,8 @@ new_user: "To create a new account use:\n
 The emailaddress is optional"
 missing_parameter: "Missing parameter. The syntax is: "
 new_user_usage: "/newUser <username> [email address]"
-add_server_usage: "/addServer <type> <url> <port> <username> [optional: password]"
+add_server_usage: "/addServer <type> <url> <port> <username> [optional: password]
+Please be careful when adding a server as there is no easy way to change a server afterwards"
 add_channel_usage: "/addChannel <server_id> <channel_name> [optional: channel_password]\n
 Currently we are only able to join one channel per server"
 

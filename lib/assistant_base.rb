@@ -121,7 +121,7 @@ class AssistantBase
     end
   end
 
-  def edit_server(server_id, server_url, server_port, server_username = nil, server_password = nil)
+  def edit_server(server_id, server_url: nil, server_port: nil, server_username: nil, server_password: nil)
     if @db.allowed_server?(server_id, @userid)
 
     end
