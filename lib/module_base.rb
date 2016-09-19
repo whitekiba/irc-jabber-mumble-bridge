@@ -99,12 +99,15 @@ class ModuleBase
               message: nil, nick:, user_id: nil, network_id: nil , timestamp: nil,
               message_type: 'msg', attachment: nil, is_assistant: false, chat_id: nil)
     $logger.debug ('publish wurde aufgerufen')
+    no_user_id = [ 'broadcast' ]
 
     return false if @blacklist.blacklisted?(user_id, nick)
     $logger.debug "User war nicht blacklisted."
 
-    return false if message_type != "broadcast" && user_id.nil?
-    $logger.debug "kein broadcast und user_id nicht nil"
+    if !is_assistant
+      return false if no_user_id.has_value?(message_type) && user_id.nil?
+      $logger.debug "kein broadcast und user_id nicht nil"
+    end
 
     message = message.force_encoding('UTF-8') if !message.nil?
     $logger.debug "UTF-8 wurde forciert"
