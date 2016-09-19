@@ -121,7 +121,11 @@ class AssistantBase
     end
   end
 
-  def edit_server(server_id, server_url: nil, server_port: nil, server_username: nil, server_password: nil)
+  def edit_server(server_id = nil, server_url: nil, server_port: nil, server_username: nil, server_password: nil)
+    if server.nil? || server == '' #falls nil oder leer usage anzeigen
+      publish(message: @lang.get("edit_server_usage"), chat_id: data['chat_id'])
+      return
+    end
     if @db.allowed_server?(server_id, @userid)
 
     end

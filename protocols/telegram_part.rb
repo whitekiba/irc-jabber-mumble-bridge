@@ -105,13 +105,18 @@ class TelegramBridge < ModuleBase
     end
 
     unless msg.text.nil?
-      is_assistant = false
-      is_assistant = true if msg.chat.type.eql?('private')
-      publish(source_network_type: @my_short,
-              user_id: @chat_ids[msg.chat.id.to_s],
-              source_network: @my_name, source_user: 'empty',
-              nick: msg.from.first_name, message: msg.text,
-              is_assistant: is_assistant, chat_id: msg.chat.id)
+      begin
+        is_assistant = false
+        is_assistant = true if msg.chat.type.eql?('private')
+        publish(source_network_type: @my_short,
+                user_id: @chat_ids[msg.chat.id.to_s],
+                source_network: @my_name, source_user: 'empty',
+                nick: msg.from.first_name, message: msg.text,
+                is_assistant: is_assistant, chat_id: msg.chat.id)
+      rescue StandardError => e
+        $logger.error "publish hat eine Exception geworfen."
+        $logger.error e
+      end
     end
   end
 end

@@ -35,7 +35,7 @@ class TelegramAssistant < AssistantBase
               when '/showServers', '/listServers'
                 list_servers(msg_in)
               when '/editServer'
-                edit_server(split_message[1], split_message[2], split_message[3], split_message[4], split_message[5], split_message[6])
+                edit_server(split_message[1], split_message[2], split_message[3], split_message[4], split_message[5])
               when '/editChannel'
                 edit_channel(split_message[1], split_message[2]) #1 ist channel id, 2 ist channel name
             end
