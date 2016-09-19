@@ -105,7 +105,7 @@ class ModuleBase
     $logger.debug "User war nicht blacklisted."
 
     if !is_assistant
-      return false if no_user_id.has_value?(message_type) && user_id.nil?
+      return false if no_user_id.include?(message_type) && user_id.nil?
       $logger.debug "kein broadcast und user_id nicht nil"
     end
 
