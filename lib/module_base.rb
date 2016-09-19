@@ -101,8 +101,14 @@ class ModuleBase
     $logger.debug ('publish wurde aufgerufen')
 
     return false if @blacklist.blacklisted?(user_id, nick)
+    $logger.debug "User war nicht blacklisted."
+
     return false if message_type != "broadcast" && user_id.nil?
+    $logger.debug "kein broadcast und user_id nicht nil"
+
     message = message.force_encoding('UTF-8') if !message.nil?
+    $logger.debug "UTF-8 wurde forciert"
+
     source_network_type = @my_name_short if source_network_type.nil?
     $logger.error 'Da wurde eine Fehlerhafte Nachricht gesendet.' if message.nil? unless message_type == 'join' || message_type == 'part'
     json = JSON.generate ({

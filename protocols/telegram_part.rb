@@ -108,6 +108,7 @@ class TelegramBridge < ModuleBase
       begin
         is_assistant = false
         is_assistant = true if msg.chat.type.eql?('private')
+        $logger.debug "is_assistant ist #{is_assistant.class}"
         publish(source_network_type: @my_short,
                 user_id: @chat_ids[msg.chat.id.to_s],
                 source_network: @my_name, source_user: 'empty',
