@@ -78,18 +78,21 @@ class DbManager
   #TODO: Eine ziemlich unschöne Lösung
   # Eventuell wäre hier eine komplette Klasse nur für Server praktischer
   def edit_server(server_id, server_url, server_port, server_type, user_name = 'bridge', user_password = 'NULL', user_id = 'NULL')
-
+    @db.query("UPDATE servers SET
+        server_url = #{server_url}, server_port = #{server_port}, user_name = #{user_name}, user_password = #{user_password}, user_ID = #{user_id}
+        WHERE ID = #{server_id}")
   end
 
   #Wie bei der edit_server methode. Es wäre vielleicht eine Channel Klasse besser geeignet
   # TODO: Klasse für Channel schreiben oder das so fertigbauen
-  def edit_channel(channel_id, channel_name)
-
+  def edit_channel(channel_id, channel_name, channel_password = 'NULL')
+    @db.query("UPDATE channels SET channel_name = #{channel_name}, channel_password = #{channel_password} WHERE ID = #{channel_id}")
   end
 
   def getServerCount(user_id)
     @db.query("SELECT ID FROM servers WHERE user_ID = #{@db.escape(user_id)}").count
   end
+
   def getChannelCount(user_id, server_id = nil)
     if server_id.nil?
       @db.query("SELECT ID FROM servers WHERE user_ID = #{@db.escape(user_id)}").count
@@ -97,27 +100,31 @@ class DbManager
       @db.query("SELECT ID FROM servers WHERE user_ID = #{@db.escape(user_id)} AND server_ID LIKE '#{@db.escape(server_id)}'").count
     end
   end
+
   def server_exists?(server_type, server_url, server_port)
     if @db.query("SELECT ID FROM servers WHERE server_type LIKE '#{@db.escape(server_type)}' AND server_url LIKE '#{@db.escape(server_url)}' AND server_url LIKE '#{@db.escape(server_url)}'").count > 0
       true
     end
   end
+
   def channel_exists?(user_id, server_id, channel_name)
     if @db.query("SELECT ID FROM channels WHERE user_ID = #{@db.escape(user_id)} AND server_ID = #{@db.escape(server_id)} AND channel_name LIKE '#{@db.escape(channel_name)}'").count > 0
       true
     end
   end
+
   def hasServer?(user_id, server_type)
     if ['telegram', 'irc'].include? server_type
       true
     else
       res = @db.query("SELECT ID FROM servers WHERE user_ID = #{@db.escape(user_id)} AND server_type LIKE '#{@db.escape(server_type)}'")
       if res.count > 0
-        returntrue
+        return true
       end
       false
     end
   end
+
   def userServers(user_id)
     return_vars = Hash.new
     res = @db.query("SELECT ID, server_url, server_port, server_type FROM servers WHERE user_ID = #{@db.escape(user_id)} OR user_ID IS NULL")
@@ -126,6 +133,7 @@ class DbManager
     end
     return_vars
   end
+
   def userChannels(user_id)
     return_vars = Hash.new
     res = @db.query("SELECT ID, channel_name FROM channels WHERE user_ID = #{@db.escape(user_id)} OR user_ID IS NULL")
@@ -134,6 +142,7 @@ class DbManager
     end
     return_vars
   end
+
   def valid_server?(server_id)
     res = @db.query("SELECT ID FROM servers WHERE ID = #{@db.escape(server_id)}")
     true if res.count > 0
@@ -165,6 +174,16 @@ class DbManager
   def getServerID(server_url, server_port)
     @db.query("SELECT ID FROM servers WHERE server_url LIKE '#{@db.escape(server_url)}' AND server_port LIKE '#{@db.escape(server_port)}'").fetch_hash['ID']
   end
+
+  def get_server_type(server_id)
+    @db.query("SELECT server_type FROM servers WHERE ID = #{server_id}").fetch_hash['server_type']
+  end
+
+  def get_server_type_of_channel(channel_id)
+    server_id = @db.query("SELECT server_ID FROM channels WHERE ID = #{channel_id}").fetch_hash['server_ID']
+    get_server_type(server_id)
+  end
+
   def blacklist
     return_vars = Hash.new
     res = @db.query('SELECT * FROM ignorelist')

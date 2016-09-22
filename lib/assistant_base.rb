@@ -127,13 +127,13 @@ class AssistantBase
       return
     end
     if @db.allowed_server?(server_id, @userid)
-
+      @db.edit_server(server_id, server_url, server_port, server_username, server_password)
     end
   end
 
   def edit_channel(channel_id, channel_name)
     if @db.allowed_channel?(channel_id, @userid)
-
+      @db.edit_channel(channel_id, channel_name)
     end
   end
 
@@ -157,8 +157,10 @@ class AssistantBase
   end
 
   def del_channel(channel_id)
+    type  = @db.get_server_type_of_channel(channel_id)
     if @db.allowed_channel?(channel_id, @userid)
       @db.del_channel(channel_id)
+      reload(type)
     end
   end
 
