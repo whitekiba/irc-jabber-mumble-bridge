@@ -79,6 +79,7 @@ class IRCBridge < ModuleBase
   end
 
   def handleMessage(message)
+    gotPing(message)
     $logger.info 'handleMessage wurde aufgerufen'
     begin
       if /^\x01ACTION (.)+\x01$/.match(message.message)
