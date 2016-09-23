@@ -14,7 +14,6 @@ class TelegramAssistant < AssistantBase
     subscribe('telegram')
     Thread.new do
       loop do
-        sleep 0.1
         begin
           msg_in = @assistant_message.pop
           unless msg_in.nil?
@@ -22,6 +21,7 @@ class TelegramAssistant < AssistantBase
             $logger.debug msg_in
             split_message = msg_in['message'].split(' ')
             $logger.debug split_message
+            @chat_id = msg_in['chat_id']
             case split_message[0]
               when '/test'
                 $logger.debug 'test matched. calling method!'

@@ -17,8 +17,9 @@ class AssistantBase
 
     @last_command = Time.now
     @next_step = Array.new
-    @assistant_message = Array.new
+    @assistant_message = Queue.new
     @db = DbManager.new
+    @chat_id = 0
     @redis_pub = Redis.new(:host => 'localhost', :port => 7777)
     @redis_sub = Redis.new(:host => 'localhost', :port => 7777)
     @valid_servers = {'telegram' => 'Telegram',
@@ -52,7 +53,7 @@ class AssistantBase
 
         #url validieren
         unless server_url.valid_url?
-          publish(message: 'Invalid URL! Exiting hard!', chat_id: data['chat_id'])
+          publish(message: 'Invalid URL! Exiting hard!', chat_id: @chat_id)
           return
         end
 
@@ -68,21 +69,21 @@ class AssistantBase
           server_username = 'bridgie'
         else
           unless /^[a-z0-9_]+$/.match(server_username)
-            publish(message: @lang.get("invalid_username"), chat_id: data['chat_id'])
+            publish(message: @lang.get("invalid_username"), chat_id: @chat_id)
             return
           end
         end
 
         if @db.server_exists?(server_type, server_url, server_port)
-          publish(message: @lang.get("server_already_exists"), chat_id: data['chat_id'])
+          publish(message: @lang.get("server_already_exists"), chat_id: @chat_id)
         else
           if @db.addServer(server_url, server_port, server_type, server_password, server_username)
-            publish(message: 'Server sucessfully added.', chat_id: data['chat_id'])
+            publish(message: 'Server sucessfully added.', chat_id: @chat_id)
           end
         end
 
       else
-        publish(message: 'You are not allowed to add a server of that type', chat_id: data['chat_id'])
+        publish(message: 'You are not allowed to add a server of that type', chat_id: @chat_id)
       end
     rescue StandardError => e
       $logger.error 'Error ocurred while creating new Server. Stacktrace follows'
@@ -96,25 +97,25 @@ class AssistantBase
 
         #server_id checken ob es ne nummer ist
         if !server_id.is_a?(Fixnum)
-          publish(message: @lang.get('invalid_id'), chat_id: data['chat_id'])
+          publish(message: @lang.get('invalid_id'), chat_id: @chat_id)
           return
         end
 
         if @db.channel_exists?(@userid, server_id, channel_name)
-          publish(message: @lang.get("channel_already_exists"), chat_id: data['chat_id'])
+          publish(message: @lang.get("channel_already_exists"), chat_id: @chat_id)
         else
           if @db.getChannelCount(@user_id, server_id) > 1
             #TODO: Message anpassen
-            publish(message: '1 Channel max.', chat_id: data['chat_id'])
+            publish(message: '1 Channel max.', chat_id: @chat_id)
           else
             if @db.addChannel(@userid, server_id, channel_name)
-              publish(message: @lang.get("channel_added"), chat_id: data['chat_id'])
+              publish(message: @lang.get("channel_added"), chat_id: @chat_id)
               reload(server_id)
             end
           end
         end
       else
-        publish(message: @lang.get('no_server'), chat_id: data['chat_id'])
+        publish(message: @lang.get('no_server'), chat_id: @chat_id)
       end
     rescue StandardError => e
       $logger.error e
@@ -123,23 +124,49 @@ class AssistantBase
 
   def edit_server(server_id = nil, server_url: nil, server_port: nil, server_username: nil, server_password: nil)
     if server.nil? || server == '' #falls nil oder leer usage anzeigen
-      publish(message: @lang.get("edit_server_usage"), chat_id: data['chat_id'])
+      publish(message: @lang.get("edit_server_usage"), chat_id: @chat_id)
       return
     end
+
+    unless server_url.valid_url?
+      publish(message: 'Invalid URL! Exiting hard!', chat_id: @chat_id)
+      return
+    end
+
+    #username checken
+    unless server_username.nil?
+      $logger.info 'Setting server username to bridgie'
+      server_username = 'bridgie'
+    else
+      unless /^[a-z0-9_]+$/.match(server_username)
+        publish(message: @lang.get("invalid_username"), chat_id: @chat_id)
+        return
+      end
+    end
+
     if @db.allowed_server?(server_id, @userid)
       @db.edit_server(server_id, server_url, server_port, server_username, server_password)
+      reload(@db.get_server_type(server_id))
     end
   end
 
   def edit_channel(channel_id, channel_name)
     if @db.allowed_channel?(channel_id, @userid)
       @db.edit_channel(channel_id, channel_name)
+      reload(@db.get_server_type_of_channel(channel_id))
     end
   end
 
   #Hier müssen wir zusehen dass wir das sehr gut sichern und alle Channel mitlöschen
   #
   def del_server(server_id)
+
+    #server_id checken ob es ne nummer ist
+    if !server_id.is_a?(Fixnum)
+      publish(message: @lang.get('invalid_id'), chat_id: @chat_id)
+      return
+    end
+
     if @db.allowed_server?(server_id, @userid) #user darf das ding benutzen
       begin
         @db.loadChannels(server_id).each do |key, value|
@@ -148,11 +175,13 @@ class AssistantBase
       rescue StandardError => e
         $logger.error "Fehler beim löschen! Schau dir die Exception an:"
         $logger.error e
-        publish(message: @lang.get("unable_delete_channel"), chat_id: data['chat_id'])
-        publish(message: @lang.get("unable_delete_server"), chat_id: data['chat_id'])
+        publish(message: @lang.get("unable_delete_channel"), chat_id: @chat_id)
+        publish(message: @lang.get("unable_delete_server"), chat_id: @chat_id)
         return #wir würgen den aufruf der methode ab
       end
+      server_type = @db.get_server_type(sever_id)
       @db.del_server(server_id)
+      reload(server_type)
     end
   end
 

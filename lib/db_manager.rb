@@ -63,16 +63,18 @@ class DbManager
   end
 
   def addServer(server_url, server_port, server_type, user_name = 'bridge', user_password = 'NULL', user_id = 'NULL')
-    server_port.to_int if server_port.respond_to?(:to_int)
-    user_id = 'NULL' if user_id.nil?
-    user_password = 'NULL' if user_password.nil?
-    user_name = 'bridgie' if user_name.nil?
-    sql = "INSERT INTO `servers` (`ID`, `user_ID`, `server_url`, `server_port`, `server_type`, `user_name`, `user_password`)
-            VALUES (NULL, #{@db.escape(user_id)}, '#{@db.escape(server_url)}', '#{@db.escape(server_port)}', '#{@db.escape(server_type)}', '#{@db.escape(user_name)}', '#{@db.escape(user_password)}');"
-    @logger.debug sql
-    res = @db.query(sql)
-    @logger.debug res
-    #TODO: Reload starten oder planen
+    if !server_exists?(server_type, server_url, server_port)
+      server_port.to_int if server_port.respond_to?(:to_int)
+      user_id = 'NULL' if user_id.nil?
+      user_password = 'NULL' if user_password.nil?
+      user_name = 'bridgie' if user_name.nil?
+      sql = "INSERT INTO `servers` (`ID`, `user_ID`, `server_url`, `server_port`, `server_type`, `user_name`, `user_password`)
+              VALUES (NULL, #{@db.escape(user_id)}, '#{@db.escape(server_url)}', '#{@db.escape(server_port)}', '#{@db.escape(server_type)}', '#{@db.escape(user_name)}', '#{@db.escape(user_password)}');"
+      @logger.debug sql
+      res = @db.query(sql)
+      @logger.debug res
+      #TODO: Reload starten oder planen
+    end
   end
 
   #TODO: Eine ziemlich unschöne Lösung
