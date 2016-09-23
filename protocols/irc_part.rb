@@ -145,7 +145,15 @@ class IRCBridge < ModuleBase
         @bot.add_channel(key)
       end
     }
+
+    #wir verlassen channel die nicht existieren
+    @bot.channels.each { |value|
+      if !@channels.has_value?(value)
+        @bot.part(value)
+      end
+    }
   end
+  
   #diese Methode lädt settings aus der Datenbank und überschreibt bestehende
   #wird von reload und receive aufgerufen
   def loadSettings
