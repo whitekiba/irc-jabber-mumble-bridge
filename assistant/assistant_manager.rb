@@ -67,9 +67,9 @@ class AssistantManager
     if @assistants["#{parsed_message['source_network']}_#{@active_users[parsed_message['chat_id']]}"].nil?
       case split_message[0]
         when '/auth'
-          auth(split_message[1], split_message[2])
+          auth(parsed_message['chat_id'], parsed_message['source_network'], split_message[1], split_message[2])
         when '/newUser'
-          new_user(split_message[1], split_message[2])
+          new_user(parsed_message['chat_id'], split_message[1], split_message[2])
         else
           aboutMe(parsed_message['chat_id'])
       end
@@ -111,42 +111,42 @@ class AssistantManager
   end
   private
 
-  def new_user(username, email = nil)
+  def new_user(chat_id, username, email = nil)
     if username.nil?
-      publish(message: @lang.get("missing_parameter"), chat_id: parsed_message['chat_id'])
-      publish(message: @lang.get("new_user_usage"), chat_id: parsed_message['chat_id'])
+      publish(message: @lang.get("missing_parameter"), chat_id: chat_id)
+      publish(message: @lang.get("new_user_usage"), chat_id: chat_id)
     else #wir erstellen einen neuen User. Alle Parameter sind okay
       #User erstellen
       begin
-        publish(message: create_user(username, email), chat_id: parsed_message['chat_id'])
+        publish(message: create_user(username, email), chat_id: chat_id)
       rescue StandardError => e
-        publish(message: @lang.get("error_occured"), chat_id: parsed_message['chat_id'])
+        publish(message: @lang.get("error_occured"), chat_id: chat_id)
         $logger.error e
       end
     end
   end
 
-  def auth(username, password)
+  def auth(chat_id, network, username, password)
     #checken ob nötige parameter gesetzt sind
     if username.nil? || password.nil?
-      publish(message: @lang.get("missing_parameter"), chat_id: parsed_message['chat_id'])
-      publish(message: @lang.get("auth_usage"), chat_id: parsed_message['chat_id'])
+      publish(message: @lang.get("missing_parameter"), chat_id: chat_id)
+      publish(message: @lang.get("auth_usage"), chat_id: chat_id)
       return #abwürgen
     end
 
     userid = @db.authUser(username, password)
     if userid
-      publish(message: 'authenticated!', chat_id: parsed_message['chat_id'])
+      publish(message: 'authenticated!', chat_id: chat_id)
       begin
-        @active_users[parsed_message['chat_id']] = userid
+        @active_users[chat_id] = userid
         $logger.info 'Starting new assistant'
-        startNewAssistant(parsed_message['source_network'], @active_users[parsed_message['chat_id']])
+        startNewAssistant(network, @active_users[chat_id])
       rescue StandardError => e
         $logger.error 'Error while starting assistant'
         $logger.error e
       end
     else
-      publish(message: 'wrong username or password!', chat_id: parsed_message['chat_id'])
+      publish(message: 'wrong username or password!', chat_id: chat_id)
     end
   end
 

@@ -119,11 +119,13 @@ class IRCBridge < ModuleBase
                    nick: event.from, user_id: @channels[event.channel], message_type: 'quit')
     end
   end
+
   def gotPing(event)
     $logger.info "Ping!"
     $logger.debug 'resetTimeout triggered. New time!'
     @last_ping = Time.now
   end
+
   #Wir reloaden das Modul
   def reload
     begin
@@ -153,7 +155,7 @@ class IRCBridge < ModuleBase
       end
     }
   end
-  
+
   #diese Methode lädt settings aus der Datenbank und überschreibt bestehende
   #wird von reload und receive aufgerufen
   def loadSettings
