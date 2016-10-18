@@ -36,11 +36,11 @@ class DbManager
   def loadServers(server_type = nil, user_id = nil)
     servers = Array.new
     if !server_type.nil?
-      query = "SELECT * FROM servers WHERE server_type LIKE '#{@db.escape(server_type)}'"
+      query = "SELECT * FROM servers WHERE server_type LIKE '#{@db.escape(server_type)}' AND status = 1"
     elsif !user_id.nil?
-      query = "SELECT * FROM servers WHERE user_ID = '#{@db.escape(user_id)}'"
+      query = "SELECT * FROM servers WHERE user_ID = '#{@db.escape(user_id)}' AND status = 1"
     else
-      query = "SELECT * FROM servers'"
+      query = "SELECT * FROM servers WHERE status = 1"
     end
     @logger.debug query
 

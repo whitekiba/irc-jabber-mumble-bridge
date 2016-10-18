@@ -141,6 +141,7 @@ class IRCBridge < ModuleBase
 
   def joinChannels
     $logger.info 'Got motd. Joining Channels.'
+    $logger.debug @channels
     @channels.each_key { |key|
       if !@bot.channels.include? key
         $logger.info "Channel gejoint! (#{key})"
