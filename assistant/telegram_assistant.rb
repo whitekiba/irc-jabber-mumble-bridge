@@ -26,16 +26,16 @@ class TelegramAssistant < AssistantBase
               when '/test'
                 $logger.debug 'test matched. calling method!'
                 test(msg_in)
-              when '/addServer', '/newServer'
-                addServer(split_message[1], split_message[2], split_message[3], split_message[4], split_message[5])
+              #when '/addServer', '/newServer'
+              #  addServer(split_message[1], split_message[2], split_message[3], split_message[4], split_message[5])
               when '/addChannel', '/newChannel'
                 add_channel(split_message[1], split_message[2])
               when '/showChannels', '/listChannels'
                 list_channels(msg_in)
               when '/showServers', '/listServers'
                 list_servers(msg_in)
-              when '/editServer'
-                edit_server(split_message[1], split_message[2], split_message[3], split_message[4], split_message[5])
+              #when '/editServer'
+              #  edit_server(split_message[1], split_message[2], split_message[3], split_message[4], split_message[5])
               when '/editChannel'
                 edit_channel(split_message[1], split_message[2]) #1 ist channel id, 2 ist channel name
             end

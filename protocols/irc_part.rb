@@ -18,7 +18,7 @@ class IRCBridge < ModuleBase
     $logger.debug @channels_invert
     $logger.debug "Starting Server. Credentials: #{server_url}, #{server_port}, #{server_username}"
 
-    @bot = IRC.new(server_username, server_url, server_port, server_username)
+    @bot = IRC.new(server_username, server_url, server_port, "Bot! Admin: WhiteKIBA")
     IRCEvent.add_callback('endofmotd') { |event| joinChannels }
     IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }
     IRCEvent.add_callback('join') { |event| joinMessage event }
@@ -72,7 +72,7 @@ class IRCBridge < ModuleBase
     begin
       @bot.connect
     rescue StandardError => e
-      $logger.debug 'Connect failed. Stacktrace follows.'
+      $logger.debug "Connect failed for #{@my_id}. Stacktrace follows."
       $logger.debug e
       abort
     end
