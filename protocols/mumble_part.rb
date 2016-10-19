@@ -17,8 +17,8 @@ class MumbleBridge < ModuleBase
     @db = DbManager.new
     $logger.info 'New Mumble Server started.'
 
-    @channels = @db.loadChannels(server_id)
-    @channels_invert = @channels.invert
+    @@channels = @db.loadChannels(server_id)
+    @channels_invert = @@channels.invert
 
     @mumble = Mumble::Client.new(server_url, server_port) do |config| config.username = server_username end
     @mumble.on_text_message do |msg| handleMessage(msg) end
@@ -76,8 +76,8 @@ class MumbleBridge < ModuleBase
       if username == @conf[:username] #if the event is triggered by bridge
         @channel_id = msg.channel_id
       else
-        if @mumble.channels[msg.channel_id].respond_to? :name
-          if @mumble.channels[msg.channel_id].name == @conf[:channel] || @mumble.users[msg.session].channel_id == @channel_id
+        if @mumble.@channels[msg.channel_id].respond_to? :name
+          if @mumble.@channels[msg.channel_id].name == @conf[:channel] || @mumble.users[msg.session].channel_id == @channel_id
             self.publish(source_network_type: @my_short, source_network: @my_name,
                          nick: username, user_id: @user_id, message_type: 'join')
           end

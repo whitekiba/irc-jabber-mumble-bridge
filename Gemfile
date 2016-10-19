@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'Ruby-IRC'
+gem 'cinch'
 gem 'xmpp4r'
 gem 'mumble-ruby'
 gem 'sanitize'

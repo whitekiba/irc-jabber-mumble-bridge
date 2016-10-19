@@ -1,5 +1,5 @@
 require 'rubygems'
-require 'IRC'
+require 'cinch'
 require_relative '../lib/module_base'
 require_relative '../lib/db_manager'
 require 'logger'
@@ -13,19 +13,42 @@ class IRCBridge < ModuleBase
     @my_username = server_username
     @my_short = 'I'
     @my_id = server_id
+    @@channels = Hash.new
+    @@channels_array = Array.new
 
     loadSettings
     $logger.debug @channels_invert
-    $logger.debug "Starting Server. Credentials: #{server_url}, #{server_port}, #{server_username}"
+    $logger.debug "Starting Server. My ID: #{server_id} Credentials: #{server_url}, #{server_port}, #{server_username}"
 
-    @bot = IRC.new(server_username, server_url, server_port, "Bot! Admin: WhiteKIBA")
-    IRCEvent.add_callback('endofmotd') { |event| joinChannels }
-    IRCEvent.add_callback('privmsg') { |event| handleMessage(event) }
-    IRCEvent.add_callback('join') { |event| joinMessage event }
-    IRCEvent.add_callback('part') { |event| partMessage event }
-    IRCEvent.add_callback('quit') { |event| quitMessage event }
-    IRCEvent.add_callback('ping') { |event| gotPing event }
+    @bot = Cinch::Bot.new do
+      configure do |c|
+        c.server = server_url
+        c.port = server_port
+        c.nick = server_username
+        c.user = server_username
+        c.realname = "Bot! Admin: WhiteKIBA"
+        c.channels = @@channels_array
+      end
 
+      on :privmsg do |m|
+        handle_message(m)
+      end
+      on :endofmotd do |m|
+        joinChannels
+      end
+      on :join do |m|
+        joinMessage(m)
+      end
+      on :part do |m|
+        partMessage(m)
+      end
+      on :quit do |m|
+        quitMessage(m)
+      end
+      on :ping do |m|
+        gotPing(m)
+      end
+    end
 
     subscribe(@my_name)
     subscribe_cmd(@my_id)
@@ -37,19 +60,19 @@ class IRCBridge < ModuleBase
             $logger.info msg_in
             #user_id ist die zuordnungsnummer
             if msg_in["message_type"] == 'msg'
-              @bot.send_message(@channels_invert[msg_in['user_id']],
-                                "[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
+              Channel(@channels_invert[msg_in['user_id']])
+                  .send("[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
             else
               case msg_in["message_type"]
                 when 'join'
-                  @bot.send_message(@channels_invert[msg_in['user_id']],
-                                    "#{msg_in["nick"]} kam in den Channel")
+                  Channel(@channels_invert[msg_in['user_id']])
+                      .send("#{msg_in["nick"]} kam in den Channel")
                 when 'part'
-                  @bot.send_message(@channels_invert[msg_in['user_id']],
-                                    "#{msg_in["nick"]} hat den Channel verlassen")
+                  Channel(@channels_invert[msg_in['user_id']])
+                      .send("#{msg_in["nick"]} hat den Channel verlassen")
                 when 'quit'
-                  @bot.send_message(@channels_invert[msg_in['user_id']],
-                                    "#{msg_in["nick"]} hat den Server verlassen")
+                  Channel(@channels_invert[msg_in['user_id']])
+                      .send("#{msg_in["nick"]} hat den Server verlassen")
               end
             end
           rescue StandardError => e
@@ -70,7 +93,7 @@ class IRCBridge < ModuleBase
     end
 
     begin
-      @bot.connect
+      @bot.start
     rescue StandardError => e
       $logger.debug "Connect failed for #{@my_id}. Stacktrace follows."
       $logger.debug e
@@ -78,16 +101,20 @@ class IRCBridge < ModuleBase
     end
   end
 
-  def handleMessage(message)
+  def handle_message(message)
     gotPing(message)
     $logger.info 'handleMessage wurde aufgerufen'
+    $logger.debug message
+    $logger.debug 'My channels!'
+    $logger.debug @@channels
+    $logger.debug "Object ID of channels inside handleMessage: #{@@channels.object_id}"
     begin
       if /^\x01ACTION (.)+\x01$/.match(message.message)
         self.publish(source_network_type: @my_short, source_network: @my_name,
-                     nick: message.from, message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}", user_id: @channels[message.channel])
+                     nick: message.from, message: " * [#{message.from}] #{message.message.gsub(/^\x01ACTION |\x01$/, '')}", user_id: @@channels[message.channel])
       else
         self.publish(source_network_type: @my_short, source_network: @my_name,
-                     nick: message.from, message: message.message, user_id: @channels[message.channel])
+                     nick: message.from, message: message.message, user_id: @@channels[message.channel])
       end
       $logger.info message.message
     rescue StandardError => e
@@ -102,21 +129,21 @@ class IRCBridge < ModuleBase
     $logger.info event
     if event.from != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: event.from, user_id: @channels[event.channel], message_type: 'join')
+                   nick: event.from, user_id: @@channels[event.channel], message_type: 'join')
     end
   end
 
   def partMessage(event)
     if event.from != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: event.from, user_id: @channels[event.channel], message_type: 'part')
+                   nick: event.from, user_id: @@channels[event.channel], message_type: 'part')
     end
   end
 
   def quitMessage(event)
     if event.from != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: event.from, user_id: @channels[event.channel], message_type: 'quit')
+                   nick: event.from, user_id: @@channels[event.channel], message_type: 'quit')
     end
   end
 
@@ -141,17 +168,17 @@ class IRCBridge < ModuleBase
 
   def joinChannels
     $logger.info 'Got motd. Joining Channels.'
-    $logger.debug @channels
-    @channels.each_key { |key|
+    $logger.debug @@channels
+    @@channels.each_key { |key|
       if !@bot.channels.include? key
         $logger.info "Channel gejoint! (#{key})"
-        @bot.add_channel(key)
+        @bot.join(key)
       end
     }
 
     #wir verlassen channel die nicht existieren
     @bot.channels.each { |value|
-      if !@channels.has_value?(value)
+      if !@@channels.has_value?(value)
         @bot.part(value)
       end
     }
@@ -160,12 +187,16 @@ class IRCBridge < ModuleBase
   #diese Methode lädt settings aus der Datenbank und überschreibt bestehende
   #wird von reload und receive aufgerufen
   def loadSettings
-    @channels = @db.loadChannels(@my_id)
-    @channels_invert = @channels.invert
+    @@channels = @db.loadChannels(@my_id).dup
+    @@channels.each_pair { |key, value|
+      @@channels_array.push key
+    }
+    $logger.debug "Object of channels: #{@@channels.object_id}"
+    @channels_invert = @@channels.invert.dup
   end
 end
 
-$servers = Array.new
+$servers = Hash.new
 
 #server starting stuff
 #wir müssen für jeden Server eine eigene Instanz der IRCBridge erzeugen
@@ -182,16 +213,18 @@ loop do
     unless server.nil?
       if $servers[server['ID']].nil?
         begin
-          Thread.new do
+          Thread.new {
             $servers[server['ID']] = IRCBridge.new
             $servers[server['ID']].receive(server['ID'], server['server_url'], server['server_port'], server['user_name'])
-          end
+          }
         rescue StandardError => e
           $logger.debug 'IRC crashed. Stacktrace follows.'
           $logger.debug e
         end
       end
     end
+    #$logger.debug $servers
+    sleep 3
   end
   sleep 60 #60 sekunden sollte ausreichend häufig sein
 end

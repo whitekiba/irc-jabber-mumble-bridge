@@ -78,24 +78,24 @@ class JabberBridge < ModuleBase
     $logger.debug 'handleMessage called.'
     $logger.debug message
     self.publish(source_network_type: @my_short, source_network: @my_name,
-                 nick: nick, message: message, user_id: @channels[channel])
+                 nick: nick, message: message, user_id: @@channels[channel])
   end
   def handleJoin(nick)
     $logger.debug 'handleJoin called.'
     self.publish(source_network_type: @my_short, source_network: @my_name,
-                 nick: nick, user_id: @channels[channel], message_type: 'join')
+                 nick: nick, user_id: @@channels[channel], message_type: 'join')
   end
   def handleLeave(nick)
     $logger.debug 'handleLeave called.'
     self.publish(source_network_type: @my_short, source_network: @my_name,
-                 nick: nick, user_id: @channels[channel], message_type: 'part')
+                 nick: nick, user_id: @@channels[channel], message_type: 'part')
   end
 
   def join_channels
-    @channels = @db.loadChannels(@my_id)
-    $logger.debug @channels
+    @@channels = @db.loadChannels(@my_id)
+    $logger.debug @@channels
     #wird genutzt für die channel zu user zuordnung. channel name => user id
-    @channels_invert = @channels.invert
+    @channels_invert = @@channels.invert
 
     #wir schreiben unsere Channel in den @muc hash.
     $logger.debug @channels_invert

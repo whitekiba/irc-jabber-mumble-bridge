@@ -30,7 +30,7 @@ class DbManager
     res.each do |entry|
       channels[entry['channel_name']] = entry['user_ID']
     end
-    channels
+    return channels
   end
 
   def loadServers(server_type = nil, user_id = nil)

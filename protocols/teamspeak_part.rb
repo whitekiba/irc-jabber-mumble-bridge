@@ -23,7 +23,7 @@ class TeamspeakBridge < ModuleBase
     @my_name = 'ts'
     @my_short = 'TS'
     @my_id = server_id
-    @channels = Hash.new
+    @@channels = Hash.new
     @db = DbManager.new
 
     #TODO: Das ist unschön. Hier sollte alles geladen werden
@@ -38,7 +38,7 @@ class TeamspeakBridge < ModuleBase
 
       #IDs beziehen
       @channel_id = ts.command("channelfind pattern=#{channel_name}", sid: 1)['cid']
-      @channels[@channel_id] = user_id
+      @@channels[@channel_id] = user_id
       whoami = ts.command("whoami", sid: 1)
       @my_ts_id = whoami['client_id']
       @my_username = whoami['client_login_name']
@@ -78,7 +78,7 @@ class TeamspeakBridge < ModuleBase
             self.publish(source_network_type: @my_short, source_network: @my_name,
                          nick: parsed_response[0]['invokername'],
                          message: parsed_response[0]['msg'],
-                         user_id: @channels[@channel_id])
+                         user_id: @@channels[@channel_id])
           end
         end
       rescue StandardError => e
