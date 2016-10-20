@@ -4,7 +4,12 @@ require 'yaml'
 require_relative '../lib/blacklist'
 
 class ModuleBase
+  #compat für Cinch
   def initialize
+    setup_base
+  end
+
+  def setup_base
     $config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')
     @timeout = 10
     @last_ping = Time.now
@@ -29,6 +34,7 @@ class ModuleBase
     @messages_cmd = Queue.new
     @assistantMessages = Queue.new
   end
+
   def subscribe(name)
     Thread.new do
       $logger.info('Thread gestartet!')

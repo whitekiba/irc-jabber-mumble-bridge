@@ -5,6 +5,7 @@ require 'logger'
 require 'active_record'
 require 'sqlite3'
 require 'logger'
+require 'childprocess'
 
 #ActiveRecord::Base.logger = Logger.new('database.log')
 #configuration = YAML::load(IO.read(File.dirname(__FILE__) + '/../db/database.yml'))
@@ -49,6 +50,14 @@ class DbManager
       servers[entry['ID']] = entry
     end
     servers
+  end
+
+  def load_server(server_id)
+    query = "SELECT * FROM servers WHERE ID = #{server_id}"
+    @logger.debug query
+
+    res = @db.query(query)
+    res.first
   end
 
   #server hinzufügen. Im Grunde nur aliase für addServer
