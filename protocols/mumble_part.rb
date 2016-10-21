@@ -55,6 +55,7 @@ class MumbleBridge < ModuleBase
     $logger.info 'handleMessage wurde aufgerufen.'
     $logger.debug msg.to_hash()
     if /#{@conf[:username]} (.*)/.match(msg.message)
+      #TODO: Was ist das?! Kann das was oder soll das weg?
       $logger.info 'Hier fehlt der Kommandocode fuer Mumble'
     else
       if @mumble.users[msg.actor].respond_to? :name
@@ -74,7 +75,7 @@ class MumbleBridge < ModuleBase
       if username == @conf[:username] #if the event is triggered by bridge
         @channel_id = msg.channel_id
       else
-        
+
         if @mumble.channels[msg.channel_id].respond_to? :name
           if @mumble.channels[msg.channel_id].name == @conf[:channel] || @mumble.users[msg.session].channel_id == @channel_id
             self.publish(source_network_type: @my_short, source_network: @my_name,
