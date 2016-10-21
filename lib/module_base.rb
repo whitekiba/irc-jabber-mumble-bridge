@@ -18,6 +18,8 @@ class ModuleBase
 
     @timeout = 10
     @my_name = "unnamed"
+    @@channels = Hash.new
+    @channels_invert = Hash.new
     @last_ping = Time.now
 
     if $config[:dev]
