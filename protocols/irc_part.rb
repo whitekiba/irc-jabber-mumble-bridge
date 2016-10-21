@@ -113,7 +113,7 @@ class IRCBridge < ModuleBase
 
   listen_to :privmsg, method: :handle_message
   def handle_message(message)
-    gotPing(message)
+    got_ping(message)
     $logger.info 'handleMessage wurde aufgerufen'
     $logger.debug message
     $logger.debug 'My channels!'
@@ -161,7 +161,8 @@ class IRCBridge < ModuleBase
     end
   end
 
-  def gotPing(event)
+  listen_to :ping, method: :got_ping
+  def got_ping(event)
     $logger.info "Ping!"
     $logger.debug 'resetTimeout triggered. New time!'
     @last_ping = Time.now
