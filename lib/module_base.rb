@@ -5,6 +5,9 @@ require_relative '../lib/blacklist'
 
 class ModuleBase
   #compat für Cinch
+  #Das IRC Modul nutzt cinch. Cinch überschreibt den parent constructor
+  # aus diesem Grund rufen wir in irc_part.rb nur setup_base auf
+  #alle übrigen können einfach initialize automatisch nutzen
   def initialize
     setup_base
   end
@@ -15,6 +18,7 @@ class ModuleBase
 
     @timeout = 10
     @last_ping = Time.now
+
     if $config[:dev]
       $logger.info "Devmode active. loading profiler."
       require 'ruby-prof'
@@ -25,6 +29,7 @@ class ModuleBase
         printer.print(STDOUT)
       })
     end
+
     @single_con_networks = %w(I T)
     $logger.info "Subscribing on redis..."
     @blacklist = Blacklist.new
@@ -37,6 +42,10 @@ class ModuleBase
     @assistantMessages = Queue.new
   end
 
+  #primärer Redis publish channel
+  # hier liegt das Workhorse des Systems. Nachrichten kommen rein und werden in den Channel gesendet
+  # Hier ist darauf zu achten dass der Overhead so gering wie möglich gehalten wird. Später wird in diesem Thread 99% der Last entstehen
+  #
   def subscribe(name)
     Thread.new do
       $logger.info('Thread gestartet!')
@@ -56,6 +65,7 @@ class ModuleBase
       end
     end
   end
+
   #Der Commandchannel. Schläft mehr und subscribed
   def subscribe_cmd(id)
     Thread.new do
@@ -81,6 +91,9 @@ class ModuleBase
       end
     end
   end
+
+  #Channel für Assistenten
+  #Hier wird auf passende Nachrichten gewartet und entsprechend reagiert
   def subscribeAssistant(name)
     Thread.new do
       $logger.info('Thread gestartet!')
@@ -103,6 +116,7 @@ class ModuleBase
       end
     end
   end
+
   def publish(api_ver: '1', source_network_type: nil, source_network: nil, source_user: nil,
               message: nil, nick:, user_id: nil, network_id: nil , timestamp: nil,
               message_type: 'msg', attachment: nil, is_assistant: false, chat_id: nil)
@@ -139,6 +153,7 @@ class ModuleBase
     @redis_pub.publish("msg.#{source_network}", json) if !is_assistant
     @redis_pub.publish('assistant_all', json) if is_assistant #wir publishen nicht auf assistant.*
   end
+
   #TODO: Hier könnte man das interne befehlssystem reinhängen
   def command(command, args = nil)
     begin
@@ -153,6 +168,7 @@ class ModuleBase
       $logger.error e
     end
   end
+
   def waitForTimeout
     loop do
       sleep 1
