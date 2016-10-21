@@ -17,7 +17,7 @@ class TelegramBridge < ModuleBase
     @telegram = Telegram::Bot::Client.new($config[:telegram][:token], logger: $logger)
 
     #Channel laden
-    loadChannels
+    loadSettings
 
     #assistenten subscribe
     subscribe(@my_name)
@@ -29,7 +29,7 @@ class TelegramBridge < ModuleBase
         msg_in = @messages.pop
         #$logger.debug("Length of @message seen by #{@my_name}: #{@messages.length}")
         unless msg_in.nil?
-          $logger.info msg_in
+          $logger.debug msg_in
           begin
             if msg_in["message_type"] == 'msg'
               @telegram.api.send_message(chat_id: @@channels_invert[msg_in['user_id']],
@@ -58,10 +58,10 @@ class TelegramBridge < ModuleBase
       loop do
         msg_in = @assistantMessages.pop
         unless msg_in.nil?
-          $logger.info 'Got Assistant message'
+          $logger.debug 'Got Assistant message'
           begin
-            $logger.info msg_in
-            $logger.info msg_in['reply_markup'].class
+            $logger.debug msg_in
+            $logger.debug msg_in['reply_markup'].class
             @telegram.api.send_message(chat_id: msg_in['chat_id'], text: msg_in['message'], reply_markup: msg_in['reply_markup'])
           rescue StandardError => e
             $logger.error 'Got Exception!'
@@ -70,7 +70,7 @@ class TelegramBridge < ModuleBase
         end
       end
     end
-    
+
     #TODO: Weiterer Thread um Nachrichten direkt an User zu senden.
     # Das ganze kriegt einen eigenen Channel
     # In der eingehenden Nachricht wird es keine chat_id geben. Stattdessen wird die Userid aus der Datenbank gesendet.
@@ -94,7 +94,8 @@ class TelegramBridge < ModuleBase
 
   def handleMessage(msg)
     #$logger.info 'handleMessage wurde aufgerufen!'
-    $logger.info msg
+    $logger.debug msg
+
     #das hier ist die nachricht falls die bridge im chat noch nicht registriert wurde
     if @@channels[msg.chat.id.to_s].nil?
       unless msg.new_chat_member.nil?
