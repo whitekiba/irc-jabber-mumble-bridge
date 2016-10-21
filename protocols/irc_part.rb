@@ -71,28 +71,30 @@ class IRCBridge < ModuleBase
       loop do
         msg_in = @messages.pop
         unless msg_in.nil?
-          begin
-            $logger.info msg_in
-            #user_id ist die zuordnungsnummer
-            if msg_in["message_type"] == 'msg'
-              Channel(@channels_invert[msg_in['user_id']])
-                  .send("[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
-            else
-              case msg_in["message_type"]
-                when 'join'
-                  Channel(@channels_invert[msg_in['user_id']])
-                      .send("#{msg_in["nick"]} kam in den Channel")
-                when 'part'
-                  Channel(@channels_invert[msg_in['user_id']])
-                      .send("#{msg_in["nick"]} hat den Channel verlassen")
-                when 'quit'
-                  Channel(@channels_invert[msg_in['user_id']])
-                      .send("#{msg_in["nick"]} hat den Server verlassen")
+          if @channels_invert.count > 0
+            begin
+              $logger.info msg_in
+              #user_id ist die zuordnungsnummer
+              if msg_in["message_type"] == 'msg'
+                Channel(@channels_invert[msg_in['user_id']])
+                    .send("[#{msg_in['source_network_type']}][#{msg_in['nick']}] #{msg_in['message']}")
+              else
+                case msg_in["message_type"]
+                  when 'join'
+                    Channel(@channels_invert[msg_in['user_id']])
+                        .send("#{msg_in["nick"]} kam in den Channel")
+                  when 'part'
+                    Channel(@channels_invert[msg_in['user_id']])
+                        .send("#{msg_in["nick"]} hat den Channel verlassen")
+                  when 'quit'
+                    Channel(@channels_invert[msg_in['user_id']])
+                        .send("#{msg_in["nick"]} hat den Server verlassen")
+                end
               end
+            rescue StandardError => e
+              $logger.debug 'Failed to send message. Stacktrace:'
+              $logger.debug e
             end
-          rescue StandardError => e
-            $logger.debug 'Failed to send message. Stacktrace:'
-            $logger.debug e
           end
         end
       end
