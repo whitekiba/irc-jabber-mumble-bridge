@@ -81,17 +81,6 @@ class TelegramBridge < ModuleBase
     end
   end
 
-  #Wir reloaden das Modul
-  def reload
-    begin
-      $logger.info "Starting Telegram reload."
-      loadSettings
-    rescue StandardError => e
-      $logger.error "Reloading failed. Exception thrown:"
-      $logger.error e
-    end
-  end
-
   def handleMessage(msg)
     #$logger.info 'handleMessage wurde aufgerufen!'
     $logger.debug msg

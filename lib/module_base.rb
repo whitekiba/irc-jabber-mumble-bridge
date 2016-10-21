@@ -17,6 +17,7 @@ class ModuleBase
     $config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')
 
     @timeout = 10
+    @my_name = "unnamed"
     @last_ping = Time.now
 
     if $config[:dev]
@@ -179,6 +180,17 @@ class ModuleBase
   def gotPing
     $logger.debug 'resetTimeout triggered. New time!'
     @last_ping = Time.now
+  end
+
+  #Wir reloaden das Modul
+  def reload
+    begin
+      $logger.info "Starting #{@my_name} reload."
+      loadSettings
+    rescue StandardError => e
+      $logger.error "Reloading failed. Exception thrown:"
+      $logger.error e
+    end
   end
 
   #diese Methode lädt settings aus der Datenbank und überschreibt bestehende
