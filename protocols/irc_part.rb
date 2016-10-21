@@ -225,7 +225,7 @@ else
       #ich habe keine ahnung wieso da felder nil sind
       unless server.nil?
         if $servers[server['ID']].nil?
-          $servers[server['ID']] = ChildProcess.build('ruby', "irc_part.rb", "#{server["ID"]}")
+          $servers[server['ID']] = ChildProcess.build('ruby', "protocols/irc_part.rb", "#{server["ID"]}")
           $servers[server['ID']].start
         end
       end
