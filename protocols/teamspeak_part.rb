@@ -23,11 +23,10 @@ class TeamspeakBridge < ModuleBase
     @my_name = 'ts'
     @my_short = 'TS'
     @my_id = server_id
-    @@channels = Hash.new
-    @db = DbManager.new
 
     #TODO: Das ist unschön. Hier sollte alles geladen werden
     #temporär lassen wir das so weil wir nur einen Channel pro Server unterstützen
+    @@channels = Hash.new
     channel_name, user_id = @db.loadChannels(server_id).first
 
     begin

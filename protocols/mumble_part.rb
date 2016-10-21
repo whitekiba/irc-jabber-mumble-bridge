@@ -14,11 +14,9 @@ class MumbleBridge < ModuleBase
     @my_name = 'mumble'
     @my_short = 'M'
     @my_id = server_id
-    @db = DbManager.new
     $logger.info 'New Mumble Server started.'
 
-    @@channels = @db.loadChannels(server_id)
-    @channels_invert = @@channels.invert
+    loadSettings
 
     @mumble = Mumble::Client.new(server_url, server_port) do |config| config.username = server_username end
     @mumble.on_text_message do |msg| handleMessage(msg) end

@@ -11,10 +11,11 @@ class JabberBridge < ModuleBase
     @my_name = 'jabber'
     @my_short = 'J'
     @my_id = id
-    @db = DbManager.new
     $logger.info 'New Jabber Server started.'
     $logger.debug "My credentials are: Username: #{username} and Password: #{password}"
     @muc = Hash.new
+
+    loadSettings
 
     begin
       @jid = Jabber::JID.new(username)
@@ -92,11 +93,6 @@ class JabberBridge < ModuleBase
   end
 
   def join_channels
-    @@channels = @db.loadChannels(@my_id)
-    $logger.debug @@channels
-    #wird genutzt für die channel zu user zuordnung. channel name => user id
-    @channels_invert = @@channels.invert
-
     #wir schreiben unsere Channel in den @muc hash.
     $logger.debug @channels_invert
     @channels_invert.each_value do |channel|

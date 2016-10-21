@@ -10,7 +10,9 @@ class ModuleBase
   end
 
   def setup_base
+    @db = DbManager.new
     $config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')
+
     @timeout = 10
     @last_ping = Time.now
     if $config[:dev]
@@ -161,5 +163,14 @@ class ModuleBase
   def gotPing
     $logger.debug 'resetTimeout triggered. New time!'
     @last_ping = Time.now
+  end
+
+  #diese Methode lädt settings aus der Datenbank und überschreibt bestehende
+  #wird von reload und receive aufgerufen
+  def loadSettings
+    @@channels = nil unless @@channels.nil? #löschen wir den Kram mal
+    @channels_invert = nil unless @channels_invert.nil?
+    @@channels = @db.loadChannels(@my_id).dup
+    @channels_invert = @@channels.invert.dup
   end
 end

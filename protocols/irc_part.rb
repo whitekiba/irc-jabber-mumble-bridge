@@ -53,7 +53,6 @@ class IRCBridge < ModuleBase
     super
     setup_base
 
-    @db = DbManager.new
     @my_name = 'irc'
     @my_username = shared["server_username"]
     @my_short = 'I'
@@ -197,12 +196,6 @@ class IRCBridge < ModuleBase
     }
   end
 
-  #diese Methode lädt settings aus der Datenbank und überschreibt bestehende
-  #wird von reload und receive aufgerufen
-  def loadSettings
-    @@channels = @db.loadChannels(@my_id).dup
-    @channels_invert = @@channels.invert.dup
-  end
 end
 
 $servers = Hash.new
