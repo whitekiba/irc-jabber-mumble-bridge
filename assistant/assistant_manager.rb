@@ -65,22 +65,33 @@ class AssistantManager
 
     #TODO: Hier müssen wir noch etwas präziser bei den Fehlern werden.
     if @assistants["#{parsed_message['source_network']}_#{@active_users[parsed_message['chat_id']]}"].nil?
+      $logger.debug "got unauthenticated message."
       case split_message[0]
         when '/auth'
           auth(parsed_message['chat_id'], parsed_message['source_network'], split_message[1], split_message[2])
         when '/newUser'
           new_user(parsed_message['chat_id'], split_message[1], split_message[2])
+        when '/help', 'help'
+          help(parsed_message['chat_id'])
         else
           aboutMe(parsed_message['chat_id'])
       end
     else
       #wir sind authentifiziert. Das handlet nun alles der assistant prozess
+      $logger.debug "got authenticated message."
       @redis_pub.publish("assistant.#{@active_users[parsed_message['chat_id']]}", message)
     end
   end
 
   def aboutMe(chat_id)
     publish(message: @lang.get('about_me'), chat_id: chat_id)
+    publish(message: @lang.get('help_unauthenticated'), chat_id: chat_id)
+  end
+
+
+  # @param [Integer] chat_id
+  def help(chat_id)
+    publish(message: @lang.get('help_unauthenticated'), chat_id: chat_id)
   end
 
   def startNewAssistant(protocol, userid)
@@ -136,7 +147,7 @@ class AssistantManager
 
     userid = @db.authUser(username, password)
     if userid
-      publish(message: 'authenticated!', chat_id: chat_id)
+      publish(message: @lang.get("authenticated"), chat_id: chat_id)
       begin
         @active_users[chat_id] = userid
         $logger.info 'Starting new assistant'

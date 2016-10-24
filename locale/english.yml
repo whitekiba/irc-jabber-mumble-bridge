@@ -1,7 +1,7 @@
 language: "english"
 test: "I am a test string!"
-about_me: "Hi!\nI am bridgie (beta!) your friendly integration Bot\n
-Possible commands are:\n
+about_me: "Hi!\nI am bridgie (beta!) your friendly integration Bot\n"
+help_unauthenticated: "Possible commands are:\n
 /auth - Authenticate with account\n
 /newUser - Create new User"
 new_user: "To create a new account use:\n
@@ -19,3 +19,5 @@ no_servers: "You have no valid server configured."
 assistant_timeout: "Assistant timed out. Please authenticate again."
 user_created: "User created sucessfully!"
 your_secret: "Your secret Key: "
+auth_usage: "/auth <username> <password>"
+authenticated: "Logged in succesfully."
