@@ -227,7 +227,11 @@ else
     servers.each do |server|
       #ich habe keine ahnung wieso da felder nil sind
       unless server.nil?
-        if $servers[server['ID']].nil?
+        if $servers[server['ID']].respond_to?(:exited?)
+          if $servers[server['ID']].exited?
+            $servers[server['ID']] = nil #nil setzen damit die gb das ding entfernt
+          end
+        else
           $servers[server['ID']] = ChildProcess.build('ruby', "protocols/irc_part.rb", "#{server["ID"]}")
           $servers[server['ID']].start
         end
