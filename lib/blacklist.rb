@@ -15,7 +15,7 @@ class Blacklist
   end
 
   def sort_entrys(entrys)
-    entrys.each do |entry|
+    entrys.each_value do |entry|
       #neues Array element erstellen falls nicht existent
       if @blacklist[entry["user_ID"]].nil?
         @blacklist[entry["user_ID"]] = Array.new
