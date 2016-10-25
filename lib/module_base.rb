@@ -123,6 +123,7 @@ class ModuleBase
   def publish(api_ver: '1', source_network_type: nil, source_network: nil, source_user: nil,
               message: nil, nick:, user_id: nil, network_id: nil , timestamp: nil,
               message_type: 'msg', attachment: nil, is_assistant: false, chat_id: nil)
+    nick = nick.to_s
     $logger.debug ('publish wurde aufgerufen')
     no_user_id = [ 'broadcast' ]
 
