@@ -4,6 +4,12 @@ about_me: "Hi!\nI am bridgie (beta!) your friendly integration Bot\n"
 help_unauthenticated: "Possible commands are:\n
 /auth - Authenticate with account\n
 /newUser - Create new User"
+help_authenticated: "Possible commands are:\n
+/addChannel - Add a new channel to a server or network
+/showChannels - Show all of your channels
+/editChannel - Modify a channel
+/showServers - Shows available Servers and Networks
+/logout - Logs you out"
 new_user: "To create a new account use:\n
 /newUser <username> [emailaddress]\n
 The emailaddress is optional"
@@ -21,3 +27,7 @@ user_created: "User created sucessfully!"
 your_secret: "Your secret Key: "
 auth_usage: "/auth <username> <password>"
 authenticated: "Logged in succesfully."
+unknown_command: "Unknown command."
+timed_out: "Session timed out. Please /auth again."
+timeout_warning: "No interaction. You will be logged out in less than 2 minutes."
+logging_out: "Logging out and stopped assistant session. Bye."

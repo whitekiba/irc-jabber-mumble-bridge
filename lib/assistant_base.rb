@@ -14,6 +14,7 @@ class AssistantBase
     end
     @lang = Language.new
     @timeout = 15 #das ist der timeout
+    @timeout_warning = false
 
     @last_command = Time.now
     @next_step = Array.new
@@ -157,6 +158,18 @@ class AssistantBase
     end
   end
 
+  def help(unknown_command = false)
+    if unknown_command
+      publish(message: @lang.get('unknown_command'), chat_id: @chat_id)
+    end
+    publish(message: @lang.get('help_authenticated'), chat_id: @chat_id)
+  end
+
+  def logout
+    publish(message: @lang.get('logging_out'), chat_id: @chat_id)
+    exit
+  end
+
   #Hier müssen wir zusehen dass wir das sehr gut sichern und alle Channel mitlöschen
   #
   def del_server(server_id)
@@ -206,12 +219,20 @@ class AssistantBase
   def waitForTimeout
     loop do
       sleep 1
-      break if @last_command < (Time.now - (@timeout*60)) #5 ist der timeout
+      if @last_command < (Time.now - (2*60)) && !@timeout_warning
+        publish(message: @lang.get('timeout_warning'), chat_id: @chat_id)
+        @timeout_warning = true
+      end
+      if @last_command < (Time.now - (@timeout*60))
+        publish(message: @lang.get('timed_out'), chat_id: @chat_id)
+        break
+      end
     end
   end
 
   def resetTimeout
     $logger.debug 'resetTimeout triggered. New time!'
+    @timeout_warning = false
     @last_command = Time.now
   end
 

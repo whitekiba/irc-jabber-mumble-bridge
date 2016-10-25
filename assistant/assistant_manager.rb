@@ -148,6 +148,7 @@ class AssistantManager
     userid = @db.authUser(username, password)
     if userid
       publish(message: @lang.get("authenticated"), chat_id: chat_id)
+      publish(message: @lang.get("help_authenticated"), chat_id: chat_id)
       begin
         @active_users[chat_id] = userid
         $logger.info 'Starting new assistant'
