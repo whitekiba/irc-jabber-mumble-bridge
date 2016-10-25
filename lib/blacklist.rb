@@ -3,8 +3,8 @@ require_relative '../lib/db_manager'
 class Blacklist
   def initialize
     @blacklist = Hash.new
-    db = DbManager.new
-    load
+    @db = DbManager.new
+    first_load
   end
 
   def blacklisted?(user_id, username)
@@ -26,11 +26,11 @@ class Blacklist
 
   def reload
     @blacklist = Hash.new
-    load
+    first_load
   end
 
-  def load
-    blacklist_entrys = db.blacklist
+  def first_load
+    blacklist_entrys = @db.blacklist
     self.sort_entrys(blacklist_entrys)
   end
 end
