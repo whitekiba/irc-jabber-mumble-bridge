@@ -4,15 +4,16 @@ class Blacklist
   def initialize
     @blacklist = Hash.new
     db = DbManager.new
-    blacklist_entrys = db.blacklist
-    self.sort_entrys(blacklist_entrys)
+    load
   end
+
   def blacklisted?(user_id, username)
     if !@blacklist[user_id].nil? && @blacklist[user_id].include?(username)
       return true
     end
     false
   end
+
   def sort_entrys(entrys)
     entrys.each do |entry|
       #neues Array element erstellen falls nicht existent
@@ -21,5 +22,15 @@ class Blacklist
       end
       @blacklist[entry["user_ID"]].push(entry["username"])
     end
+  end
+
+  def reload
+    @blacklist = Hash.new
+    load
+  end
+
+  def load
+    blacklist_entrys = db.blacklist
+    self.sort_entrys(blacklist_entrys)
   end
 end

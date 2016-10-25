@@ -127,6 +127,7 @@ class JabberBridge < ModuleBase
     begin
       $logger.info "Starting Jabber reload."
       join_channels #Wir joinen einfach alle Channel erneut. Die Methode handlet das
+      @blacklist.reload
     rescue StandardError => e
       $logger.error "Reloading failed. Exception thrown:"
       $logger.error e

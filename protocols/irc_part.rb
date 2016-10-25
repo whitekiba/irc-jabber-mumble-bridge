@@ -175,6 +175,7 @@ class IRCBridge < ModuleBase
       #Als erstes neue Channels
       loadSettings
       joinChannels #wir nutzen dafür die bestehende methode
+      @blacklist.reload
     rescue StandardError => e
       $logger.error "Reloading failed. Exception thrown:"
       $logger.error e
