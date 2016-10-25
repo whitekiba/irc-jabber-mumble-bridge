@@ -139,29 +139,29 @@ class IRCBridge < ModuleBase
   def join_message(event)
     $logger.info "Join wurde aufgerufen."
     $logger.info event
-    if event.from != @my_username
+    if event.user != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: event.from, user_id: @@channels[event.channel], message_type: 'join')
+                   nick: event.user, user_id: @@channels[event.channel], message_type: 'join')
     end
   end
 
   listen_to :part, method: :part_message
   def part_message(event)
-    if event.from != @my_username
+    if event.user != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: event.from, user_id: @@channels[event.channel], message_type: 'part')
+                   nick: event.user, user_id: @@channels[event.channel], message_type: 'part')
     end
   end
 
   listen_to :quit, method: :quit_message
   def quit_message(event)
-    if event.from != @my_username
+    if event.user != @my_username
       self.publish(source_network_type: @my_short, source_network: @my_name,
-                   nick: event.from, user_id: @@channels[event.channel], message_type: 'quit')
+                   nick: event.user, user_id: @@channels[event.channel], message_type: 'quit')
     end
   end
 
-  listen_to :ping, method: :got_ping
+  listen_to :pong, method: :got_ping
   def got_ping(event)
     $logger.info "Ping!"
     $logger.debug 'resetTimeout triggered. New time!'
