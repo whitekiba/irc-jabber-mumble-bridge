@@ -15,6 +15,10 @@ class JabberBridge < ModuleBase
     $logger.debug "My credentials are: Username: #{username} and Password: #{password}"
     @muc = Hash.new
 
+    if $config[:dev]
+      Jabber::debug = true
+    end
+
     loadSettings
 
     begin
@@ -22,7 +26,15 @@ class JabberBridge < ModuleBase
       @bot = Jabber::Client.new(@jid)
       @bot.connect
       $logger.info 'Connected to server.'
+      sleep 2 #ich glaub es ist besser wenn wir hier warten
+
       @bot.auth(password)
+      $logger.info "Authenticated!"
+
+      #channel joinen
+      sleep 2
+      join_channels
+      $logger.info "Channels joined!"
     rescue StandardError => e
       $logger.info e
     end
@@ -59,19 +71,10 @@ class JabberBridge < ModuleBase
         end
       end
     end
-    #cmd thread
-    Thread.new do
-      loop do
-        msg_in = @messages.pop
-        if !msg_in.nil?
-            if msg_in['cmd'] == 'reload'
-              reload
-            end
-        end
-      end
-    end
+
     loop do
       sleep 60
+      $logger.debug self
     end
   end
 
@@ -101,9 +104,10 @@ class JabberBridge < ModuleBase
   end
 
   def join_channel(channel)
-    $logger.info "Joining MUC #{channel}"
+    puts "Test!"
     begin
-      unless @muc[channel].nil?
+      if @muc[channel].nil?
+        $logger.info "Joining MUC #{channel}"
         @muc[channel] = Jabber::MUC::SimpleMUCClient.new(@bot)
         @muc[channel].join(channel)
         @muc[channel].on_message { |time,nick,text|
@@ -137,6 +141,8 @@ end
 
 #server starting stuff
 db = DbManager.new
+$servers = Hash.new
+
 #TODO: Wir müssen irgendwie neue Server starten. Vorerst pollen wir die Datenbank
 #Ja das ist scheiße unschön.
 #TODO: Unschön. Das muss sauberer umgesetzt werden. Alle 60 Sekunden die Datenbank anzufragen ist scheiße
@@ -147,11 +153,12 @@ loop do
   servers.each do |server|
     #TODO: Aus irgendeinem Grund sind ein paar Felder leer.
     unless server.nil?
-      if servers[server['ID']].nil? #wir starten nur falls da noch kein Objekt von existiert
+      if $servers[server['ID']].nil? #wir starten nur falls da noch kein Objekt von existiert
         begin
           Thread.new do
-            jb = JabberBridge.new
-            jb.startServer(server['ID'], server['server_url'], server['server_port'],
+            $logger.info "Trying to start thread"
+            $servers[server['ID']] = JabberBridge.new
+            $servers[server['ID']].startServer(server['ID'], server['server_url'], server['server_port'],
                            server['user_name'], server['user_password'])
             $logger.info "Server #{server['server_url']} started..."
           end
