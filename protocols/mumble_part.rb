@@ -22,6 +22,7 @@ class MumbleBridge < ModuleBase
     @mumble.on_text_message do |msg| handleMessage(msg) end
     @mumble.on_user_state do |msg| handleUserChange(msg) end
     @mumble.on_user_remove do |msg| handleUserRemove(msg) end
+
     subscribe(@my_name)
     subscribe_cmd(@my_id)
     Thread.new do
@@ -45,16 +46,21 @@ class MumbleBridge < ModuleBase
       #TODO: Möglichkeiten auf mehrere Channel zuzugreifen erforschen
       key, value = @channels_invert.first
       @user_id = key
+      @channel = value
       @channel_id = @mumble.join_channel(value)
     rescue Exception => e
       $logger.error 'Failed to join channel'
       $logger.error e
     end
+    loop do
+      sleep 60
+    end
   end
+
   def handleMessage(msg)
     $logger.info 'handleMessage wurde aufgerufen.'
     $logger.debug msg.to_hash()
-    if /#{@conf[:username]} (.*)/.match(msg.message)
+    if /#{@my_username} (.*)/.match(msg.message)
       #TODO: Was ist das?! Kann das was oder soll das weg?
       $logger.info 'Hier fehlt der Kommandocode fuer Mumble'
     else
@@ -66,18 +72,19 @@ class MumbleBridge < ModuleBase
       end
     end
   end
+
   def handleUserChange(msg)
     $logger.info 'handleUserChange wurde aufgerufen.'
     $logger.debug msg.to_hash()
     if @mumble.users[msg.session].respond_to? :name
       username = @mumble.users[msg.session].name
       $logger.debug "handleUserChange wurde ausgelöst von #{username}"
-      if username == @conf[:username] #if the event is triggered by bridge
+      if username == @my_username #if the event is triggered by bridge
         @channel_id = msg.channel_id
       else
 
         if @mumble.channels[msg.channel_id].respond_to? :name
-          if @mumble.channels[msg.channel_id].name == @conf[:channel] || @mumble.users[msg.session].channel_id == @channel_id
+          if @mumble.channels[msg.channel_id].name == @channel || @mumble.users[msg.session].channel_id == @channel_id
             self.publish(source_network_type: @my_short, source_network: @my_name,
                          nick: username, user_id: @user_id, message_type: 'join')
           end
@@ -88,6 +95,7 @@ class MumbleBridge < ModuleBase
 #                   nick: msg.name, user_id: @channels[channel], message_type: "join")
 #    end
   end
+
   def handleUserRemove(msg)
     $logger.info 'handleUserRemove wurde aufgerufen.'
     $logger.debug msg.to_hash()
