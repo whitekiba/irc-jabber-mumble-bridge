@@ -74,7 +74,6 @@ class JabberBridge < ModuleBase
 
     loop do
       sleep 60
-      $logger.debug self
     end
   end
 
