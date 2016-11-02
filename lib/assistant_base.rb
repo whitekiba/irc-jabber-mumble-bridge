@@ -31,6 +31,7 @@ class AssistantBase
   end
 
   def subscribe(name)
+    $logger.debug "starting Subscribe Thread"
     Thread.new do
       sleep 0.1
       @redis_sub.psubscribe("assistant.#{@userid}") do |on|

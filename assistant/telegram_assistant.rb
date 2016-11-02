@@ -47,7 +47,7 @@ class TelegramAssistant < AssistantBase
             end
           end
         rescue StandardError => e
-          logger.debug 'Exception'
+          $logger.debug 'Exception'
           $logger.error e
         end
       end

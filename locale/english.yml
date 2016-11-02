@@ -5,10 +5,10 @@ help_unauthenticated: "Possible commands are:\n
 /auth - Authenticate with account\n
 /newUser - Create new User"
 help_authenticated: "Possible commands are:\n
-/addChannel - Add a new channel to a server or network
-/showChannels - Show all of your channels
-/editChannel - Modify a channel
-/showServers - Shows available Servers and Networks
+/addChannel - Add a new channel to a server or network\n
+/showChannels - Show all of your channels\n
+/editChannel - Modify a channel\n
+/showServers - Shows available Servers and Networks\n
 /logout - Logs you out"
 new_user: "To create a new account use:\n
 /newUser <username> [emailaddress]\n
