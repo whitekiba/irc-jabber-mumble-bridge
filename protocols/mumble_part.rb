@@ -25,6 +25,7 @@ class MumbleBridge < ModuleBase
 
     subscribe(@my_name)
     subscribe_cmd(@my_id)
+
     Thread.new do
       loop do
         msg_in = @messages.pop
@@ -38,6 +39,7 @@ class MumbleBridge < ModuleBase
         end
       end
     end
+
     @mumble.connect
     sleep 4 #wir muessen warten weil er den channel sonnst nicht joint
     begin
@@ -52,6 +54,7 @@ class MumbleBridge < ModuleBase
       $logger.error 'Failed to join channel'
       $logger.error e
     end
+
     loop do
       sleep 60
     end
@@ -60,16 +63,11 @@ class MumbleBridge < ModuleBase
   def handleMessage(msg)
     $logger.info 'handleMessage wurde aufgerufen.'
     $logger.debug msg.to_hash()
-    if /#{@my_username} (.*)/.match(msg.message)
-      #TODO: Was ist das?! Kann das was oder soll das weg?
-      $logger.info 'Hier fehlt der Kommandocode fuer Mumble'
-    else
-      if @mumble.users[msg.actor].respond_to? :name
-        username = @mumble.users[msg.actor].name
-        self.publish(source_network_type: @my_short, source_network: @my_name,
-                     nick: username, message: Sanitize.clean(CGI.unescapeHTML(msg.to_hash()['message'])), user_id: @user_id)
-        $logger.info msg.to_hash()['message']
-      end
+    if @mumble.users[msg.actor].respond_to? :name
+      username = @mumble.users[msg.actor].name
+      self.publish(source_network_type: @my_short, source_network: @my_name,
+                   nick: username, message: Sanitize.clean(CGI.unescapeHTML(msg.to_hash()['message'])), user_id: @user_id)
+      $logger.info msg.to_hash()['message']
     end
   end
 

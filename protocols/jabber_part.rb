@@ -3,6 +3,7 @@ require 'xmpp4r'
 require 'xmpp4r/muc/helper/simplemucclient'
 require_relative '../lib/module_base'
 require_relative '../lib/db_manager'
+require_relative '../lib/exception_helper'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/jabber.log')
 
@@ -13,7 +14,9 @@ class JabberBridge < ModuleBase
     @my_id = id
     $logger.info 'New Jabber Server started.'
     $logger.debug "My credentials are: Username: #{username} and Password: #{password}"
+
     @muc = Hash.new
+    @eh = ExceptionHelper.new
 
     if $config[:dev]
       Jabber::debug = true
@@ -64,13 +67,18 @@ class JabberBridge < ModuleBase
                       .say("#{msg_in["nick"]} hat den Server verlassen")
               end
             end
+            @eh.reset_counter
           rescue StandardError => e
             $logger.error 'Unable to send message. Stacktrace follows:'
+            @eh.new_exception(e)
             $logger.error e
           end
         end
       end
     end
+
+    #helper initialisieren
+    @eh.poll_for_limit
 
     loop do
       sleep 60
@@ -121,6 +129,7 @@ class JabberBridge < ModuleBase
       end
     rescue StandardError => e
       $logger.error 'Unable to join MUC. Stacktrace follows:'
+      @eh.new_exception(e)
       $logger.error e
     end
   end
@@ -133,6 +142,7 @@ class JabberBridge < ModuleBase
       @blacklist.reload
     rescue StandardError => e
       $logger.error "Reloading failed. Exception thrown:"
+      @eh.new_exception(e)
       $logger.error e
     end
   end
