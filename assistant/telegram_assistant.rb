@@ -16,9 +16,9 @@ class TelegramAssistant < AssistantBase
       loop do
         begin
           msg_in = @assistant_message.pop
+          $logger.debug msg_in
           unless msg_in.nil?
             $logger.debug 'assistant got message. handling it!'
-            $logger.debug msg_in
             split_message = msg_in['message'].split(' ')
             $logger.debug split_message
             @chat_id = msg_in['chat_id']

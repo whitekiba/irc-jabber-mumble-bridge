@@ -32,17 +32,27 @@ class AssistantBase
 
   def subscribe(name)
     $logger.debug "starting Subscribe Thread"
-    Thread.new do
-      sleep 0.1
-      @redis_sub.psubscribe("assistant.#{@userid}") do |on|
-        on.pmessage do |pattern, channel, message|
-          data = JSON.parse(message)
-          resetTimeout
-          #TODO: Code checken. Keine ahnung wofür das mal war
-          #start(data) if data['source_network_type'].eql?(name) & data['message'].eql?('/start')
-          @assistant_message.unshift(data)
+    begin
+      Thread.new do
+        sleep 0.1
+        $logger.debug "Subscribing on assistant.#{@userid}"
+        @redis_sub.psubscribe("assistant.#{@userid}") do |on|
+          on.pmessage do |pattern, channel, message|
+            data = JSON.parse(message)
+            if data['source'] != "bot"
+              resetTimeout
+              #TODO: Code checken. Keine ahnung wofür das mal war
+              #start(data) if data['source_network_type'].eql?(name) & data['message'].eql?('/start')
+              $logger.debug "got message. unshifting the Queue"
+              @assistant_message.push(data)
+              $logger.debug("Length of @assistant_message #{@assistant_message.length}")
+            end
+          end
         end
       end
+    rescue StandardError => e
+      $logger.error "Exception beim subcriben auf Redis aufgetreten"
+      $logger.error e
     end
   end
 
@@ -98,7 +108,7 @@ class AssistantBase
       if @db.getServerCount(@userid) > 0
 
         #server_id checken ob es ne nummer ist
-        if !server_id.is_a?(Fixnum)
+        unless server_id.is_a?(Fixnum)
           publish(message: @lang.get('invalid_id'), chat_id: @chat_id)
           return
         end
@@ -208,12 +218,15 @@ class AssistantBase
   end
 
   def publish(api_ver: '1', message: nil, chat_id: nil, reply_markup: nil)
+    $logger.debug "publish aufgerufen."
     json = JSON.generate ({
+        'source' => 'bot',
         'message' => message.force_encoding('UTF-8'),
         'source_network_type' => 'assistant',
         'chat_id' => chat_id,
         'reply_markup' => reply_markup
     })
+    $logger.debug json
     @redis_pub.publish("assistant.#{@userid}", json)
   end
 
@@ -323,6 +336,7 @@ class AssistantBase
   end
 
   def list_servers(data)
+    $logger.debug "list_servers aufgerufen"
     publish(message: get_available_servers(@userid), chat_id: data['chat_id'])
   end
 end
