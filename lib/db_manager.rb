@@ -19,6 +19,9 @@ class DbManager
     @logger = Logger.new(File.dirname(__FILE__) + '/db_manager.log')
     @db = Mysql2::Client.new(:host => @config[:host], :username => @config[:user], :password => @config[:password])
     @db.select_db(@config[:database])
+    Thread.new do
+      monitor_connection
+    end
   end
 
   def loadChannels(server_id)
@@ -246,5 +249,11 @@ class DbManager
       return false
     end
     true
+  end
+
+  def monitor_connection
+    loop do
+      #TODO: Verbindung zur DB checken und ggf reconnecten
+    end
   end
 end

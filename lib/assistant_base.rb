@@ -18,6 +18,7 @@ class AssistantBase
 
     @last_command = Time.now
     @next_step = Array.new
+
     @assistant_message = Queue.new
     @db = DbManager.new
     @chat_id = 0
@@ -134,8 +135,8 @@ class AssistantBase
     end
   end
 
-  def edit_server(server_id = nil, server_url: nil, server_port: nil, server_username: nil, server_password: nil)
-    if server.nil? || server == '' #falls nil oder leer usage anzeigen
+  def edit_server(server_id, server_url: nil, server_port: nil, server_username: nil, server_password: nil)
+    if sever_id.nil? || server.nil? || server == '' #falls nil oder leer usage anzeigen
       publish(message: @lang.get("edit_server_usage"), chat_id: @chat_id)
       return
     end
@@ -233,7 +234,7 @@ class AssistantBase
   def waitForTimeout
     loop do
       sleep 1
-      if @last_command < (Time.now - (2*60)) && !@timeout_warning
+      if @last_command < (Time.now - ((@timeout-2)*60)) && !@timeout_warning
         publish(message: @lang.get('timeout_warning'), chat_id: @chat_id)
         @timeout_warning = true
       end
