@@ -105,6 +105,11 @@ class AssistantBase
   end
 
   def add_channel(server_id, channel_name)
+    if server_id.nil? || channel_name.nil? #falls nil oder leer usage anzeigen
+      publish(message: @lang.get("add_channel_usage"), chat_id: @chat_id)
+      return
+    end
+
     begin
       if @db.getServerCount(@userid) > 0
 
@@ -283,14 +288,14 @@ class AssistantBase
   def get_available_servers(user_id)
     available_server_text = @lang.get('available_server_intro')
     @db.userServers(user_id).each_value do |av_server|
-      available_server_text << "#{av_server['ID']} - #{av_server['server_url']}\n"
+      available_server_text << "#{av_server['ID']} - #{av_server['server_url']} (#{av_server['server_type']})\n"
     end
     available_server_text
   end
 
   def get_channels(user_id)
     message = @lang.get('your_channels')
-    @db.userChannels(user_ID).each_value do |av_channel|
+    @db.userChannels(user_id).each_value do |av_channel|
       message << "#{av_channel['ID']} - #{av_channel['channel_name']}\n"
     end
     message
