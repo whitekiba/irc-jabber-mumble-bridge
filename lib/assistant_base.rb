@@ -164,6 +164,11 @@ class AssistantBase
   end
 
   def edit_channel(channel_id, channel_name)
+    if channel_id.nil? || channel_name.nil? #falls nil oder leer usage anzeigen
+      publish(message: @lang.get("edit_channel_usage"), chat_id: @chat_id)
+      return
+    end
+
     if @db.allowed_channel?(channel_id, @userid)
       @db.edit_channel(channel_id, channel_name)
       reload(@db.get_server_type_of_channel(channel_id))

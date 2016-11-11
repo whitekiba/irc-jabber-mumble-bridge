@@ -253,6 +253,8 @@ class DbManager
 
   def monitor_connection
     loop do
+      #der sleep ist nötig weil sonnst 20 Threads gespawnt werden die CPU Zeit verbrennen
+      sleep 60
       #TODO: Verbindung zur DB checken und ggf reconnecten
     end
   end

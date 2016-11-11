@@ -1,6 +1,7 @@
 language: "english"
 test: "I am a test string!"
 about_me: "Hi!\nI am bridgie (beta!) your friendly integration Bot\n"
+invalid_username: "Invalid Username"
 help_unauthenticated: "Possible commands are:\n
 /auth - Authenticate with account\n
 /newUser - Create new User"
@@ -19,6 +20,9 @@ add_server_usage: "/addServer <type> <url> <port> <username> [optional: password
 Please be careful when adding a server as there is no easy way to change a server afterwards"
 add_channel_usage: "/addChannel <server_id> <channel_name> [optional: channel_password]\n
 Currently we are only able to join one channel per server"
+
+edit_server_usage: "/editServer <server id> <>"
+edit_channel_usage: "/editChannel <channel id> <channel name>"
 
 valid_server_intro: "These are the networks i support:\n"
 no_servers: "You have no valid server configured."
