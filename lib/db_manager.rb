@@ -20,7 +20,7 @@ class DbManager
     @db = Mysql2::Client.new(:host => @config[:host],
                              :username => @config[:user],
                              :password => @config[:password],
-                             :reconnect => true/false,)
+                             :reconnect => true)
     @db.select_db(@config[:database])
   end
 
