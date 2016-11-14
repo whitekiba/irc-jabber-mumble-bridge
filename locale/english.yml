@@ -21,6 +21,8 @@ Please be careful when adding a server as there is no easy way to change a serve
 add_channel_usage: "/addChannel <server_id> <channel_name> [optional: channel_password]\n
 Currently we are only able to join one channel per server"
 
+your_channels: "Your channels currently joined by the bridge."
+
 edit_server_usage: "/editServer <server id> <>"
 edit_channel_usage: "/editChannel <channel id> <channel name>"
 

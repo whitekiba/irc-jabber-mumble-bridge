@@ -17,11 +17,11 @@ class DbManager
   def initialize
     @config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:database]
     @logger = Logger.new(File.dirname(__FILE__) + '/db_manager.log')
-    @db = Mysql2::Client.new(:host => @config[:host], :username => @config[:user], :password => @config[:password])
+    @db = Mysql2::Client.new(:host => @config[:host],
+                             :username => @config[:user],
+                             :password => @config[:password],
+                             :reconnect => true/false,)
     @db.select_db(@config[:database])
-    Thread.new do
-      monitor_connection
-    end
   end
 
   def loadChannels(server_id)
@@ -249,13 +249,5 @@ class DbManager
       return false
     end
     true
-  end
-
-  def monitor_connection
-    loop do
-      #der sleep ist nötig weil sonnst 20 Threads gespawnt werden die CPU Zeit verbrennen
-      sleep 60
-      #TODO: Verbindung zur DB checken und ggf reconnecten
-    end
   end
 end
