@@ -13,7 +13,7 @@ class AssistantBase
       exit
     end
     @lang = Language.new
-    @timeout = 15 #das ist der timeout
+    @timeout = 30 #das ist der timeout
     @timeout_warning = false
 
     @last_command = Time.now
@@ -294,7 +294,7 @@ class AssistantBase
   end
 
   def get_channels(user_id)
-    message = @lang.get('your_channels')
+    message = "#{@lang.get('your_channels')}\n"
     @db.userChannels(user_id).each_value do |av_channel|
       message << "#{av_channel['ID']} - #{av_channel['channel_name']}\n"
     end

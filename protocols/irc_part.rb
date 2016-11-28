@@ -39,6 +39,7 @@ class IRCBridgeBotStart
       $logger.debug e
       abort
     end
+
     loop do
       sleep 60
     end
