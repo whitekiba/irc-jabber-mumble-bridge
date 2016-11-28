@@ -109,6 +109,10 @@ class IRCBridge < ModuleBase
         abort #sollte waitForTimeout irgendwie beenden aborten wir in der nächsten Zeile
       end
     end
+
+    Thread.new do
+      keep_username
+    end
   end
 
   listen_to :privmsg, method: :handle_message
@@ -198,6 +202,16 @@ class IRCBridge < ModuleBase
         @bot.part(value)
       end
     }
+  end
+
+  def keep_username
+    loop do
+      sleep 60
+
+      if @bot.nick != @bot_username
+        @bot.set_nick(@bot_username)
+      end
+    end
   end
 
 end
