@@ -8,6 +8,7 @@ require_relative '../lib/db_manager'
 require_relative '../lib/module_base'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/mumble.log')
+$logger.level = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:loglevel]
 
 class MumbleBridge < ModuleBase
   def startServer(server_id, server_url, server_port, server_username)

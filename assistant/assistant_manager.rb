@@ -8,6 +8,8 @@ require_relative '../lib/language'
 require_relative '../lib/base_helpers'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/assistant_manager.log')
+$logger.level = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:loglevel]
+
 class AssistantManager
   def initialize
     @lang = Language.new

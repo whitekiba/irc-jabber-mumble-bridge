@@ -6,6 +6,7 @@ require 'logger'
 class TelegramAssistant < AssistantBase
   def go
     $logger = Logger.new(File.dirname(__FILE__) + "/tg_#{@userid}_assistant.log")
+    $logger.level = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:loglevel]
     @cur_step = 'start'
     next_steps :start, :addServer, :test
   end

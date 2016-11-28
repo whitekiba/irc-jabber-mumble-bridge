@@ -17,6 +17,8 @@ class DbManager
   def initialize
     @config = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:database]
     @logger = Logger.new(File.dirname(__FILE__) + '/db_manager.log')
+    $logger.level = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:loglevel]
+
     @db = Mysql2::Client.new(:host => @config[:host],
                              :username => @config[:user],
                              :password => @config[:password],

@@ -3,6 +3,7 @@ require_relative '../lib/db_manager'
 require 'teamspeak-ruby'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/teamspeak.log')
+$logger.level = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:loglevel]
 
 class TeamspeakBridge < ModuleBase
   SPECIAL_CHARS = [

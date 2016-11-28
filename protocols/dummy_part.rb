@@ -4,6 +4,7 @@ require_relative '../lib/module_base'
 require 'logger'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/dummy.log')
+$logger.level = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:loglevel]
 
 class DummyBridge < ModuleBase
   @die = 60

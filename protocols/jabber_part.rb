@@ -6,6 +6,7 @@ require_relative '../lib/db_manager'
 require_relative '../lib/exception_helper'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/jabber.log')
+$logger.level = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:loglevel]
 
 class JabberBridge < ModuleBase
   def startServer(id, address, port, username, password)

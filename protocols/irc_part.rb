@@ -5,6 +5,7 @@ require_relative '../lib/db_manager'
 require 'logger'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/irc.log')
+$logger.level = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:loglevel]
 
 class IRCBridgeBotStart
   def receive(server_id, server_url, server_port, server_username)

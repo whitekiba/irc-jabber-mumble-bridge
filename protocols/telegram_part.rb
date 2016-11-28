@@ -7,6 +7,7 @@ require_relative '../lib/db_manager'
 require 'logger'
 
 $logger = Logger.new(File.dirname(__FILE__) + '/telegram.log')
+$logger.level = YAML.load_file(File.dirname(__FILE__) + '/../config.yml')[:loglevel]
 
 class TelegramBridge < ModuleBase
   def receive
