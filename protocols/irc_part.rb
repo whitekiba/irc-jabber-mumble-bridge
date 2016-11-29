@@ -209,9 +209,13 @@ class IRCBridge < ModuleBase
   def keep_username
     loop do
       sleep 60
-
-      if @bot.nick != @bot_username
-        @bot.set_nick(@bot_username)
+      begin
+        if @bot.nick != @my_username
+          @bot.nick = @my_username
+        end
+      rescue StandardError => e
+        $logger.error "Exception beim setzen eines Usernamen"
+        $logger.error e
       end
     end
   end

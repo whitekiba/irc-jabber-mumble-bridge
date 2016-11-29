@@ -60,9 +60,11 @@ class ModuleBase
           $logger.debug ("Got message! #{message}")
           data = JSON.parse(message)
           if data['source_network'] != name
-            $logger.debug data
-            @messages.push(data)
-            $logger.debug("Length of @message #{@messages.length}")
+            if !data['user_id'].nil?
+              $logger.debug data
+              @messages.push(data)
+              $logger.debug("Length of @message #{@messages.length}")
+            end
           end
         end
       end
