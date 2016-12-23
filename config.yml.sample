@@ -1,3 +1,5 @@
+:dev: false
+:loglevel: debug
 :irc:
    :enabled: true
 :jabber:
@@ -6,12 +8,16 @@
    :enabled: true
 :telegram:
    :enabled: true
-   :token: 'API-KEY'
+   :token: ''
 :redis:
-   :host: 10.1.0.48
+   :host: 127.0.0.1
    :port: 7777
 :database:
    :host: 10.1.0.48
    :database: 'bridge'
    :user: 'root'
    :password: ''
+:enabled_services:
+   - irc
+   - telegram
+   - jabber

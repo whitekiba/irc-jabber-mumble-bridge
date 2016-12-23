@@ -4,10 +4,10 @@ require 'yaml'
 require_relative '../lib/blacklist'
 
 class ModuleBase
-  #compat für Cinch
-  #Das IRC Modul nutzt cinch. Cinch überschreibt den parent constructor
+  # compat für Cinch
+  # Das IRC Modul nutzt cinch. Cinch überschreibt den parent constructor
   # aus diesem Grund rufen wir in irc_part.rb nur setup_base auf
-  #alle übrigen können einfach initialize automatisch nutzen
+  # alle übrigen können einfach initialize automatisch nutzen
   def initialize
     setup_base
   end
